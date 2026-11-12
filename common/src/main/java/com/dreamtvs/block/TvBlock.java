@@ -22,6 +22,7 @@ import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.phys.BlockHitResult;
@@ -29,14 +30,17 @@ import org.jetbrains.annotations.Nullable;
 
 /**
  * The TV. Its front ({@link #FACING}) points at the player who placed it, and that's the side the video
- * shows on. For now every TV is its own 1×1 screen; merging neighbours into bigger screens comes next (M2).
+ * shows on. Same-facing TVs on one wall that fill a rectangle form one screen (see {@code ScreenReconciler});
+ * {@link #FORMED} says whether a screen currently covers this block.
  */
 public class TvBlock extends HorizontalDirectionalBlock {
     public static final MapCodec<TvBlock> CODEC = simpleCodec(TvBlock::new);
+    /** Set by the reconciler: true while a Dream Displays screen covers this TV. */
+    public static final BooleanProperty FORMED = BooleanProperty.create("formed");
 
     public TvBlock(Properties properties) {
         super(properties);
-        registerDefaultState(stateDefinition.any().setValue(FACING, Direction.NORTH));
+        registerDefaultState(stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(FORMED, false));
     }
 
     public static Properties defaultProperties() {
@@ -55,12 +59,20 @@ public class TvBlock extends HorizontalDirectionalBlock {
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-        builder.add(FACING);
+        builder.add(FACING, FORMED);
     }
 
+    /** Server side, placing is refused when the TV would join a screen the player may not change (plan §5.7). */
     @Override
-    public BlockState getStateForPlacement(BlockPlaceContext context) {
-        return defaultBlockState().setValue(FACING, context.getHorizontalDirection().getOpposite());
+    public @Nullable BlockState getStateForPlacement(BlockPlaceContext context) {
+        BlockState state = defaultBlockState().setValue(FACING, context.getHorizontalDirection().getOpposite());
+        if (context.getLevel() instanceof ServerLevel level && context.getPlayer() instanceof ServerPlayer player
+                && !Screens.canPlace(level, context.getClickedPos(), state.getValue(FACING), player)) {
+            // The client already predicted the placement; resend the inventory so the TV shows up again.
+            player.inventoryMenu.sendAllDataToRemote();
+            return null;
+        }
+        return state;
     }
 
     @Override
@@ -71,12 +83,25 @@ public class TvBlock extends HorizontalDirectionalBlock {
         }
     }
 
+    /** Any new or turned TV marks its wall for the end-of-tick reconcile. FORMED-only changes don't. */
+    @Override
+    protected void onPlace(BlockState state, Level level, BlockPos pos, BlockState oldState, boolean movedByPiston) {
+        super.onPlace(state, level, pos, oldState, movedByPiston);
+        if (level instanceof ServerLevel serverLevel && !sameTv(oldState, state)) {
+            Screens.onAdded(serverLevel, pos, state.getValue(FACING));
+        }
+    }
+
     @Override
     protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {
-        if (!state.is(newState.getBlock()) && level instanceof ServerLevel serverLevel) {
-            Screens.onRemoved(serverLevel, pos);
+        if (level instanceof ServerLevel serverLevel && !sameTv(state, newState)) {
+            Screens.onRemoved(serverLevel, pos, state.getValue(FACING));
         }
         super.onRemove(state, level, pos, newState, movedByPiston);
+    }
+
+    private static boolean sameTv(BlockState a, BlockState b) {
+        return a.getBlock() instanceof TvBlock && b.getBlock() instanceof TvBlock && a.getValue(FACING) == b.getValue(FACING);
     }
 
     /** Holding a block: skip our click so it gets placed (e.g. stacking TVs). Anything else: fall through to the menu. */

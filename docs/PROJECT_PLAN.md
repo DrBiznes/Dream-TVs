@@ -225,7 +225,7 @@ How it's enforced:
 - [x] DD 1.10.9 from Modrinth Maven (`maven.modrinth:dreamdisplays`, version IDs in `gradle.properties`) on the compile
       classpath and in both dev runtimes. Both loaders build against it.
 - [ ] Register `DreamTvsAddon` through `DreamDisplaysServer.onReady` and log on enable (Fabric + NeoForge, SP + dedicated).
-      *Code written. Not yet confirmed at runtime.*
+      *Confirmed on a NeoForge dedicated (GameTest) server, 2026-11-12. Fabric and singleplayer not yet checked.*
 - [ ] **Spike A:** from a debug command, call `displays.create(...)` on a 3×2 wall of placeholder blocks and check that
       rendering, the menu and playback work.
 - [ ] **Spike B:** confirm the break-protection behavior and prototype fallback 2 on both loaders.
@@ -247,14 +247,35 @@ and test it in a singleplayer world:
 ### M1: Block and assets
 - [x] Minimal `TvBlock` (facing only) registered on both loaders. Placing one makes a 1×1 screen, and breaking or
       removing it deletes the screen. Breaks run before DD's protection, with an owner/op check.
-- [ ] Connection flags and `FORMED` blockstate (needs M2).
+- [x] `FORMED` blockstate (set by the M2 reconciler, placeholder "no signal" front when unformed).
+- [ ] Connection flags `UP/DOWN/LEFT/RIGHT` for connected bezels (with the M4 visuals).
 - [x] Placeholder textures, model, recipe (`IGI/GRG/ICI` → 4), loot table, pickaxe tag, lang. *(Final art TBD.)*
 
 ### M2: Multiblock core
-- [ ] `ScreenSolver` + unit tests: 1×1, filled rectangles, L-shapes, holes, oversized, splits.
-- [ ] `ScreenScanner` (capped flood fill) and end-of-tick debounce queue.
-- [ ] `ScreenReconciler` create / moveTo / merge / delete through `DreamDisplaysBridge`.
-- [ ] Owner tracking, per-player screen limit, and the §5.7 permission checks (`extendPolicy`, LuckPerms optional).
+- [x] `ScreenSolver` + unit tests: 1×1, filled rectangles, L-shapes, holes, oversized, splits.
+- [x] `ScreenScanner` (capped flood fill) and end-of-tick debounce queue.
+- [x] `ScreenReconciler` create / moveTo / merge / delete through `DreamDisplaysBridge`.
+- [x] Owner tracking, per-player screen limit, and the §5.7 permission checks (`extendPolicy`, LuckPerms optional).
+
+#### M2 notes (2026-11-12)
+- **Code:** pure rules in `screen/solve/` (`ScreenSolver`, `ScreenPlanner`, no Minecraft imports). World side in
+  `screen/`: `ScreenPlane` (block pos ↔ 2D cell), `ScreenScanner`, `ScreenQueue` (end-of-tick flush on both
+  loaders), `ScreenReconciler`, `ScreenPermissions` + `LuckPermsCheck` (LuckPerms API is `compileOnly`).
+  Config model `config/DreamTvsConfig` is loaded from `config/dreamtvs.json` on server start (M4 still owns docs
+  and validation polish).
+- **Keeping the link while building:** a group that isn't a rectangle (half-built row, broken corner) doesn't
+  delete its screen. The screen stays where it is if its blocks are all still there, or shrinks to the largest
+  whole rectangle left inside its old bounds. It's deleted only when none of its TVs are left. Merges keep the
+  largest screen (tie: oldest, using a `createdAt` now stored in the `customData` tag).
+- **Owners:** the placing player owns a new screen. A split-off part keeps the original owner. A screen formed
+  with no player (`/fill`, `/setblock`) is owned by the nil UUID ("the server"), so only admins can change it.
+- **`FORMED` blockstate** is set by the reconciler. Unformed TVs show a grey "no signal" front (placeholder art).
+- **Chunks:** if a wall reaches into an unloaded chunk the reconcile for that wall is skipped (no half-picture
+  shrinking). The next change to the wall retries it.
+- **Tests:** `gradlew :common:test` runs 34 solver/planner unit tests. `gradlew :neoforge:runGameTestServer`
+  runs 8 GameTests against the real DD 1.10.9 server API (form, L-shape, grow, half-built row, split, merge,
+  owner break, stranger break/attach blocked, per-player limit). All pass. The GameTests live in the
+  `neoforge/src/gametest` source set and aren't shipped. Fabric builds from the same code but has no GameTests yet.
 
 ### M3: Robustness
 - [ ] Break handling, final version (upstream API or fallback).

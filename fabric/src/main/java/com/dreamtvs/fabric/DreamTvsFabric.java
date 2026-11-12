@@ -5,6 +5,8 @@ import com.dreamtvs.block.TvBlock;
 import com.dreamtvs.screen.Screens;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.Event;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.minecraft.core.Registry;
@@ -30,6 +32,10 @@ public final class DreamTvsFabric implements ModInitializer {
         DreamTvs.init();
 
         ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(entries -> entries.accept(TV_ITEM));
+
+        ServerLifecycleEvents.SERVER_STARTING.register(Screens::onServerStarting);
+        ServerLifecycleEvents.SERVER_STOPPED.register(server -> Screens.onServerStopped());
+        ServerTickEvents.END_SERVER_TICK.register(Screens::onServerTickEnd);
 
         PlayerBlockBreakEvents.BEFORE.addPhaseOrdering(EARLY, Event.DEFAULT_PHASE);
         PlayerBlockBreakEvents.BEFORE.register(EARLY, (level, player, pos, state, blockEntity) -> {

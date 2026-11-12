@@ -31,6 +31,12 @@ subprojects {
         options.release.set(javaVersion)
     }
 
+    // Optional: when LuckPerms is installed we check its nodes, like Dream Displays does (plan §5.7).
+    // The loader projects compile common's sources, so all three need it.
+    dependencies {
+        "compileOnly"("net.luckperms:api:${providers.gradleProperty("luckperms_api_version").get()}")
+    }
+
     tasks.withType<Jar>().configureEach {
         from(rootProject.file("LICENSE")) { rename { "LICENSE_dreamtvs" } }
     }

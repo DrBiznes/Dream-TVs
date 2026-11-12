@@ -14,3 +14,14 @@ dependencies {
         isTransitive = false
     }
 }
+
+dependencies {
+    testImplementation(platform("org.junit:junit-bom:5.11.4"))
+    testImplementation("org.junit.jupiter:junit-jupiter")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+}
+
+// The solver and planner (com.dreamtvs.screen.solve) are pure Java and tested here.
+tasks.test {
+    useJUnitPlatform()
+}
