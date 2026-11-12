@@ -1,0 +1,8 @@
+{
+  "block.dreamtvs.tv": "TV",
+  "message.dreamtvs.formed": "Screen formed: %s×%s",
+  "message.dreamtvs.refused": "Dream Displays wouldn't create a screen here",
+  "message.dreamtvs.not_ready": "Dream Displays isn't ready yet, try placing the TV again",
+  "message.dreamtvs.not_yours": "This screen belongs to %s",
+  "message.dreamtvs.menu_fallback": "Sneak + right-click the screen to open the Dream Displays menu"
+}

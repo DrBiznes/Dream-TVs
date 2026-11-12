@@ -1,0 +1,25 @@
+.gradle/
+build/
+out/
+run/
+.idea/
+*.iml
+.vscode/
+.DS_Store
+
+# Art and tooling sources stay local. Only the finished files under
+# */src/main/resources/assets (textures, models, blockstates, lang) get committed.
+tools/
+scripts/
+art/
+art-src/
+*.py
+*.ps1
+*.psd
+*.kra
+*.xcf
+*.aseprite
+*.ase
+*.blend
+*.blend1
+*.bbmodel
