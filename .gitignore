@@ -7,19 +7,6 @@ run/
 .vscode/
 .DS_Store
 
-# Art and tooling sources stay local. Only the finished files under
-# */src/main/resources/assets (textures, models, blockstates, lang) get committed.
-tools/
-scripts/
-art/
-art-src/
-*.py
-*.ps1
-*.psd
-*.kra
-*.xcf
-*.aseprite
-*.ase
-*.blend
-*.blend1
-*.bbmodel
+# All art work and art scripts live here and stay local (scripts/, textures/, models/).
+# Only the finished files under */src/main/resources/assets get committed.
+blockbench/

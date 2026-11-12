@@ -261,6 +261,7 @@ and test it in a singleplayer world:
 - [ ] `/display delete` sync, orphan cleanup, managed-display index rebuilt on start.
 - [ ] Optional veto of `/display` resizes on managed screens.
 - [ ] Multiplayer test pass: two players building one wall, chunk borders, server restart mid-build.
+- [ ] Test TV screen on sable sub level support when using https://github.com/apehum/dreamdisplays-sable ensure support for dreamdisplays-sable.
 
 ### M4: Polish
 - [ ] Connected-bezel visuals, "no signal" animation, form and unform sounds and messages.
