@@ -1,0 +1,79 @@
+{
+  "//": [
+    "One recipe template per TV, filled in with each source's materials (sources.json).",
+    "A key or step names a role (frame, screen, circuit, wire, light, tube, housing) or a literal item id.",
+    "",
+    "crafting: a shaped crafting-table recipe. The vanilla source keeps the ids dreamtvs:<tv>.",
+    "sequenced_assembly: a Create sequenced assembly. 'input' goes on the belt, then each step runs in order:",
+    "'deploy <role>', 'press' or 'cut'. The in-progress item is dreamtvs:incomplete_<tv>.",
+    "Two TVs must not share both the input and the first step, or Create can't tell them apart (the generator",
+    "checks this)."
+  ],
+  "tvs": [
+    {
+      "id": "lcd_panel",
+      "crafting": {
+        "pattern": ["IGI", "GRG", "ICI"],
+        "key": { "I": "frame", "G": "screen", "R": "circuit", "C": "wire" },
+        "count": 4
+      },
+      "sequenced_assembly": {
+        "input": "frame",
+        "steps": ["deploy screen", "deploy screen", "deploy circuit", "deploy wire", "press"],
+        "count": 4
+      }
+    },
+    {
+      "id": "jumbotron",
+      "crafting": {
+        "pattern": ["IDI", "DRD", "IDI"],
+        "key": { "I": "frame", "D": "light", "R": "circuit" },
+        "count": 4
+      },
+      "sequenced_assembly": {
+        "input": "frame",
+        "steps": ["deploy light", "deploy circuit", "deploy light", "press"],
+        "count": 4
+      }
+    },
+    {
+      "id": "crt_tv",
+      "crafting": {
+        "pattern": ["CCC", "GRI", "CCC"],
+        "key": { "C": "housing", "G": "tube", "R": "circuit", "I": "frame" },
+        "count": 1
+      },
+      "sequenced_assembly": {
+        "input": "housing",
+        "steps": ["deploy tube", "deploy circuit", "deploy frame"],
+        "count": 1
+      }
+    },
+    {
+      "id": "flat_screen_2x1",
+      "crafting": {
+        "pattern": ["PPP", "IRI"],
+        "key": { "P": "screen", "I": "frame", "R": "circuit" },
+        "count": 1
+      },
+      "sequenced_assembly": {
+        "input": "frame",
+        "steps": ["deploy circuit", "deploy screen", "deploy screen", "deploy screen", "press"],
+        "count": 1
+      }
+    },
+    {
+      "id": "flat_screen_3x2",
+      "crafting": {
+        "pattern": ["PPP", "PPP", "IRI"],
+        "key": { "P": "screen", "I": "frame", "R": "circuit" },
+        "count": 1
+      },
+      "sequenced_assembly": {
+        "input": "dreamtvs:flat_screen_2x1",
+        "steps": ["deploy screen", "deploy screen", "deploy screen", "deploy circuit", "press"],
+        "count": 1
+      }
+    }
+  ]
+}

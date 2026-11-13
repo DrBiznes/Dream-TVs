@@ -1,14 +1,20 @@
 package com.dreamtvs;
 
+import com.dreamtvs.compat.CompatRecipes;
 import com.dreamtvs.dd.DreamDisplaysBridge;
 import com.mojang.logging.LogUtils;
 import net.minecraft.resources.ResourceLocation;
 import org.slf4j.Logger;
 
-/** Loader-agnostic entry point. Each loader calls {@link #init()} once during mod construction. */
+import java.nio.file.Path;
+import java.util.function.Predicate;
+
+/** Loader-agnostic entry point. Each loader calls {@link #init} once during mod construction. */
 public final class DreamTvs {
     public static final String MOD_ID = "dreamtvs";
     public static final Logger LOGGER = LogUtils.getLogger();
+
+    private static Path configDir = Path.of("config");
 
     private DreamTvs() {}
 
@@ -16,8 +22,19 @@ public final class DreamTvs {
         return ResourceLocation.fromNamespaceAndPath(MOD_ID, path);
     }
 
-    public static void init() {
+    /**
+     * @param configDir the loader's config folder ({@code config/} in the game directory)
+     * @param modLoaded whether a mod with this id is installed (for the compat recipes)
+     */
+    public static void init(Path configDir, Predicate<String> modLoaded) {
         LOGGER.info("Dream TVs initializing");
+        DreamTvs.configDir = configDir;
+        CompatRecipes.init(modLoaded);
         DreamDisplaysBridge.init();
+    }
+
+    /** {@code config/dreamtvs.json}. */
+    public static Path configFile() {
+        return configDir.resolve(MOD_ID + ".json");
     }
 }

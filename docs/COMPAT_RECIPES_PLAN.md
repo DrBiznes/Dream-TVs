@@ -1,203 +1,248 @@
 # Dream TVs — Tech Mod Compatibility Update (Recipes)
 
-> A future compatibility update for [Dream TVs](PROJECT_PLAN.md). When a supported technology mod is installed, the
-> TV block gets a **crafting recipe built from that mod's items**. If several supported mods are loaded, a fixed
-> **priority list** picks the recipe from the highest-priority one. A **config option** lets players override that and
-> use the recipe from a different mod (or the vanilla one).
+> A compatibility update for [Dream TVs](PROJECT_PLAN.md). When a supported technology mod is installed, every TV
+> gets a recipe **built from that mod's parts**. With **Create** installed, the TVs are made in a **Create sequenced
+> assembly** instead of at a crafting table, and if other tech mods are installed too, the assembly deploys **their**
+> parts. A fixed **priority list** picks one source when several mods are loaded, and **config options** let players
+> pick another source, go back to vanilla, or turn sequenced assembly off.
 
 | | |
 |---|---|
-| **Status** | Planned. Not started. Depends on M2/M4 of [PROJECT_PLAN.md](PROJECT_PLAN.md) (config file exists, block is stable). |
+| **Status** | Implemented (C0 to C2). Recipe balance and the in-game matrix still need playtesting (C3, C4). |
 | **Target version** | Dream TVs `0.x` compat release, after the 1.21.1 release (M5) |
-| **Scope** | Recipes only. No new blocks, items or Dream Displays changes. |
-| **Loaders** | Fabric and NeoForge (not every supported mod exists on both, see [§2](#2-supported-mods-and-priority-order)) |
+| **Scope** | Recipes for all five TVs, plus five hidden "incomplete" items for Create. No Dream Displays changes. |
+| **Loaders** | Fabric and NeoForge. On 1.21.1 every supported mod is NeoForge-only, so Fabric only ever uses vanilla. |
 
 ---
 
 ## 1. Goals and non-goals
 
 ### Goals
-- If a supported tech mod is present, the TV is craftable with that mod's materials, so it fits modpack progression.
-- Several mods loaded at once: exactly **one** TV recipe is active, chosen by the priority list.
-- A server-side config option picks a different source, so a pack author can choose "use the Mekanism recipe even
-  though Power Grid is installed".
-- No supported mod installed: the existing vanilla recipe ([PROJECT_PLAN.md §6](PROJECT_PLAN.md#6-content)) still works.
-- No hard dependency on any of these mods. Dream TVs must load fine without all of them.
+- If a supported tech mod is present, the TVs are craftable with that mod's materials, so they fit modpack
+  progression.
+- If **Create** is present, the TVs are made in a Create sequenced assembly (deployers and a press), and the parts it
+  deploys come from the highest-priority other tech mod that's installed (Mekanism circuits, Power Grid display
+  modules, and so on).
+- Several mods loaded at once: exactly **one** recipe per TV is active.
+- Server-side config: pick a different source, force vanilla, or turn sequenced assembly off.
+- No supported mod installed: the vanilla recipes work as before, with their original ids.
+- **No hard or compile dependency** on any of these mods, Create included. Dream TVs must keep loading when it's
+  ported to a Minecraft version where Create or some of these mods don't exist, or where an item was renamed.
 
 ### Non-goals
 - Compat *behavior* (powering the TV with FE, Create stress, energy use). Possible later, see [§10](#10-stretch-goals).
-- Changing the vanilla recipe's yield or layout.
-- Per-mod item/block content from our side (no new textures or models).
-- Supporting every tech mod. The list is fixed per release and datapack authors can add their own ([§6.3](#63-adding-your-own-variant-datapacks)).
+- Changing the vanilla recipes.
+- Supporting every tech mod. The list is fixed per release; datapack authors can override any recipe
+  ([§6.4](#64-overriding-or-adding-recipes-datapacks)).
 
 ---
 
-## 2. Supported mods and priority order
+## 2. Supported sources and priority order
 
-Higher in the table = higher priority. The first loaded mod wins in `auto` mode.
+Higher in the table = higher priority. In `auto` mode the first **usable** source wins (its mods are loaded and
+every item it uses exists).
 
-| # | Variant id | Mod | Mod ID (for `mod_loaded`) | Loaders (1.21.1) | Notes |
+| # | Source id | Mod | Mod ids required | 1.21.1 loaders | Parts used |
 |---|---|---|---|---|---|
-| 1 | `power_grid` | **Create: Power Grid** | *TBD, read from the jar* | Fabric, NeoForge | Physics-based electricity. Has "Modular Displays" and circuit parts we may reuse. |
-| 2 | `electro_energetics` | **Create: Electro Energetics** | *TBD, read from the jar* | NeoForge | Realistic-ish electricity addon (capacitors, diodes, relays, transformers). |
-| 3 | `mekanism` | **Mekanism** | `mekanism` | NeoForge | Most popular tech mod. See the naming note below. |
-| 4 | `createaddition` | **Create: Crafts & Additions** | `createaddition` | NeoForge | Electricity for Create (capacitors, copper wire, motors). |
-| 5 | `immersiveengineering` | **Immersive Engineering** | `immersiveengineering` | NeoForge | Wires, electronic components, steel plates. |
-| 6 | `modern_industrialization` | **Modern Industrialization** | `modern_industrialization` | Fabric, NeoForge | Gives Fabric players a tech option. |
-| 7 | `thermal` | **Thermal Series** | `thermal` | NeoForge | RF coils, electrum. |
-| 8 | `ae2` | **Applied Energistics 2** | `ae2` | Fabric, NeoForge | Logic processors, vibrant glass. Good "screen" ingredients. |
-| fallback | `vanilla` | (none) | | | The current recipe. Used when no supported mod is loaded. |
+| 1 | `power_grid` | **Create: Power Grid** | `create`, `powergrid` | NeoForge | display module, circuit board, copper wire, light bulb, cathode ray tube |
+| 2 | `electro_energetics` | **Create: Electro Energetics** | `create`, `electroenergetics` | NeoForge | relay, copper wire, bulb |
+| 3 | `mekanism` | **Mekanism** | `mekanism` | NeoForge | steel ingot, basic control circuit, infused alloy |
+| 4 | `createaddition` | **Create Crafts & Additions** | `create`, `createaddition` | NeoForge | capacitor, copper wire |
+| 5 | `immersiveengineering` | **Immersive Engineering** | `immersiveengineering` | NeoForge | steel plate, electronic component, copper wire, light bulb |
+| 6 | `modern_industrialization` | **Modern Industrialization** | `modern_industrialization` | NeoForge | steel plate, analog circuit, copper cable |
+| 7 | `thermal` | **Thermal Series** | `thermal` | *none (no 1.21.1 release)* | steel ingot, RF coil, electrum ingot |
+| 8 | `ae2` | **Applied Energistics 2** | `ae2` | NeoForge | quartz vibrant glass, logic processor, fluix crystal |
+| 9 | `create` | **Create** (alone) | `create` | NeoForge | iron sheet, electron tube, copper sheet |
+| fallback | `vanilla` | (none) | | all | iron, black glass pane, redstone, copper, glowstone, glass pane, gray concrete |
 
-> ⚠️ **Naming note.** The request listed "Mechanism" as #3. The only exact match found on Modrinth is a *Paper
-> plugin* (not a mod), so this plan assumes **Mekanism** was meant. If a different mod was intended, swap row 3. The
-> rest of the plan doesn't change.
->
-> **Mod IDs for rows 1 and 2** weren't published on their Modrinth/GitHub pages. Read them from each jar's
-> `neoforge.mods.toml` / `fabric.mod.json` before writing the conditions (task C0).
->
-> **Why these 5 extra mods:** popularity and a spread of play styles: Create-ecosystem electricity (Crafts &
-> Additions), classic tech (Immersive Engineering, Thermal), a Fabric-friendly tech mod (Modern Industrialization) and
-> the most-installed storage/logic mod (AE2).
+Notes from research (C0, 2026-11-13):
+- Mod ids were read from each jar: Power Grid is `powergrid` (0.6.2), Electro Energetics is `electroenergetics`
+  (1.1.4). Every item id above was checked against the latest 1.21.1 jar of its mod, except Thermal's.
+- Row 3 is **Mekanism** (the request said "Mechanism"; the only exact match is a Paper plugin). Confirm with the
+  project owner; swapping it is a one-entry change in `sources.json`.
+- **Thermal has no 1.21.1 release.** It stays in the list for ports to versions that have it (e.g. 1.20.1). Its item
+  ids are from memory and unverified; if they're wrong the source is skipped with a warning ([§5.1](#51-resolver)).
+- **None of these mods have a Fabric build for 1.21.1**, Create included. The Fabric side is fully wired up and
+  will pick them up on versions where Fabric builds exist.
+- Sources that are Create addons (rows 1, 2, 4) inherit Create's parts for roles they don't override.
 
-Priority is **hard-coded in order** (the table above) and lives in one place in code (`CompatVariants`), so reordering is
-a one-line change. A user-editable order is a [stretch goal](#10-stretch-goals).
+The priority order, mod ids and materials all live in one file, [`common/src/compat/sources.json`](../common/src/compat/sources.json).
+Reordering is moving one entry. A user-editable order is a [stretch goal](#10-stretch-goals).
 
 ---
 
 ## 3. Player experience
 
-1. Install Dream TVs with no tech mods: the vanilla recipe works as today.
-2. Install Mekanism: the TV recipe changes to the Mekanism one. Recipe book, JEI/REI/EMI show only that recipe.
-3. Install Mekanism **and** Create: Power Grid: Power Grid wins (higher priority). Only one recipe is shown.
-4. Not happy? Set `compat.recipeSource` to `"mekanism"` in `config/dreamtvs.json`, then run `/reload` (or restart).
-   Now the Mekanism recipe is the active one.
-5. A log line at startup always says what happened, for example:
-   `Dream TVs recipe source: mekanism (auto: highest priority of [power_grid, mekanism])`.
+1. No tech mods: the vanilla crafting recipes, as before.
+2. Mekanism only: crafting-table recipes with Mekanism parts.
+3. **Create** only: every TV is made in a Create sequenced assembly with Create parts.
+4. **Create + Mekanism**: a sequenced assembly that deploys Mekanism parts (steel ingot on the belt, deploy black
+   glass panes, a basic control circuit and infused alloy, then press).
+5. Create + Power Grid + Mekanism: Power Grid wins (highest priority). One recipe per TV is shown.
+6. Not happy? Set `compat.recipeSource` or `compat.createSequencedAssembly` in `config/dreamtvs.json` and run
+   `/reload`.
+7. The log always says what was picked, for example:
+   `Dream TVs recipes: mekanism (sequenced_assembly) [auto, installed: mekanism, create]`.
 
 ---
 
 ## 4. Config
 
-Added to `config/dreamtvs.json` (server-side, same file as in [PROJECT_PLAN.md §6](PROJECT_PLAN.md#6-content)):
+In `config/dreamtvs.json` (server-side, the same file as [PROJECT_PLAN.md §6](PROJECT_PLAN.md#6-content)):
 
 ```json
 {
   "compat": {
-    "recipeSource": "auto"
+    "recipeSource": "auto",
+    "createSequencedAssembly": true
   }
 }
 ```
 
 | Key | Values | Default | Meaning |
 |---|---|---|---|
-| `compat.recipeSource` | `"auto"` | `"auto"` | Pick the highest-priority **loaded** mod from [§2](#2-supported-mods-and-priority-order). `vanilla` if none. |
-| | `"vanilla"` | | Always use the vanilla recipe, even if tech mods are installed. |
-| | a variant id, e.g. `"mekanism"` | | Use that mod's recipe. Must be loaded, otherwise see below. |
+| `compat.recipeSource` | `"auto"` | `"auto"` | The highest-priority usable source from [§2](#2-supported-sources-and-priority-order), `vanilla` if none. |
+| | `"vanilla"` | | Always the vanilla crafting recipes, even with tech mods installed (and no sequenced assembly). |
+| | a source id, e.g. `"mekanism"` | | That source's parts. If it can't be used, see below. |
+| `compat.createSequencedAssembly` | `true` / `false` | `true` | With Create installed, make TVs in a sequenced assembly. `false` = crafting-table recipes with the same parts. |
 
 **Invalid values.**
-- Unknown id (typo) → log a warning listing the valid ids, behave as `auto`.
-- Valid id but that mod isn't loaded → log a warning, behave as `auto`. We never enable a recipe whose ingredients
-  don't exist.
-- The resolved choice is always logged once per reload.
+- Unknown id (typo) → warning listing the valid ids, then `auto`.
+- Valid id but its mods aren't loaded, or its items don't exist → warning, then `auto`. We never enable a recipe whose
+  ingredients don't exist.
+- Ids are case-insensitive and trimmed. A value that isn't a string, or a non-boolean `createSequencedAssembly`,
+  is fixed by the normal config validation (M4) with a warning at server start.
+- The config file lists every source id with its mod name in a comment.
 
-**When it applies.** Recipes are datapack data, so the config is read when data loads: **world load, `/reload`, or
-server restart**. Changing the file while running does nothing until a reload. Validation of the value belongs with the
-rest of the config validation (M4).
+**When it applies.** Recipes are data, so the compat options are read when data loads: **world load and `/reload`**.
+The rest of the config still applies on server start. The resolver re-reads the file itself (quietly) because
+datapacks load before the server-start config load runs.
 
-**Multiplayer.** The server's config decides. Clients get the recipe through normal recipe sync and need no config
-(clients still need the tech mods that add the items, as with any modded recipe).
+**Multiplayer.** The server's config decides. Clients get the recipes through normal recipe sync (and need the tech
+mods that add the items, as with any modded recipe).
 
 ---
 
 ## 5. How the recipe is chosen
 
-### 5.1 Resolver (pure, in `common`)
+### 5.1 Resolver
+
+`CompatResolver` (pure Java in `common`, unit-tested) takes the config, the sources in priority order, a
+"mod loaded" check and an "item exists" check, and returns one `(source, method)`:
 
 ```
-CompatResolver.resolve(configValue, loadedModIds) -> Variant
-  1. if configValue == "vanilla"                      -> VANILLA
-  2. if configValue names a known, loaded variant     -> that variant
-  3. otherwise (auto, unknown, or not loaded)         -> first variant in PRIORITY whose mod is loaded
-  4. none loaded                                      -> VANILLA
+resolve(recipeSource, createSequencedAssembly) -> (source, method)
+  methods = createSequencedAssembly ? [sequenced_assembly, crafting] : [crafting]
+  1. "vanilla"                                         -> (vanilla, crafting)
+  2. a known source id: first method it's usable for   -> (that source, method)   else warn, go on
+  3. for each method in methods:
+       for each source in priority order (not vanilla): if usable -> (source, method)
+  4. nothing usable                                    -> (vanilla, crafting)
+
+usable(source, method) = all the method's mods are loaded AND all its items exist in the item registry
 ```
 
-- No Minecraft imports. Takes a `Set<String>` of loaded mod ids, so it is **unit-testable** without a game.
-- The result is computed once per data load and cached. Both loaders ask it the same question, so behavior is identical.
+- **Method first, then source**, so Create installed means "sequenced assembly with the best parts available"
+  before falling back to crafting.
+- **Item existence is what makes ports safe.** If a mod is installed but an item was renamed or doesn't exist on this
+  game version, that source is skipped with a warning naming the missing items, and the next one is used. Tags
+  can't be checked this early, so sources use plain item ids.
+- Sequenced assemblies also need our `dreamtvs:incomplete_<tv>` items, which only exist with Create installed. If
+  they're missing for any reason the resolver falls back to crafting.
+- `CompatRecipes` caches the result for one data load and logs it. Each loader clears the cache when a reload starts
+  (NeoForge `AddReloadListenerEvent`, Fabric `START_DATA_PACK_RELOAD` and server stop), and editing the config file
+  also forces a new choice.
 
 ### 5.2 Making the choice reach the recipe system
 
-The challenge is that recipe JSON can't read our config by itself. Options:
+**Option A from the first draft: conditional JSON with one custom condition**, `dreamtvs:recipe_source`:
 
-| Option | How | Pros | Cons |
-|---|---|---|---|
-| **A. Conditional JSON + custom condition** *(recommended)* | One recipe file per variant in the datapack. Each has a load condition: `mod_loaded(X)` **and** `dreamtvs:variant_selected(X)`. Our custom condition asks `CompatResolver`. | Uses each loader's supported mechanism. Datapack-friendly, so players can read and override recipes. Disabled recipes are never parsed, so missing items don't error. Viewers (JEI/EMI) just see one recipe. | The condition key differs per loader (`neoforge:conditions` vs `fabric:load_conditions`), so recipe JSON can't be shared as is. Needs a custom condition registered on each loader. |
-| B. Mixin on `RecipeManager` | Build or filter variant recipes in code after load. | One code path, no per-loader JSON. | Brittle across MC versions, hidden from datapack authors. |
-| C. One recipe type that checks at craft time | Custom serializer; `matches()` returns false when inactive. | Loader-neutral. | Inactive recipes still show in recipe book and JEI/EMI. Bad UX. |
+```json
+{ "type": "dreamtvs:recipe_source", "source": "mekanism", "method": "sequenced_assembly" }
+```
 
-**Decision: Option A.** To avoid keeping two copies of every recipe by hand:
+- Every TV recipe (vanilla included) carries it, so exactly one recipe per TV loads. Non-selected recipes are never
+  parsed, so missing items or a missing `create:sequenced_assembly` recipe type never cause errors.
+- **One file serves both loaders.** Each recipe has a `neoforge:conditions` block *and* a `fabric:load_conditions`
+  block; each loader ignores the other's key. They also list `mod_loaded` / `all_mods_loaded` for readability.
+- Registered as an `ICondition` codec on NeoForge and a `ResourceConditionType` on Fabric, both calling
+  `CompatRecipes.isSelected(source, method)`.
 
-- Keep the loader-neutral source of truth in `common/src/compat/variants/<variant>.json`, containing only the shaped
-  recipe (pattern, keys, result).
-- A small Gradle task (`generateCompatRecipes`) writes the per-loader files, adding the right condition block:
-  - NeoForge → `data/dreamtvs/recipe/compat/<variant>.json` with `neoforge:conditions`.
-  - Fabric → same path with `fabric:load_conditions` (Fabric API *resource conditions*).
-- Custom condition `dreamtvs:variant_selected { "variant": "<id>" }`, registered once per loader, both calling
-  `CompatResolver`.
-- The vanilla recipe stays at `data/dreamtvs/recipe/tv.json` (same id) and gets the same treatment
-  (`variant_selected: vanilla`), so exactly one of the nine recipes is ever active.
+### 5.3 Recipe ids
 
-> The config must be loaded **before** datapack recipes are read. Our config is a plain JSON file read at mod init
-> (not a `ModConfigSpec`), so load order isn't a problem. Verify this in the spike (C1).
+| Recipe | Id |
+|---|---|
+| Vanilla (unchanged) | `dreamtvs:<tv>` |
+| Crafting with a source's parts | `dreamtvs:compat/<source>/crafting/<tv>` |
+| Create sequenced assembly | `dreamtvs:compat/<source>/sequenced_assembly/<tv>` |
 
-### 5.3 Only one TV recipe ever exists
-All variants produce `dreamtvs:lcd_panel`. Because non-selected variants are skipped at load time, the recipe book, JEI, REI
-and EMI never show duplicates, and `/recipe give` only grants the active one. Compat recipe ids are
-`dreamtvs:compat/<variant>`. The vanilla recipe **keeps its original id** `dreamtvs:lcd_panel`, so existing datapack
-overrides, scripts and recipe-book progress keep working (see [Risks](#9-risks-and-open-questions) K2/K3).
+`<tv>` is `lcd_panel`, `jumbotron`, `crt_tv`, `flat_screen_2x1` or `flat_screen_3x2`. Vanilla ids are unchanged, so
+existing datapack overrides, scripts and recipe-book progress keep working.
 
 ---
 
 ## 6. Recipe design
 
-### 6.1 Rules for every variant
-- **Same shape and yield as vanilla** (`IGI / GRG / ICI`, makes 4), so screens cost about the same everywhere and
-  docs/screenshots stay valid. Only the ingredients change.
-- Ingredients play the same **roles**:
+### 6.1 Roles
 
-  | Slot | Role | Typical source |
-  |---|---|---|
-  | `I` | Frame / casing | The mod's plate or casing material |
-  | `G` | Screen | Glass or display part (black glass pane if the mod has no equivalent) |
-  | `R` | Brain | The mod's circuit / logic component |
-  | `C` | Power / wiring | The mod's wire, capacitor or conductor |
+Each source maps **roles** to items; each TV's templates use roles. Roles a source doesn't set come from its parent
+(Create addons → `create`) and finally from `vanilla`.
 
-- **Prefer common tags** (`c:ingots/steel`, `c:plates/steel`, etc.) over mod-specific items when a tag exists, so
-  small item renames and other mods adding the same material don't break the recipe.
-- Early-to-mid-game cost: reachable once the player has the mod's first circuit tier. Not end-game.
-- Every variant recipe is a normal datapack file. Players can override it with their own datapack.
+| Role | Meaning | Vanilla |
+|---|---|---|
+| `frame` | Casing / plate material | iron ingot |
+| `screen` | Display surface | black stained glass pane |
+| `circuit` | The brain | redstone |
+| `wire` | Power / wiring | copper ingot |
+| `light` | Backlight (Jumbotron) | glowstone dust |
+| `tube` | Picture tube (CRT) | glass pane |
+| `housing` | CRT body | gray concrete |
 
-### 6.2 Draft ingredients (to be verified in-game)
+### 6.2 Templates
 
-> All item ids below are **drafts** from memory of each mod's content. Each one must be checked against the real mod
-> version during task C2, before it ships. Rows 1 and 2 need the jars opened first.
+From [`common/src/compat/tvs.json`](../common/src/compat/tvs.json). Crafting keeps the vanilla shapes and yields.
 
-| Variant | `I` frame | `G` screen | `R` brain | `C` power | Notes |
-|---|---|---|---|---|---|
-| `power_grid` | TBD | TBD (look at *Modular Displays*) | TBD (circuit board / transistor) | TBD (conductive part) | Needs jar inspection |
-| `electro_energetics` | TBD | black glass pane | TBD (capacitor / diode / relay) | TBD (conductor) | Needs jar inspection |
-| `mekanism` | `mekanism:ingot_steel` | black glass pane | `mekanism:basic_control_circuit` | `mekanism:alloy_infused` | |
-| `createaddition` | `create:iron_sheet` | black glass pane | `createaddition:capacitor` | `createaddition:copper_wire` | |
-| `immersiveengineering` | `immersiveengineering:plate_steel` | black glass pane | `immersiveengineering:component_electronic` | `immersiveengineering:wire_copper` | |
-| `modern_industrialization` | steel plate (use `c:` tag) | black glass pane | electronic circuit (use `c:` tag) | copper cable (use `c:` tag) | Check tag availability first |
-| `thermal` | `thermal:steel_ingot` | black glass pane | `thermal:rf_coil` | `thermal:electrum_ingot` | |
-| `ae2` | `minecraft:iron_ingot` | `ae2:quartz_vibrant_glass` | `ae2:logic_processor` | `ae2:fluix_crystal` | |
-| `vanilla` | `minecraft:iron_ingot` | `minecraft:black_stained_glass_pane` | `minecraft:redstone` | `minecraft:copper_ingot` | Existing recipe |
+| TV | Crafting (yield) | Sequenced assembly: input → steps (yield) |
+|---|---|---|
+| LCD Panel | `IGI / GRG / ICI` frame, screen, circuit, wire (4) | frame → deploy screen, screen, circuit, wire → press (4) |
+| Jumbotron | `IDI / DRD / IDI` frame, light, circuit (4) | frame → deploy light, circuit, light → press (4) |
+| CRT TV | `CCC / GRI / CCC` housing, tube, circuit, frame (1) | housing → deploy tube, circuit, frame (1) |
+| Flat Screen (2x1) | `PPP / IRI` screen, frame, circuit (1) | frame → deploy circuit, screen, screen, screen → press (1) |
+| Flat Screen (3x2) | `PPP / PPP / IRI` screen, frame, circuit (1) | **a Flat Screen (2x1)** → deploy screen ×3, circuit → press (1) |
 
-### 6.3 Adding your own variant (datapacks)
-Pack authors can add a recipe for a mod we don't support by shipping a normal recipe that produces `dreamtvs:lcd_panel` with
-their own conditions. Document in the README that if they add one, they should also disable the matching built-in
-variant with `compat.recipeSource` or by overriding its file, otherwise two recipes can be active. A clean version of
-this (custom variants ids accepted by the config) is a [stretch goal](#10-stretch-goals).
+- Create picks a sequenced assembly by its input and first step, so no two TVs may share both. The generator checks
+  this for every source and fails with a clear message.
+- The in-progress item is `dreamtvs:incomplete_<tv>` (registered only with Create installed; its model is the
+  finished TV for now, and it has no progress bar since that would need Create's item class).
+- Balance (K7) is a first pass: assemblies use fewer frames than crafting, as a reward for automating.
+
+### 6.3 Generation
+
+The recipes are generated, not hand-written:
+
+```
+common/src/compat/sources.json   # sources in priority order, mods, materials per role
+common/src/compat/tvs.json       # one crafting + one sequenced assembly template per TV
+        │  gradlew :common:generateCompatRecipes   (CompatRecipeGenerator, common/src/compatgen)
+        ▼
+common/src/generated/resources/  # committed, shipped by both loaders
+  data/dreamtvs/recipe/<tv>.json                                  (vanilla)
+  data/dreamtvs/recipe/compat/<source>/<method>/<tv>.json         (90 compat recipes)
+  assets/dreamtvs/models/item/incomplete_<tv>.json
+  dreamtvs.compat.json            # runtime index: sources in order, mods and items per method
+```
+
+`CompatRecipesUpToDateTest` fails the build if the committed output doesn't match the sources. **Porting:** the
+1.21.1 / Create 6 JSON format is confined to two methods in the generator (`crafting`, `sequencedAssembly`); a port
+with a different recipe format changes those and regenerates. Mods or items missing on that version need no code
+change, the resolver skips them.
+
+### 6.4 Overriding or adding recipes (datapacks)
+- Override any generated file by id, like any recipe. Keep the `dreamtvs:recipe_source` condition if it should still
+  follow the config.
+- To add a source for an unsupported mod, ship a recipe producing the TV with your own conditions, and set
+  `compat.recipeSource: "vanilla"` (or override the built-in files) so two recipes aren't active. A cleaner way
+  (custom source ids in config) is a [stretch goal](#10-stretch-goals).
 
 ---
 
@@ -206,49 +251,50 @@ this (custom variants ids accepted by the config) is a [stretch goal](#10-stretc
 ```
 dreamtvs/
 ├── common/
-│   ├── compat/CompatVariants        # ordered list: id, mod id, display name (the priority list lives here)
-│   ├── compat/CompatResolver        # PURE: (config value, loaded mods) -> Variant (unit-tested)
-│   ├── compat/CompatConfig          # reads/validates compat.recipeSource, logs warnings
-│   └── src/compat/variants/*.json   # loader-neutral recipe sources, one per variant
-├── fabric/
-│   └── VariantSelectedCondition     # registered with Fabric API ResourceConditions
-│                                    # + generated data/dreamtvs/recipe/compat/*.json (fabric:load_conditions)
-└── neoforge/
-    └── VariantSelectedCondition     # registered as an ICondition codec
-                                     # + generated data/dreamtvs/recipe/compat/*.json (neoforge:conditions)
+│   ├── src/compat/{sources,tvs}.json           # hand-written sources (the priority list lives here)
+│   ├── src/compatgen/.../CompatRecipeGenerator # Gradle-run generator (Gson only, no Minecraft)
+│   ├── src/generated/resources/                # generated recipes, models, index (committed)
+│   └── src/main/java/com/dreamtvs/compat/
+│       ├── CompatIndex       # reads dreamtvs.compat.json from the jar
+│       ├── CompatResolver    # PURE: (config, sources, mods, items) -> (source, method)
+│       ├── CompatRecipes     # caches the choice per data load, logs it, answers the condition
+│       └── RecipeMethod      # crafting | sequenced_assembly
+├── fabric/   RecipeSourceCondition  (ResourceConditionType, registered with ResourceConditions)
+└── neoforge/ RecipeSourceCondition  (ICondition codec, DeferredRegister on CONDITION_CODECS)
 ```
 
-- **Fabric** needs Fabric API's resource-conditions module (already a dependency of the Fabric build).
-- **Mod loaded check** comes from `FabricLoader.isModLoaded` / `ModList.isLoaded`, passed into the resolver as a
-  `Set<String>` so `common` never touches loader APIs.
-- **No compile dependency** on any supported mod. Recipes reference items by id in JSON only, so nothing in code
-  imports their classes.
+- `DreamTvs.init(configDir, modLoaded)` gets the loader's config folder and `isModLoaded` check, so `common` never
+  touches loader APIs.
+- **No compile dependency** on any supported mod or on Create. Recipes reference items by id in JSON only. The
+  in-progress items are plain `Item`s, registered only when `create` is loaded.
 
 ---
 
 ## 8. Milestones
 
 ### C0: Research
-- [ ] Open the Power Grid and Electro Energetics jars and record their mod ids and relevant items.
+- [x] Read the Power Grid and Electro Energetics mod ids from their jars and check every item id (2026-11-13).
 - [ ] Confirm the interpretation of #3 (Mekanism) with the project owner.
-- [ ] Confirm each supported mod's loader availability for our target Minecraft version.
+- [x] Check loader availability for 1.21.1 (all NeoForge-only; Thermal has no 1.21.1 release).
 
-### C1: Spike (reduce risk first)
-- [ ] Register `dreamtvs:variant_selected` on NeoForge and Fabric and make one conditional recipe appear or disappear
-      based on a hard-coded value.
-- [ ] Confirm the config is readable by the time recipes load, in singleplayer and on a dedicated server.
-- [ ] Confirm that `/reload` after a config edit switches the recipe.
+### C1: Spike
+- [x] `dreamtvs:recipe_source` registered on NeoForge and Fabric.
+- [x] Config readable when recipes load: the resolver reads the file itself.
+- [x] GameTest: without tech mods only the 5 vanilla recipes load; with Create only the 5 Create sequenced
+      assemblies load; with `createSequencedAssembly: false` only the 5 Create crafting recipes load.
+- [ ] Check in a client that `/reload` after a config edit switches the recipe (code path exists, not yet tried).
 
 ### C2: Core
-- [ ] `CompatVariants`, `CompatResolver` and `CompatConfig` with unit tests ([§11](#11-testing)).
-- [ ] `generateCompatRecipes` Gradle task producing both loaders' recipe JSON.
-- [ ] Put the vanilla recipe (id unchanged) under the variant system.
-- [ ] Draft and verify ingredients for all eight variants in-game ([§6.2](#62-draft-ingredients-to-be-verified-in-game)).
+- [x] `CompatIndex`, `CompatResolver`, `CompatRecipes` and config options, with unit tests.
+- [x] `generateCompatRecipes` task and up-to-date test.
+- [x] Vanilla recipes (ids unchanged) under the same condition.
+- [x] Sequenced assembly for every source, with in-progress items.
 
 ### C3: Polish
-- [ ] Startup log line, warnings for bad config values, README section with the priority table and config example.
-- [ ] Lang/tooltip: nothing needed unless we decide to show the active source somewhere (optional).
-- [ ] Modrinth/CurseForge description: add a "Compatibility" section; list the mods as *optional* integrations.
+- [ ] Playtest each source for cost parity (K7), especially Power Grid's display modules and circuit boards.
+- [ ] Art for the incomplete items (they reuse the finished TV models), and maybe a progress bar.
+- [ ] Try each mod in a dev client: JEI/EMI show one recipe per TV and the assembly runs on a belt.
+- [ ] Modrinth/CurseForge description: list the mods as *optional* integrations.
 
 ### C4: Release
 - [ ] Test matrix ([§11](#11-testing)), then ship with the next Dream TVs version.
@@ -257,43 +303,47 @@ dreamtvs/
 
 ## 9. Risks and open questions
 
-| # | Item | Mitigation / decision needed |
+| # | Item | Mitigation / decision |
 |---|---|---|
-| K1 | Item ids and tags in tech mods change between versions | Prefer `c:` tags. Conditions only check that the mod is *loaded*, so a renamed item would produce a recipe parse error. Consider also guarding with `item_exists`-style conditions where the loader offers them, and test against each mod's latest 1.21.1 build. |
-| K2 | Changing the vanilla recipe id would break datapacks or KubeJS scripts that reference it | Decided: vanilla keeps its original id `dreamtvs:lcd_panel`. Only the compat recipes are namespaced under `compat/`. |
-| K3 | Recipe book progress: players who unlocked the old recipe | Unchanged ids keep progress (follows from K2). Compat recipes are new ids and unlock normally. |
-| K4 | Config isn't loaded before data on some loader/path | C1 spike. Fall back to reading the file directly in the condition. |
-| K5 | Fabric only has some of the supported mods | Accepted: the list is per-loader in practice. On Fabric the usable variants are Power Grid, Modern Industrialization, AE2 and `vanilla`. |
-| K6 | "Which mod did #3 mean?" | Needs a yes/no from the project owner. Assumed Mekanism. |
-| K7 | Balance: some mods' items are far cheaper or more expensive than others | Playtest each variant for approximate parity with vanilla's cost. Tune in the recipe JSON only. |
-| K8 | Two supported mods in a pack where the pack author wants *neither* | `recipeSource: "vanilla"` covers it. |
+| K1 | Item ids change between mod or game versions | The resolver checks every item exists and skips the source with a warning. No parse errors, no TV without a recipe. |
+| K2 | Changing the vanilla recipe ids would break datapacks and scripts | Decided: vanilla keeps `dreamtvs:<tv>`. |
+| K3 | Recipe book progress | Unchanged ids keep progress; compat recipes unlock normally. |
+| K4 | Config not loaded before data | Solved: the resolver reads the file directly when the first condition is tested. |
+| K5 | Fabric has none of these mods on 1.21.1 | Accepted. Fabric is fully wired for versions that do have them. |
+| K6 | "Which mod did #3 mean?" | Assumed Mekanism. Needs a yes/no from the project owner. |
+| K7 | Balance between sources | First pass only. Tune in `sources.json` / `tvs.json`, regenerate. |
+| K8 | Pack author wants none of it | `recipeSource: "vanilla"`. |
+| K9 | Another mod's sequenced assembly with the same input and first step | Create would pick one of them. Ours start with distinct steps; cross-mod clashes are unlikely but possible. |
+| K10 | Thermal ids are unverified | Harmless: skipped with a warning if wrong. Verify when porting to a version with Thermal. |
 
 ---
 
 ## 10. Stretch goals
-- **User-editable priority order** in config (`compat.priority: ["mekanism", "power_grid", ...]`) instead of the fixed
-  list.
-- **Custom variants through config or datapack** that the resolver recognises by id, without code changes.
-- **Optional hard override** `compat.disableVariants: [...]` to take specific mods out of `auto` selection.
-- **Energy/power integration** (TV draws FE or stress, needs power to display). That is real compat, not just recipes,
-  and would need its own plan.
-- Show the active recipe source in a TV item tooltip or a `/dreamtvs recipe-source` command.
+- **User-editable priority order** in config (`compat.priority: [...]`).
+- **Custom sources** through config or datapack, recognised by id.
+- **`compat.disabledSources: [...]`** to take specific mods out of `auto`.
+- **Energy/power integration** (TV draws FE or stress). Real compat, needs its own plan.
+- Show the active recipe source in a tooltip or a `/dreamtvs recipe-source` command.
+- A progress bar on the incomplete items (Create's own item class would mean a compile dependency; a small
+  reflection-based bar would not).
 
 ---
 
 ## 11. Testing
 
-- **Unit (`common`):** `CompatResolver` for every path:
-  - no mods loaded → `vanilla`
-  - one mod loaded → that mod
-  - several loaded → highest priority wins, regardless of load order
-  - config names a loaded mod → that mod, even if it is lower priority
-  - config names a mod that isn't loaded → falls back to `auto` + warning
-  - config has an unknown id or wrong case → falls back to `auto` + warning
-  - config `vanilla` with mods loaded → `vanilla`
-- **Datagen/Gradle check:** the generated files for both loaders exist, parse, and contain exactly one condition block.
-- **Manual matrix:** {Fabric, NeoForge} × {singleplayer, dedicated} × {no mods, 1 mod, 2+ mods} × {`auto`, forced
-  other mod, forced `vanilla`, bad value}. In each: check the active recipe in the recipe book / JEI, craft a TV, edit
-  the config, `/reload`, check again.
-- **Pack sanity:** a pack containing all eight mods must still log one clear "recipe source" line and show exactly one
-  TV recipe.
+- **Unit (`common`, `gradlew :common:test`):**
+  - `CompatResolverTest`: no mods → vanilla; one tech mod → its crafting; Create → Create assembly; Create + tech mod
+    → assembly with its parts; priority regardless of load order; assembly off → crafting; config names a lower
+    source; forced source without Create → its crafting; not installed / unknown id / wrong case → auto (+ warning);
+    `vanilla` with mods → vanilla; installed mod with missing items → skipped with a warning; missing in-progress
+    items → crafting.
+  - `CompatRecipesUpToDateTest`: committed files match the generator; one `dreamtvs:recipe_source` per loader block;
+    vanilla ids kept; the shipped index parses; clashing assembly starts are rejected.
+  - `DreamTvsConfigTest`: the compat section round-trips, defaults, normalisation and bad values.
+- **GameTest (`gradlew :neoforge:runGameTestServer`):** `CompatRecipeGameTests` checks that exactly the selected
+  source's five recipes load. With no extra mods that's vanilla. To check another source, copy its jars into
+  `run/neoforge-gametest/mods` (the screen tests crash with Create there because Create's networking doesn't
+  accept GameTest fake players, so run the compat test on its own).
+- **Manual matrix:** {NeoForge, Fabric} × {singleplayer, dedicated} × {no mods, Create, Create + 1 mod, 1 mod without
+  Create, 2+ mods} × {`auto`, forced other source, `vanilla`, assembly off, bad value}. In each: check the recipe in
+  JEI/EMI, make a TV, edit the config, `/reload`, check again.

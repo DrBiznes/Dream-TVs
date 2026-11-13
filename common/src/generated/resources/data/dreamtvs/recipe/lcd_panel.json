@@ -1,0 +1,41 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "dreamtvs:recipe_source",
+      "source": "vanilla",
+      "method": "crafting"
+    }
+  ],
+  "fabric:load_conditions": [
+    {
+      "condition": "dreamtvs:recipe_source",
+      "source": "vanilla",
+      "method": "crafting"
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "pattern": [
+    "IGI",
+    "GRG",
+    "ICI"
+  ],
+  "key": {
+    "I": {
+      "item": "minecraft:iron_ingot"
+    },
+    "G": {
+      "item": "minecraft:black_stained_glass_pane"
+    },
+    "R": {
+      "item": "minecraft:redstone"
+    },
+    "C": {
+      "item": "minecraft:copper_ingot"
+    }
+  },
+  "result": {
+    "id": "dreamtvs:lcd_panel",
+    "count": 4
+  }
+}

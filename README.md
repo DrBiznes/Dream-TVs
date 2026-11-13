@@ -52,6 +52,23 @@ A few rules:
 
 Each line between slashes is one row of the crafting grid. Recipes can be changed with a datapack.
 
+## Mod compatibility
+
+Dream TVs fits into tech modpacks. When one of these mods is installed, the TV recipes use its parts instead of
+the vanilla ones:
+
+- **Create**: TVs are made in a Create sequenced assembly
+- **Create: Power Grid**, **Create: Electro Energetics** and **Create Crafts & Additions**
+- **Mekanism**
+- **Immersive Engineering**
+- **Modern Industrialization**
+- **Applied Energistics 2**
+- **Thermal Series** (on Minecraft versions where it's available)
+
+With Create and another tech mod installed, the sequenced assembly uses that mod's parts. If several are installed,
+one is picked by priority. All of them are optional, and you can pick a different one or switch back to the vanilla
+recipes in the config.
+
 ## Permissions
 
 Dream TVs uses Dream Displays' permission nodes. Without LuckPerms, the fallback applies.
@@ -68,7 +85,7 @@ Who can change the video on a screen is set by its owner in the Dream Displays m
 ## Config
 
 The server config is `config/dreamtvs.json`. It's created on first start, and each option has a comment
-explaining it. Changes apply when the server restarts.
+explaining it. Changes apply when the server restarts, except the `compat` options, which also apply on `/reload`.
 
 | Option | Default | Meaning |
 |---|---|---|
@@ -76,6 +93,8 @@ explaining it. Changes apply when the server restarts.
 | `maxScreensPerPlayer` | `0` | Screens each player may own, `0` for unlimited |
 | `extendPolicy` | `"OWNER"` | `"OWNER"`: only the owner or an admin can change a screen. `"ANYONE"`: every player can. |
 | `showFormMessages` | `true` | Show "Screen formed" and shape hints on the action bar |
+| `compat.recipeSource` | `"auto"` | Which mod's parts the recipes use: `"auto"`, `"vanilla"`, or a mod listed in the file |
+| `compat.createSequencedAssembly` | `true` | With Create installed, make TVs in a sequenced assembly instead of a crafting table |
 
 If a value is invalid, Dream TVs fixes it and writes a warning to the server log. If the file can't be read at
 all, it's left alone and the defaults are used.
@@ -87,7 +106,8 @@ gradlew build
 ```
 
 The jars are written to `fabric/build/libs` and `neoforge/build/libs`. `gradlew :common:test` runs the unit
-tests, and `gradlew :neoforge:runGameTestServer` runs the in-game tests.
+tests, and `gradlew :neoforge:runGameTestServer` runs the in-game tests. After editing the compat recipe sources
+in `common/src/compat`, run `gradlew :common:generateCompatRecipes`.
 
 ## License
 

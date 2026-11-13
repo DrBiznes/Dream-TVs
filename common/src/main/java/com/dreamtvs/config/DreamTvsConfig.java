@@ -1,6 +1,8 @@
 package com.dreamtvs.config;
 
 import com.dreamtvs.DreamTvs;
+import com.dreamtvs.compat.CompatIndex;
+import com.dreamtvs.compat.CompatSource;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
@@ -18,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 /**
  * Server config, {@code config/dreamtvs.json} (plan §6), loaded when the server starts.
@@ -44,9 +47,18 @@ public final class DreamTvsConfig {
     public int maxScreensPerPlayer = 0;
     public ExtendPolicy extendPolicy = ExtendPolicy.OWNER;
     public boolean showFormMessages = true;
+    /**
+     * {@code compat.recipeSource}: whose parts the TV recipes use, {@code "auto"}, {@code "vanilla"} or a source
+     * id (docs/COMPAT_RECIPES_PLAN.md §4). Only the format is checked here; {@code CompatResolver} checks the id.
+     */
+    public String recipeSource = "auto";
+    /** {@code compat.createSequencedAssembly}: with Create installed, make TVs in a sequenced assembly. */
+    public boolean createSequencedAssembly = true;
 
     private static final Set<String> KNOWN = Set.of(
-            "maxWidth", "maxHeight", "maxScreensPerPlayer", "extendPolicy", "showFormMessages");
+            "maxWidth", "maxHeight", "maxScreensPerPlayer", "extendPolicy", "showFormMessages", "compat");
+    private static final Set<String> KNOWN_COMPAT = Set.of("recipeSource", "createSequencedAssembly");
+    private static final Pattern SOURCE_ID = Pattern.compile("[a-z0-9_]+");
     private static volatile DreamTvsConfig current = new DreamTvsConfig();
 
     public static DreamTvsConfig get() {
@@ -83,6 +95,20 @@ public final class DreamTvsConfig {
     }
 
     /**
+     * Reads the file without writing or logging anything, for the recipe conditions: datapacks load before
+     * {@link #load} runs on server start, and again on every {@code /reload}. Defaults if the file is missing or
+     * broken ({@link #load} reports problems).
+     */
+    public static DreamTvsConfig readQuietly(Path file) {
+        try {
+            if (Files.exists(file)) return parse(Files.readString(file, StandardCharsets.UTF_8), new ArrayList<>());
+        } catch (IOException | RuntimeException e) {
+            // fall through to the defaults
+        }
+        return new DreamTvsConfig();
+    }
+
+    /**
      * Reads the file's text. Missing options keep their defaults; bad values are fixed and described in
      * {@code warnings}. Throws {@link JsonParseException} only when the text isn't a JSON object at all.
      */
@@ -102,7 +128,32 @@ public final class DreamTvsConfig {
         c.maxScreensPerPlayer = readInt(json, "maxScreensPerPlayer", c.maxScreensPerPlayer, 0, Integer.MAX_VALUE, warnings);
         c.extendPolicy = readPolicy(json, c.extendPolicy, warnings);
         c.showFormMessages = readBoolean(json, "showFormMessages", c.showFormMessages, warnings);
+        readCompat(json.get("compat"), c, warnings);
         return c;
+    }
+
+    private static void readCompat(JsonElement element, DreamTvsConfig c, List<String> warnings) {
+        if (element == null || element.isJsonNull()) return;
+        if (!element.isJsonObject()) {
+            warnings.add("compat must be an object { ... }, not " + element + ". Using its defaults.");
+            return;
+        }
+        JsonObject compat = element.getAsJsonObject();
+        for (String key : compat.keySet()) {
+            if (!KNOWN_COMPAT.contains(key)) warnings.add("unknown option \"compat." + key + "\" is ignored");
+        }
+        JsonPrimitive source = primitive(compat, "recipeSource");
+        if (source != null) {
+            String id = source.isString() ? source.getAsString().trim().toLowerCase(Locale.ROOT) : "";
+            if (SOURCE_ID.matcher(id).matches()) {
+                c.recipeSource = id;
+            } else {
+                warnings.add("compat.recipeSource must be \"auto\", \"vanilla\" or a mod's source id, not "
+                        + source + ". Using \"" + c.recipeSource + "\".");
+            }
+        }
+        c.createSequencedAssembly = readBoolean(compat, "createSequencedAssembly", c.createSequencedAssembly,
+                warnings);
     }
 
     private static int readInt(JsonObject json, String key, int fallback, int min, int max, List<String> warnings) {
@@ -160,7 +211,8 @@ public final class DreamTvsConfig {
     /** The file as written to disk: every option with a comment saying what it does and what it accepts. */
     String toFileText() {
         return """
-                // Dream TVs server config. Changes apply the next time the server starts.
+                // Dream TVs server config. Changes apply the next time the server starts
+                // (the "compat" options also on /reload).
                 // Lines starting with // are comments. A value that's out of range or of the wrong type
                 // is fixed when the server starts, and the server log says what was changed.
                 {
@@ -181,10 +233,40 @@ public final class DreamTvsConfig {
 
                   // Show "Screen formed" and "panels must fill a rectangle" hints on the action bar.
                   // Refusals (no permission, limit reached, someone else's screen) are always shown.
-                  "showFormMessages": %s
+                  "showFormMessages": %s,
+
+                  // Recipes that use parts from other mods. Read when the world loads and on /reload.
+                  // The server log says which recipes are in use ("Dream TVs recipes: ...").
+                  "compat": {
+                    // Whose parts the TV recipes use:
+                    //   "auto"    - the first installed mod in this list (highest priority first), else vanilla
+                    //   "vanilla" - the normal crafting-table recipes, even with these mods installed
+                    //   or one of these ids (if that mod isn't installed, "auto" is used):
+                %s
+                    "recipeSource": "%s",
+
+                    // With Create installed, TVs are made in a Create sequenced assembly (deployers and a
+                    // press) using the parts above, instead of at a crafting table. false = crafting table.
+                    "createSequencedAssembly": %s
+                  }
                 }
                 """.formatted(MAX_SIDE, maxWidth, maxHeight, maxScreensPerPlayer, extendPolicy.name(),
-                showFormMessages);
+                showFormMessages, sourceList(), recipeSource, createSequencedAssembly);
+    }
+
+    /** One comment line per recipe source in the jar, for the file. */
+    private static String sourceList() {
+        StringBuilder lines = new StringBuilder();
+        try {
+            for (CompatSource source : CompatIndex.sources()) {
+                if (source.id().equals(CompatSource.VANILLA)) continue;
+                if (!lines.isEmpty()) lines.append('\n');
+                lines.append("    //     %-26s %s".formatted(source.id(), source.name()));
+            }
+        } catch (RuntimeException e) {
+            lines.append("    //     (the list couldn't be read: ").append(e.getMessage()).append(')');
+        }
+        return lines.toString();
     }
 
     /** The scanner's flood-fill cap: one more cell than the largest allowed screen. */

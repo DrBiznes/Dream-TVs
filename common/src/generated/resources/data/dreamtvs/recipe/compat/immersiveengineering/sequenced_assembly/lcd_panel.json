@@ -1,0 +1,124 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "create"
+    },
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "immersiveengineering"
+    },
+    {
+      "type": "dreamtvs:recipe_source",
+      "source": "immersiveengineering",
+      "method": "sequenced_assembly"
+    }
+  ],
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "create",
+        "immersiveengineering"
+      ]
+    },
+    {
+      "condition": "dreamtvs:recipe_source",
+      "source": "immersiveengineering",
+      "method": "sequenced_assembly"
+    }
+  ],
+  "type": "create:sequenced_assembly",
+  "ingredient": {
+    "item": "immersiveengineering:plate_steel"
+  },
+  "loops": 1,
+  "results": [
+    {
+      "id": "dreamtvs:lcd_panel",
+      "count": 4
+    }
+  ],
+  "sequence": [
+    {
+      "type": "create:deploying",
+      "ingredients": [
+        {
+          "item": "dreamtvs:incomplete_lcd_panel"
+        },
+        {
+          "item": "minecraft:black_stained_glass_pane"
+        }
+      ],
+      "results": [
+        {
+          "id": "dreamtvs:incomplete_lcd_panel"
+        }
+      ]
+    },
+    {
+      "type": "create:deploying",
+      "ingredients": [
+        {
+          "item": "dreamtvs:incomplete_lcd_panel"
+        },
+        {
+          "item": "minecraft:black_stained_glass_pane"
+        }
+      ],
+      "results": [
+        {
+          "id": "dreamtvs:incomplete_lcd_panel"
+        }
+      ]
+    },
+    {
+      "type": "create:deploying",
+      "ingredients": [
+        {
+          "item": "dreamtvs:incomplete_lcd_panel"
+        },
+        {
+          "item": "immersiveengineering:component_electronic"
+        }
+      ],
+      "results": [
+        {
+          "id": "dreamtvs:incomplete_lcd_panel"
+        }
+      ]
+    },
+    {
+      "type": "create:deploying",
+      "ingredients": [
+        {
+          "item": "dreamtvs:incomplete_lcd_panel"
+        },
+        {
+          "item": "immersiveengineering:wire_copper"
+        }
+      ],
+      "results": [
+        {
+          "id": "dreamtvs:incomplete_lcd_panel"
+        }
+      ]
+    },
+    {
+      "type": "create:pressing",
+      "ingredients": [
+        {
+          "item": "dreamtvs:incomplete_lcd_panel"
+        }
+      ],
+      "results": [
+        {
+          "id": "dreamtvs:incomplete_lcd_panel"
+        }
+      ]
+    }
+  ],
+  "transitional_item": {
+    "id": "dreamtvs:incomplete_lcd_panel"
+  }
+}

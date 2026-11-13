@@ -1,0 +1,47 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "mekanism"
+    },
+    {
+      "type": "dreamtvs:recipe_source",
+      "source": "mekanism",
+      "method": "crafting"
+    }
+  ],
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "mekanism"
+      ]
+    },
+    {
+      "condition": "dreamtvs:recipe_source",
+      "source": "mekanism",
+      "method": "crafting"
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "pattern": [
+    "PPP",
+    "PPP",
+    "IRI"
+  ],
+  "key": {
+    "P": {
+      "item": "minecraft:black_stained_glass_pane"
+    },
+    "I": {
+      "item": "mekanism:ingot_steel"
+    },
+    "R": {
+      "item": "mekanism:basic_control_circuit"
+    }
+  },
+  "result": {
+    "id": "dreamtvs:flat_screen_3x2"
+  }
+}

@@ -1,5 +1,6 @@
 package com.dreamtvs.screen;
 
+import com.dreamtvs.DreamTvs;
 import com.dreamtvs.block.ScreenBlock;
 import com.dreamtvs.config.DreamTvsConfig;
 import com.dreamtvs.dd.DreamDisplaysBridge;
@@ -37,7 +38,7 @@ public final class Screens {
     // --- lifecycle -------------------------------------------------------------------------------------------
 
     public static void onServerStarting(MinecraftServer server) {
-        DreamTvsConfig.load(server.getServerDirectory().resolve("config").resolve("dreamtvs.json"));
+        DreamTvsConfig.load(DreamTvs.configFile());
         ScreenQueue.clear();
         ManagedIndex.invalidate();
         ScreenSync.reset();

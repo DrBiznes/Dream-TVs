@@ -1,0 +1,53 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "create"
+    },
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "electroenergetics"
+    },
+    {
+      "type": "dreamtvs:recipe_source",
+      "source": "electro_energetics",
+      "method": "crafting"
+    }
+  ],
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "create",
+        "electroenergetics"
+      ]
+    },
+    {
+      "condition": "dreamtvs:recipe_source",
+      "source": "electro_energetics",
+      "method": "crafting"
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "pattern": [
+    "IDI",
+    "DRD",
+    "IDI"
+  ],
+  "key": {
+    "I": {
+      "item": "create:iron_sheet"
+    },
+    "D": {
+      "item": "electroenergetics:bulb"
+    },
+    "R": {
+      "item": "electroenergetics:relay"
+    }
+  },
+  "result": {
+    "id": "dreamtvs:jumbotron",
+    "count": 4
+  }
+}

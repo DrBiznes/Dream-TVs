@@ -1,0 +1,53 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "create"
+    },
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "createaddition"
+    },
+    {
+      "type": "dreamtvs:recipe_source",
+      "source": "createaddition",
+      "method": "crafting"
+    }
+  ],
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "create",
+        "createaddition"
+      ]
+    },
+    {
+      "condition": "dreamtvs:recipe_source",
+      "source": "createaddition",
+      "method": "crafting"
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "pattern": [
+    "IDI",
+    "DRD",
+    "IDI"
+  ],
+  "key": {
+    "I": {
+      "item": "create:iron_sheet"
+    },
+    "D": {
+      "item": "minecraft:glowstone_dust"
+    },
+    "R": {
+      "item": "createaddition:capacitor"
+    }
+  },
+  "result": {
+    "id": "dreamtvs:jumbotron",
+    "count": 4
+  }
+}

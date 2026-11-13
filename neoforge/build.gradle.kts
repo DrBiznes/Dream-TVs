@@ -10,6 +10,7 @@ base { archivesName.set("${prop("mod_id")}-neoforge-${prop("minecraft_version")}
 sourceSets.main {
     java.srcDir(common.file("src/main/java"))
     resources.srcDir(common.file("src/main/resources"))
+    resources.srcDir(common.file("src/generated/resources")) // compat recipes, see common/build.gradle.kts
 }
 
 // GameTests (plan §8) live in their own source set so they never ship in the mod jar.

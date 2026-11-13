@@ -1,0 +1,123 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "create"
+    },
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "powergrid"
+    },
+    {
+      "type": "dreamtvs:recipe_source",
+      "source": "power_grid",
+      "method": "sequenced_assembly"
+    }
+  ],
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "create",
+        "powergrid"
+      ]
+    },
+    {
+      "condition": "dreamtvs:recipe_source",
+      "source": "power_grid",
+      "method": "sequenced_assembly"
+    }
+  ],
+  "type": "create:sequenced_assembly",
+  "ingredient": {
+    "item": "dreamtvs:flat_screen_2x1"
+  },
+  "loops": 1,
+  "results": [
+    {
+      "id": "dreamtvs:flat_screen_3x2"
+    }
+  ],
+  "sequence": [
+    {
+      "type": "create:deploying",
+      "ingredients": [
+        {
+          "item": "dreamtvs:incomplete_flat_screen_3x2"
+        },
+        {
+          "item": "powergrid:display_module"
+        }
+      ],
+      "results": [
+        {
+          "id": "dreamtvs:incomplete_flat_screen_3x2"
+        }
+      ]
+    },
+    {
+      "type": "create:deploying",
+      "ingredients": [
+        {
+          "item": "dreamtvs:incomplete_flat_screen_3x2"
+        },
+        {
+          "item": "powergrid:display_module"
+        }
+      ],
+      "results": [
+        {
+          "id": "dreamtvs:incomplete_flat_screen_3x2"
+        }
+      ]
+    },
+    {
+      "type": "create:deploying",
+      "ingredients": [
+        {
+          "item": "dreamtvs:incomplete_flat_screen_3x2"
+        },
+        {
+          "item": "powergrid:display_module"
+        }
+      ],
+      "results": [
+        {
+          "id": "dreamtvs:incomplete_flat_screen_3x2"
+        }
+      ]
+    },
+    {
+      "type": "create:deploying",
+      "ingredients": [
+        {
+          "item": "dreamtvs:incomplete_flat_screen_3x2"
+        },
+        {
+          "item": "powergrid:circuit_board"
+        }
+      ],
+      "results": [
+        {
+          "id": "dreamtvs:incomplete_flat_screen_3x2"
+        }
+      ]
+    },
+    {
+      "type": "create:pressing",
+      "ingredients": [
+        {
+          "item": "dreamtvs:incomplete_flat_screen_3x2"
+        }
+      ],
+      "results": [
+        {
+          "id": "dreamtvs:incomplete_flat_screen_3x2"
+        }
+      ]
+    }
+  ],
+  "transitional_item": {
+    "id": "dreamtvs:incomplete_flat_screen_3x2"
+  }
+}

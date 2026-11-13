@@ -1,0 +1,124 @@
+{
+  "//": [
+    "Recipe sources for the TV compat recipes (docs/COMPAT_RECIPES_PLAN.md). Highest priority first: in auto",
+    "mode the first source whose mods are installed and whose items all exist wins.",
+    "",
+    "materials: the item for each role the TV templates (tvs.json) use. A plain id is an item, '#ns:path' is a",
+    "tag. Prefer items: the game checks that items exist before it picks a source, but it can't check tags.",
+    "Roles a source doesn't list come from its parent, and from vanilla at the end of the chain.",
+    "",
+    "Every source except vanilla gets a crafting recipe and a Create sequenced assembly recipe for each TV.",
+    "Run 'gradlew :common:generateCompatRecipes' after editing; the output goes to common/src/generated."
+  ],
+  "sources": [
+    {
+      "id": "power_grid",
+      "name": "Create: Power Grid",
+      "mods": ["create", "powergrid"],
+      "parent": "create",
+      "materials": {
+        "screen": "powergrid:display_module",
+        "circuit": "powergrid:circuit_board",
+        "wire": "powergrid:wire",
+        "light": "powergrid:light_bulb",
+        "tube": "powergrid:crt"
+      }
+    },
+    {
+      "id": "electro_energetics",
+      "name": "Create: Electro Energetics",
+      "mods": ["create", "electroenergetics"],
+      "parent": "create",
+      "materials": {
+        "circuit": "electroenergetics:relay",
+        "wire": "electroenergetics:copper_wire",
+        "light": "electroenergetics:bulb"
+      }
+    },
+    {
+      "id": "mekanism",
+      "name": "Mekanism",
+      "mods": ["mekanism"],
+      "materials": {
+        "frame": "mekanism:ingot_steel",
+        "circuit": "mekanism:basic_control_circuit",
+        "wire": "mekanism:alloy_infused"
+      }
+    },
+    {
+      "id": "createaddition",
+      "name": "Create Crafts & Additions",
+      "mods": ["create", "createaddition"],
+      "parent": "create",
+      "materials": {
+        "circuit": "createaddition:capacitor",
+        "wire": "createaddition:copper_wire"
+      }
+    },
+    {
+      "id": "immersiveengineering",
+      "name": "Immersive Engineering",
+      "mods": ["immersiveengineering"],
+      "materials": {
+        "frame": "immersiveengineering:plate_steel",
+        "circuit": "immersiveengineering:component_electronic",
+        "wire": "immersiveengineering:wire_copper",
+        "light": "immersiveengineering:light_bulb"
+      }
+    },
+    {
+      "id": "modern_industrialization",
+      "name": "Modern Industrialization",
+      "mods": ["modern_industrialization"],
+      "materials": {
+        "frame": "modern_industrialization:steel_plate",
+        "circuit": "modern_industrialization:analog_circuit",
+        "wire": "modern_industrialization:copper_cable"
+      }
+    },
+    {
+      "id": "thermal",
+      "name": "Thermal Series",
+      "mods": ["thermal"],
+      "materials": {
+        "frame": "thermal:steel_ingot",
+        "circuit": "thermal:rf_coil",
+        "wire": "thermal:electrum_ingot"
+      }
+    },
+    {
+      "id": "ae2",
+      "name": "Applied Energistics 2",
+      "mods": ["ae2"],
+      "materials": {
+        "screen": "ae2:quartz_vibrant_glass",
+        "circuit": "ae2:logic_processor",
+        "wire": "ae2:fluix_crystal"
+      }
+    },
+    {
+      "id": "create",
+      "name": "Create",
+      "mods": ["create"],
+      "materials": {
+        "frame": "create:iron_sheet",
+        "circuit": "create:electron_tube",
+        "wire": "create:copper_sheet"
+      }
+    },
+    {
+      "id": "vanilla",
+      "name": "Vanilla",
+      "mods": [],
+      "materials": {
+        "frame": "minecraft:iron_ingot",
+        "screen": "minecraft:black_stained_glass_pane",
+        "circuit": "minecraft:redstone",
+        "wire": "minecraft:copper_ingot",
+        "light": "minecraft:glowstone_dust",
+        "tube": "minecraft:glass_pane",
+        "housing": "minecraft:gray_concrete"
+      }
+    }
+  ]
+}

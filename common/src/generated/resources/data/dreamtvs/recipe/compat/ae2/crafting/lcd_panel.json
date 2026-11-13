@@ -1,0 +1,51 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "ae2"
+    },
+    {
+      "type": "dreamtvs:recipe_source",
+      "source": "ae2",
+      "method": "crafting"
+    }
+  ],
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "ae2"
+      ]
+    },
+    {
+      "condition": "dreamtvs:recipe_source",
+      "source": "ae2",
+      "method": "crafting"
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "pattern": [
+    "IGI",
+    "GRG",
+    "ICI"
+  ],
+  "key": {
+    "I": {
+      "item": "minecraft:iron_ingot"
+    },
+    "G": {
+      "item": "ae2:quartz_vibrant_glass"
+    },
+    "R": {
+      "item": "ae2:logic_processor"
+    },
+    "C": {
+      "item": "ae2:fluix_crystal"
+    }
+  },
+  "result": {
+    "id": "dreamtvs:lcd_panel",
+    "count": 4
+  }
+}

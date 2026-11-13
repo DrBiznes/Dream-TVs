@@ -24,6 +24,8 @@ class DreamTvsConfigTest {
         original.maxScreensPerPlayer = 3;
         original.extendPolicy = ExtendPolicy.ANYONE;
         original.showFormMessages = false;
+        original.recipeSource = "mekanism";
+        original.createSequencedAssembly = false;
 
         DreamTvsConfig read = parse(original.toFileText());
 
@@ -33,6 +35,8 @@ class DreamTvsConfigTest {
         assertEquals(3, read.maxScreensPerPlayer);
         assertEquals(ExtendPolicy.ANYONE, read.extendPolicy);
         assertFalse(read.showFormMessages);
+        assertEquals("mekanism", read.recipeSource);
+        assertFalse(read.createSequencedAssembly);
     }
 
     @Test
@@ -92,5 +96,39 @@ class DreamTvsConfigTest {
         assertThrows(JsonParseException.class, () -> parse(""));
         assertThrows(JsonParseException.class, () -> parse("[1, 2]"));
         assertThrows(JsonParseException.class, () -> parse("{ \"maxWidth\": "));
+    }
+
+    @Test
+    void compatDefaultsWhenMissing() {
+        DreamTvsConfig read = parse("{}");
+        assertEquals("auto", read.recipeSource);
+        assertTrue(read.createSequencedAssembly);
+        assertEquals(List.of(), warnings);
+    }
+
+    @Test
+    void compatOptionsAreReadAndNormalized() {
+        DreamTvsConfig read = parse("{ \"compat\": { \"recipeSource\": \" Power_Grid \", \"createSequencedAssembly\": false } }");
+        assertEquals("power_grid", read.recipeSource);
+        assertFalse(read.createSequencedAssembly);
+        assertEquals(List.of(), warnings);
+    }
+
+    @Test
+    void badCompatValuesFallBack() {
+        DreamTvsConfig read = parse("{ \"compat\": { \"recipeSource\": 3, \"createSequencedAssembly\": \"no\", \"extra\": 1 } }");
+        assertEquals("auto", read.recipeSource);
+        assertTrue(read.createSequencedAssembly);
+        assertEquals(3, warnings.size());
+        warnings.clear();
+        parse("{ \"compat\": \"mekanism\" }");
+        assertEquals(1, warnings.size());
+    }
+
+    @Test
+    void fileListsTheRecipeSources() {
+        String text = new DreamTvsConfig().toFileText();
+        assertTrue(text.contains("mekanism"), text);
+        assertTrue(text.contains("Create: Power Grid"), text);
     }
 }

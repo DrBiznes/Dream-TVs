@@ -34,3 +34,26 @@ dependencies {
 tasks.test {
     useJUnitPlatform()
 }
+
+// --- Compat recipes (docs/COMPAT_RECIPES_PLAN.md) ------------------------------------------------------------
+// src/compat holds the hand-written sources; the generator writes the recipes and the runtime index to
+// src/generated/resources, which is committed (like NeoForge datagen output) and shipped by both loaders.
+// CompatRecipesUpToDateTest fails the build when the committed files don't match the sources.
+val generatedResources = file("src/generated/resources")
+sourceSets.main { resources.srcDir(generatedResources) }
+
+val compatgen: SourceSet = sourceSets.create("compatgen")
+dependencies {
+    "compatgenImplementation"("com.google.code.gson:gson:2.10.1")
+    testImplementation(compatgen.output)
+}
+
+tasks.register<JavaExec>("generateCompatRecipes") {
+    group = "dreamtvs"
+    description = "Writes the TV compat recipes from src/compat into src/generated/resources."
+    classpath = compatgen.runtimeClasspath
+    mainClass.set("com.dreamtvs.compatgen.CompatRecipeGenerator")
+    args(file("src/compat").absolutePath, generatedResources.absolutePath)
+    inputs.dir("src/compat")
+    outputs.dir(generatedResources)
+}

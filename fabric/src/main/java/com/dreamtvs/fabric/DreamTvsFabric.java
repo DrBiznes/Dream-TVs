@@ -7,8 +7,12 @@ import com.dreamtvs.block.FlatScreen3x2Block;
 import com.dreamtvs.block.FlatScreenBlock;
 import com.dreamtvs.block.JumbotronBlock;
 import com.dreamtvs.block.LcdPanelBlock;
+import com.dreamtvs.compat.CompatIndex;
+import com.dreamtvs.compat.CompatRecipes;
 import com.dreamtvs.screen.Screens;
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.resource.conditions.v1.ResourceConditions;
+import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerChunkEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
@@ -67,10 +71,24 @@ public final class DreamTvsFabric implements ModInitializer {
 
     @Override
     public void onInitialize() {
-        DreamTvs.init();
+        FabricLoader loader = FabricLoader.getInstance();
+        DreamTvs.init(loader.getConfigDir(), loader::isModLoaded);
+
+        // Compat recipes (docs/COMPAT_RECIPES_PLAN.md). The in-progress items only exist with Create installed,
+        // since only Create's sequenced assembly uses them.
+        ResourceConditions.register(RecipeSourceCondition.TYPE);
+        if (CompatRecipes.createLoaded()) {
+            for (String path : CompatIndex.transitionalItems(CompatIndex.sources())) {
+                Registry.register(BuiltInRegistries.ITEM, DreamTvs.id(path), new Item(new Item.Properties().stacksTo(1)));
+            }
+        }
+        ServerLifecycleEvents.START_DATA_PACK_RELOAD.register((server, resources) -> CompatRecipes.invalidate());
 
         ServerLifecycleEvents.SERVER_STARTING.register(Screens::onServerStarting);
-        ServerLifecycleEvents.SERVER_STOPPED.register(server -> Screens.onServerStopped());
+        ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
+            Screens.onServerStopped();
+            CompatRecipes.invalidate(); // the next world chooses (and logs) again
+        });
         ServerTickEvents.END_SERVER_TICK.register(Screens::onServerTickEnd);
         ServerChunkEvents.CHUNK_LOAD.register((level, chunk) -> Screens.onChunkLoaded(level, chunk.getPos()));
 
