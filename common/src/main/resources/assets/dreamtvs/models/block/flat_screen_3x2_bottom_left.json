@@ -1,0 +1,90 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "back": "dreamtvs:block/flat_screen_back",
+    "side_west": "dreamtvs:block/flat_screen_side_west",
+    "side_east": "dreamtvs:block/flat_screen_side_east",
+    "top": "dreamtvs:block/flat_screen_top",
+    "bottom": "dreamtvs:block/flat_screen_bottom",
+    "inner": "dreamtvs:block/flat_screen_inner",
+    "front": "dreamtvs:block/flat_screen_3x2_bottom_left",
+    "particle": "dreamtvs:block/flat_screen_back"
+  },
+  "elements": [
+    {
+      "from": [
+        0,
+        0,
+        14
+      ],
+      "to": [
+        16,
+        16,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#front"
+        },
+        "south": {
+          "texture": "#back"
+        },
+        "east": {
+          "texture": "#side_east"
+        },
+        "down": {
+          "texture": "#bottom"
+        }
+      }
+    },
+    {
+      "from": [
+        0,
+        0,
+        13
+      ],
+      "to": [
+        16,
+        2,
+        15
+      ],
+      "faces": {
+        "north": {
+          "texture": "#front"
+        },
+        "up": {
+          "texture": "#inner"
+        },
+        "down": {
+          "texture": "#bottom"
+        },
+        "east": {
+          "texture": "#side_east"
+        }
+      }
+    },
+    {
+      "from": [
+        15,
+        2,
+        13
+      ],
+      "to": [
+        16,
+        16,
+        15
+      ],
+      "faces": {
+        "north": {
+          "texture": "#front"
+        },
+        "east": {
+          "texture": "#side_east"
+        },
+        "west": {
+          "texture": "#inner"
+        }
+      }
+    }
+  ]
+}

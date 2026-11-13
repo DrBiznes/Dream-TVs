@@ -25,6 +25,9 @@ import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.phys.BlockHitResult;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
+import java.util.function.Function;
+
 /**
  * What every TV block shares. Its front ({@link #FACING}) points at the player who placed it, and that's the
  * side the picture shows on. Block changes are reported to {@link Screens}, which keeps a Dream Displays screen
@@ -42,6 +45,22 @@ public abstract class ScreenBlock extends HorizontalDirectionalBlock {
     }
 
     public abstract ScreenKind kind();
+
+    /**
+     * Every block of the TV that the block at {@code pos} belongs to, for kinds that don't merge. Just {@code pos}
+     * unless the TV spans several blocks (see {@link FlatScreenBlock}).
+     */
+    public List<BlockPos> unit(BlockState state, BlockPos pos) {
+        return List.of(pos);
+    }
+
+    /**
+     * Whether all blocks of this TV are in place, so it may show a picture. {@code lookup} gives the block at a
+     * position, or {@code null} if it can't be read (an unloaded chunk, or a block that is about to break).
+     */
+    public boolean isWhole(BlockState state, BlockPos pos, Function<BlockPos, @Nullable BlockState> lookup) {
+        return true;
+    }
 
     /** {@code state} adjusted to its surroundings (e.g. connected bezels). Called for every new block. */
     protected BlockState settle(BlockState state, BlockGetter level, BlockPos pos) {

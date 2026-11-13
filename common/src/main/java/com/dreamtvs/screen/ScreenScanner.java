@@ -41,14 +41,31 @@ public final class ScreenScanner {
             return plane;
         }
 
+        /** A TV of this plane at {@code cell}. A TV that spans several blocks counts only while all of them are there. */
         public boolean filled(Cell cell) {
             BlockPos pos = plane.pos(cell);
-            if (pos.equals(ignored)) return false;
+            BlockState state = stateAt(pos);
+            return state != null && isTv(state, plane) && ((ScreenBlock) state.getBlock()).isWhole(state, pos, this::stateAt);
+        }
+
+        /** The cells of the one TV at {@code cell}, for kinds that don't merge. */
+        public Set<Cell> unit(Cell cell) {
+            BlockPos pos = plane.pos(cell);
+            BlockState state = level.getBlockState(pos);
+            if (!(state.getBlock() instanceof ScreenBlock block)) return Set.of(cell);
+            Set<Cell> cells = new HashSet<>();
+            for (BlockPos part : block.unit(state, pos)) cells.add(plane.cell(part));
+            return cells;
+        }
+
+        /** The block at {@code pos}, or {@code null} if it's the ignored one or in an unloaded chunk. */
+        private @Nullable BlockState stateAt(BlockPos pos) {
+            if (pos.equals(ignored)) return null;
             if (!level.isLoaded(pos)) {
                 hitUnloaded = true;
-                return false;
+                return null;
             }
-            return isTv(level.getBlockState(pos), plane);
+            return level.getBlockState(pos);
         }
 
         /** True if any lookup so far hit an unloaded chunk. */
@@ -62,13 +79,18 @@ public final class ScreenScanner {
                 && state.getValue(ScreenBlock.FACING) == plane.facing();
     }
 
-    /** One group: the capped flood fill from {@code seed}, solved against the configured size limits. */
+    /**
+     * One group: the capped flood fill from {@code seed}, solved against the configured size limits. TVs that
+     * don't merge are each their own group, whatever stands next to them, and their size is set by the block, so
+     * the limits (which are about walls) don't apply to them.
+     */
     public static Group group(View view, Cell seed) {
+        if (!view.plane().kind().merges()) {
+            Set<Cell> cells = view.filled(seed) ? view.unit(seed) : Set.of();
+            return new Group(cells, ScreenSolver.solve(cells, Integer.MAX_VALUE, Integer.MAX_VALUE));
+        }
         DreamTvsConfig config = DreamTvsConfig.get();
-        // TVs that don't merge are each their own group, whatever stands next to them.
-        ScreenSolver.Fill fill = view.plane().kind().merges()
-                ? ScreenSolver.floodFill(seed, view::filled, config.scanCap())
-                : ScreenSolver.floodFill(seed, seed::equals, config.scanCap());
+        ScreenSolver.Fill fill = ScreenSolver.floodFill(seed, view::filled, config.scanCap());
         return new Group(fill.cells(), ScreenSolver.solve(fill.cells(), config.maxWidth, config.maxHeight));
     }
 

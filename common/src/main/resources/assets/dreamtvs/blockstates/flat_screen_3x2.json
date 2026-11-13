@@ -1,0 +1,382 @@
+{
+  "multipart": [
+    {
+      "when": {
+        "AND": [
+          {
+            "facing": "north"
+          },
+          {
+            "part": "0"
+          }
+        ]
+      },
+      "apply": {
+        "model": "dreamtvs:block/flat_screen_3x2_bottom_left"
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "facing": "north"
+          },
+          {
+            "part": "1"
+          }
+        ]
+      },
+      "apply": {
+        "model": "dreamtvs:block/flat_screen_3x2_bottom_middle"
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "facing": "north"
+          },
+          {
+            "part": "2"
+          }
+        ]
+      },
+      "apply": {
+        "model": "dreamtvs:block/flat_screen_3x2_bottom_right"
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "facing": "north"
+          },
+          {
+            "part": "3"
+          }
+        ]
+      },
+      "apply": {
+        "model": "dreamtvs:block/flat_screen_3x2_top_left"
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "facing": "north"
+          },
+          {
+            "part": "4"
+          }
+        ]
+      },
+      "apply": {
+        "model": "dreamtvs:block/flat_screen_3x2_top_middle"
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "facing": "north"
+          },
+          {
+            "part": "5"
+          }
+        ]
+      },
+      "apply": {
+        "model": "dreamtvs:block/flat_screen_3x2_top_right"
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "facing": "east"
+          },
+          {
+            "part": "0"
+          }
+        ]
+      },
+      "apply": {
+        "model": "dreamtvs:block/flat_screen_3x2_bottom_left",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "facing": "east"
+          },
+          {
+            "part": "1"
+          }
+        ]
+      },
+      "apply": {
+        "model": "dreamtvs:block/flat_screen_3x2_bottom_middle",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "facing": "east"
+          },
+          {
+            "part": "2"
+          }
+        ]
+      },
+      "apply": {
+        "model": "dreamtvs:block/flat_screen_3x2_bottom_right",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "facing": "east"
+          },
+          {
+            "part": "3"
+          }
+        ]
+      },
+      "apply": {
+        "model": "dreamtvs:block/flat_screen_3x2_top_left",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "facing": "east"
+          },
+          {
+            "part": "4"
+          }
+        ]
+      },
+      "apply": {
+        "model": "dreamtvs:block/flat_screen_3x2_top_middle",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "facing": "east"
+          },
+          {
+            "part": "5"
+          }
+        ]
+      },
+      "apply": {
+        "model": "dreamtvs:block/flat_screen_3x2_top_right",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "facing": "south"
+          },
+          {
+            "part": "0"
+          }
+        ]
+      },
+      "apply": {
+        "model": "dreamtvs:block/flat_screen_3x2_bottom_left",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "facing": "south"
+          },
+          {
+            "part": "1"
+          }
+        ]
+      },
+      "apply": {
+        "model": "dreamtvs:block/flat_screen_3x2_bottom_middle",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "facing": "south"
+          },
+          {
+            "part": "2"
+          }
+        ]
+      },
+      "apply": {
+        "model": "dreamtvs:block/flat_screen_3x2_bottom_right",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "facing": "south"
+          },
+          {
+            "part": "3"
+          }
+        ]
+      },
+      "apply": {
+        "model": "dreamtvs:block/flat_screen_3x2_top_left",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "facing": "south"
+          },
+          {
+            "part": "4"
+          }
+        ]
+      },
+      "apply": {
+        "model": "dreamtvs:block/flat_screen_3x2_top_middle",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "facing": "south"
+          },
+          {
+            "part": "5"
+          }
+        ]
+      },
+      "apply": {
+        "model": "dreamtvs:block/flat_screen_3x2_top_right",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "facing": "west"
+          },
+          {
+            "part": "0"
+          }
+        ]
+      },
+      "apply": {
+        "model": "dreamtvs:block/flat_screen_3x2_bottom_left",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "facing": "west"
+          },
+          {
+            "part": "1"
+          }
+        ]
+      },
+      "apply": {
+        "model": "dreamtvs:block/flat_screen_3x2_bottom_middle",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "facing": "west"
+          },
+          {
+            "part": "2"
+          }
+        ]
+      },
+      "apply": {
+        "model": "dreamtvs:block/flat_screen_3x2_bottom_right",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "facing": "west"
+          },
+          {
+            "part": "3"
+          }
+        ]
+      },
+      "apply": {
+        "model": "dreamtvs:block/flat_screen_3x2_top_left",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "facing": "west"
+          },
+          {
+            "part": "4"
+          }
+        ]
+      },
+      "apply": {
+        "model": "dreamtvs:block/flat_screen_3x2_top_middle",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "facing": "west"
+          },
+          {
+            "part": "5"
+          }
+        ]
+      },
+      "apply": {
+        "model": "dreamtvs:block/flat_screen_3x2_top_right",
+        "y": 270
+      }
+    }
+  ]
+}

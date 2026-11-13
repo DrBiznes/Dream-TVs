@@ -4,7 +4,9 @@ import com.dreamdisplays.api.CommandResult;
 import com.dreamdisplays.api.server.ServerDisplay;
 import com.dreamdisplays.platform.server.managers.DisplayManager;
 import com.dreamtvs.DreamTvs;
+import com.dreamtvs.block.FlatScreenBlock;
 import com.dreamtvs.block.LcdPanelBlock;
+import com.dreamtvs.block.ScreenBlock;
 import com.dreamtvs.config.DreamTvsConfig;
 import com.dreamtvs.dd.DreamDisplaysBridge;
 import com.dreamtvs.dd.DreamDisplaysBridge.Managed;
@@ -18,12 +20,18 @@ import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.gametest.GameTestHolder;
 import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
@@ -442,5 +450,149 @@ public final class ScreenGameTests {
             h.assertTrue(!wall.id().equals(panels.id()), "Jumbotrons merged with LCD panels");
             h.assertTrue(panels.display().getWidth() == 1 && panels.display().getHeight() == 2, "panels should be their own 1x2");
         });
+    }
+
+    // --- M4: Flat Screens ------------------------------------------------------------------------------------
+
+    /**
+     * Puts a whole Flat Screen with no player (like {@code /setblock}), its bottom-left block (part 0) at (x, y).
+     * The rest goes up and to the viewer's right, which for a north-facing TV is -x. Returns the absolute
+     * positions of its blocks by part (row by row from the bottom, each row left to right).
+     */
+    private static List<BlockPos> putFlat(GameTestHelper h, FlatScreenBlock block, int x, int y) {
+        BlockState left = block.defaultBlockState().setValue(FlatScreenBlock.FACING, Direction.NORTH);
+        List<BlockPos> parts = block.unit(left, h.absolutePos(at(x, y)));
+        for (int i = 0; i < parts.size(); i++) {
+            h.getLevel().setBlock(parts.get(i), left.setValue(block.part(), i), Block.UPDATE_ALL);
+        }
+        return parts;
+    }
+
+    /** {@code player} uses a Flat Screen item on the air at (x, y), like a right-click. Mock players face south. */
+    private static InteractionResult useItem(GameTestHelper h, ServerPlayer player, ItemStack stack, int x, int y) {
+        BlockPos abs = h.absolutePos(at(x, y));
+        BlockHitResult hit = new BlockHitResult(Vec3.atCenterOf(abs), Direction.UP, abs, false);
+        return ((BlockItem) stack.getItem()).place(new BlockPlaceContext(player, InteractionHand.MAIN_HAND, stack, hit));
+    }
+
+    /** The one screen over all of {@code parts}, asserting it has their size and kind. */
+    private static Managed flatScreen(GameTestHelper h, List<BlockPos> parts, ScreenKind kind) {
+        Managed m = DreamDisplaysBridge.managedAt(h.getLevel(), parts.get(0));
+        h.assertTrue(m != null, "no screen on the Flat Screen at " + parts.get(0).toShortString());
+        for (BlockPos p : parts) {
+            Managed other = DreamDisplaysBridge.managedAt(h.getLevel(), p);
+            h.assertTrue(other != null && other.id().equals(m.id()), "the Flat Screen's blocks aren't one screen");
+            h.assertTrue(h.getLevel().getBlockState(p).getValue(ScreenBlock.FORMED), "Flat Screen block not formed");
+        }
+        h.assertTrue(m.bounds().kind() == kind, "screen tagged " + m.bounds().kind() + ", expected " + kind);
+        h.assertTrue(m.display().getWidth() == kind.width() && m.display().getHeight() == kind.height(),
+                "Flat Screen is " + m.display().getWidth() + "x" + m.display().getHeight() + ", expected " + kind.width() + "x" + kind.height());
+        return m;
+    }
+
+    @GameTest(template = EMPTY, timeoutTicks = TIMEOUT)
+    public static void flatScreensAreOneScreenEach(GameTestHelper h) {
+        requireReady(h);
+        FlatScreenBlock small = DreamTvsNeoForge.FLAT_SCREEN_2X1.get();
+        FlatScreenBlock wide = DreamTvsNeoForge.FLAT_SCREEN_3X2.get();
+        // Two 2x1s side by side and a 3x2 with a gap: three screens, nothing merges.
+        List<BlockPos> a = putFlat(h, small, 3, 1);
+        List<BlockPos> b = putFlat(h, small, 1, 1);
+        List<BlockPos> c = putFlat(h, wide, 7, 1);
+        h.succeedWhen(() -> {
+            Managed ma = flatScreen(h, a, ScreenKind.FLAT_SCREEN_2X1);
+            Managed mb = flatScreen(h, b, ScreenKind.FLAT_SCREEN_2X1);
+            flatScreen(h, c, ScreenKind.FLAT_SCREEN_3X2);
+            h.assertTrue(!ma.id().equals(mb.id()), "neighbouring Flat Screens merged");
+        });
+    }
+
+    @GameTest(template = EMPTY, timeoutTicks = TIMEOUT)
+    public static void halfAFlatScreenStaysDark(GameTestHelper h) {
+        requireReady(h);
+        FlatScreenBlock small = DreamTvsNeoForge.FLAT_SCREEN_2X1.get();
+        BlockState left = small.defaultBlockState().setValue(FlatScreenBlock.FACING, Direction.NORTH);
+        BlockPos abs = h.absolutePos(at(3, 1));
+        List<BlockPos> parts = small.unit(left, abs);
+        h.getLevel().setBlock(abs, left, Block.UPDATE_ALL);
+        h.startSequence()
+                .thenIdle(3)
+                .thenExecute(() -> {
+                    h.assertTrue(DreamDisplaysBridge.managedAt(h.getLevel(), abs) == null, "half a Flat Screen formed a screen");
+                    h.assertFalse(h.getLevel().getBlockState(abs).getValue(ScreenBlock.FORMED), "half a Flat Screen is formed");
+                })
+                .thenExecute(() -> h.getLevel().setBlock(parts.get(1), left.setValue(small.part(), 1), Block.UPDATE_ALL))
+                .thenWaitUntil(() -> flatScreen(h, parts, ScreenKind.FLAT_SCREEN_2X1))
+                .thenSucceed();
+    }
+
+    @GameTest(template = EMPTY, timeoutTicks = TIMEOUT)
+    public static void flatScreenPlacesAndBreaksAsAWhole(GameTestHelper h) {
+        requireReady(h);
+        ServerPlayer player = player(h);
+        FlatScreenBlock wide = DreamTvsNeoForge.FLAT_SCREEN_3X2.get();
+        ItemStack stack = new ItemStack(DreamTvsNeoForge.FLAT_SCREEN_3X2_ITEM.get(), 2);
+        AtomicReference<List<BlockPos>> parts = new AtomicReference<>();
+        // The clicked block is the bottom middle; anything in the way beside or above it refuses the placement.
+        for (BlockPos blocker : List.of(at(3, 1), at(4, 2), at(5, 2))) {
+            h.setBlock(blocker, Blocks.STONE);
+            h.assertFalse(useItem(h, player, stack, 4, 1).consumesAction(), "placed a Flat Screen into stone at " + blocker.toShortString());
+            h.assertBlockNotPresent(wide, at(4, 1));
+            h.setBlock(blocker, Blocks.AIR);
+        }
+        h.assertTrue(stack.getCount() == 2, "a refused placement used up the item");
+        h.assertTrue(useItem(h, player, stack, 4, 1).consumesAction(), "placing the Flat Screen failed");
+        BlockState middle = h.getBlockState(at(4, 1));
+        h.assertTrue(middle.is(wide) && middle.getValue(wide.part()) == 1, "the clicked block isn't the bottom middle");
+        parts.set(wide.unit(middle, h.absolutePos(at(4, 1))));
+        h.startSequence()
+                .thenWaitUntil(() -> h.assertTrue(flatScreen(h, parts.get(), ScreenKind.FLAT_SCREEN_3X2).owner().equals(player.getUUID()),
+                        "the placing player should own the screen"))
+                // Break the top right block: the whole TV goes. (Mock players always count as creative, so no
+                // drop here; brokenFlatScreenDropsOneItem covers drops.)
+                .thenExecute(() -> h.assertTrue(player.gameMode.destroyBlock(parts.get().get(5)),
+                        "owner's break was cancelled (Dream Displays protection?)"))
+                .thenWaitUntil(() -> {
+                    for (BlockPos p : parts.get()) h.assertTrue(h.getLevel().getBlockState(p).isAir(), "part of the TV is left");
+                    h.assertTrue(DreamDisplaysBridge.managedAt(h.getLevel(), parts.get().get(0)) == null, "the screen is still there");
+                })
+                .thenSucceed();
+    }
+
+    /** Destroyed without a player (explosion, command, another mod): the TV falls apart and drops one item. */
+    @GameTest(template = EMPTY, timeoutTicks = TIMEOUT)
+    public static void brokenFlatScreenDropsOneItem(GameTestHelper h) {
+        requireReady(h);
+        List<BlockPos> parts = putFlat(h, DreamTvsNeoForge.FLAT_SCREEN_3X2.get(), 7, 1);
+        h.startSequence()
+                .thenWaitUntil(() -> flatScreen(h, parts, ScreenKind.FLAT_SCREEN_3X2))
+                .thenExecute(() -> h.getLevel().destroyBlock(parts.get(4), true)) // top middle
+                .thenWaitUntil(() -> {
+                    for (BlockPos p : parts) h.assertTrue(h.getLevel().getBlockState(p).isAir(), "part of the TV is left");
+                    h.assertTrue(DreamDisplaysBridge.managedAt(h.getLevel(), parts.get(0)) == null, "the screen is still there");
+                    h.assertItemEntityCountIs(DreamTvsNeoForge.FLAT_SCREEN_3X2_ITEM.get(), at(6, 1), 3.0, 1);
+                })
+                .thenSucceed();
+    }
+
+    @GameTest(template = EMPTY, timeoutTicks = TIMEOUT)
+    public static void creativeBreakDropsNoFlatScreen(GameTestHelper h) {
+        requireReady(h);
+        ServerPlayer player = player(h);
+        player.setGameMode(GameType.CREATIVE);
+        FlatScreenBlock small = DreamTvsNeoForge.FLAT_SCREEN_2X1.get();
+        h.assertTrue(useItem(h, player, new ItemStack(DreamTvsNeoForge.FLAT_SCREEN_2X1_ITEM.get()), 3, 1).consumesAction(),
+                "placing the Flat Screen failed");
+        List<BlockPos> parts = small.unit(h.getBlockState(at(3, 1)), h.absolutePos(at(3, 1)));
+        h.startSequence()
+                .thenWaitUntil(() -> flatScreen(h, parts, ScreenKind.FLAT_SCREEN_2X1))
+                // Break the right block: the left one (which drops the item) must go without a drop.
+                .thenExecute(() -> h.assertTrue(player.gameMode.destroyBlock(parts.get(1)), "creative break was cancelled"))
+                .thenIdle(3)
+                .thenExecute(() -> {
+                    for (BlockPos p : parts) h.assertTrue(h.getLevel().getBlockState(p).isAir(), "part of the TV is left");
+                    h.assertItemEntityCountIs(DreamTvsNeoForge.FLAT_SCREEN_2X1_ITEM.get(), at(3, 1), 3.0, 0);
+                })
+                .thenSucceed();
     }
 }

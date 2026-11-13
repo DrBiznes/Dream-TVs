@@ -355,15 +355,15 @@ The mod ships **five screen types**:
 | **CRT** | `dreamtvs:crt_tv` | No, one block is one TV | Done, final art |
 | **Jumbotron** | `dreamtvs:jumbotron` | Yes, any filled rectangle, no bezel | Done, placeholder art |
 | **Projector** | TBD | TBD | Not started |
-| **Flat Screen** | TBD, two sizes: **2x1** and **3x1** | No, fixed sizes | Not started |
+| **Flat Screen** | `dreamtvs:flat_screen_2x1`, `dreamtvs:flat_screen_3x2` | No, fixed sizes (2x1 and 3x2) | Done, final art |
 
 - [x] The TV block is now the **LCD Panel** (`dreamtvs:lcd_panel`), with connected bezels. See the notes below.
 - [x] **CRT TV** (`dreamtvs:crt_tv`): one block, one TV, 4:3 tube.
 - [x] **Jumbotron** (`dreamtvs:jumbotron`): full-block screen with no bezel, merges into walls.
 - [x] Final art for the LCD panel and the CRT.
 - [ ] **Projector.**
-- [ ] **Flat Screen**, 2x1 and 3x1.
-- [ ] Final art for the Jumbotron, Projector and Flat Screen.
+- [x] **Flat Screen**, 2x1 and 3x2. See the notes below.
+- [ ] Final art for the Jumbotron and Projector.
 - [ ] Add expandable tooltips with explanations for each screen type like in create mod.
 - [ ] Form and unform sounds and messages.
 - [ ] Config file and validation, clamped to sensible bounds.
@@ -402,6 +402,34 @@ The mod ships **five screen types**:
   Kind `JUMBOTRON` merges like LCD panels (same rectangle rules, limits and permissions) but never with panels.
   Recipe `IDI / DRD / IDI` (iron ingot, glowstone dust, redstone) gives four. Placeholder art.
 - **Tests now:** 34 unit tests, 14 GameTests (CRTs stay separate; Jumbotrons merge, but not with panels).
+
+#### Flat Screen notes (2026-11-12)
+- **Blocks:** `dreamtvs:flat_screen_2x1` (2 wide, 1 tall) and `dreamtvs:flat_screen_3x2` (3 wide, 2 tall)
+  (classes `FlatScreen2x1Block`, `FlatScreen3x2Block`, shared logic in `FlatScreenBlock`). Kinds
+  `FLAT_SCREEN_2X1` (id 3) and `FLAT_SCREEN_3X2` (id 4). A kind that doesn't merge now has a fixed `width()` and
+  `height()` in blocks (CRT 1x1, Flat Screens 2x1 and 3x2); merging kinds have 0.
+- **Placing and breaking, like a bed:** one item places the whole TV. The clicked block becomes the bottom of
+  the middle column (the left block of a 2x1, the bottom middle of a 3x2), and the rest goes to the sides and
+  up. If any of that space is taken, nothing is placed and the action bar says so. Each block has a `part` state,
+  `row * width + column`, with row 0 at the bottom and column 0 on the viewer's left. A TV missing a
+  neighbouring part falls apart, so breaking any block removes the whole TV. Only part 0 (bottom left) drops
+  the item, so you always get back exactly one. In creative, part 0 is removed first without a drop, the way
+  doors handle it.
+- **Screens:** each Flat Screen is exactly one screen of its own size. Flat Screens next to each other never
+  merge. A TV counts only while all of its blocks are there (`ScreenBlock.isWhole`), so half a TV (left by
+  `/setblock`, say) shows no picture. The config's `maxWidth`/`maxHeight` limit walls, not fixed-size TVs.
+- **Look:** a thin piano-black panel on the back 3 pixels of the block, so it hangs flat on the wall behind it.
+  Its bezel is 1 pixel at the top and sides with a 2-pixel chin carrying a silver badge and a red standby light.
+  The glass is 14 pixels back from the block front, and the picture tucks half a pixel under the bezel. The item
+  model shows the whole TV. Art script: `blockbench/scripts/make_flat_screen.py`. Final art, but the rendering
+  and item transforms still need a look in a dev client.
+- **Recipes** (one each): 2x1 `PPP / IRI`, 3x2 `PPP / PPP / IRI` (black stained glass pane, iron ingot,
+  redstone). No tool needed to get the drop, like the CRT.
+- **Tests:** 34 unit tests and 19 GameTests pass. The 5 new GameTests cover: Flat Screens side by side stay
+  separate screens of the right size and kind; half a TV stays dark until it's finished; placing with the
+  real item, including refusals when the space beside or above is taken; breaking one block removes the whole TV and its screen; a TV
+  destroyed without a player drops exactly one item; and a creative break drops nothing. GameTest mock players
+  always report `isCreative()`, so drops from a survival player's break are covered by the player-less test.
 
 ### M5: Release and versions
 - [ ] 1.21.1 release (Fabric + NeoForge jars), declared dependency on `dreamdisplays`.

@@ -2,6 +2,9 @@ package com.dreamtvs.fabric;
 
 import com.dreamtvs.DreamTvs;
 import com.dreamtvs.block.CrtTvBlock;
+import com.dreamtvs.block.FlatScreen2x1Block;
+import com.dreamtvs.block.FlatScreen3x2Block;
+import com.dreamtvs.block.FlatScreenBlock;
 import com.dreamtvs.block.JumbotronBlock;
 import com.dreamtvs.block.LcdPanelBlock;
 import com.dreamtvs.screen.Screens;
@@ -37,6 +40,14 @@ public final class DreamTvsFabric implements ModInitializer {
             new JumbotronBlock(JumbotronBlock.defaultProperties()));
     public static final Item JUMBOTRON_ITEM = Registry.register(BuiltInRegistries.ITEM, DreamTvs.id("jumbotron"),
             new BlockItem(JUMBOTRON, new Item.Properties()));
+    public static final Block FLAT_SCREEN_2X1 = Registry.register(BuiltInRegistries.BLOCK, DreamTvs.id("flat_screen_2x1"),
+            new FlatScreen2x1Block(FlatScreenBlock.defaultProperties()));
+    public static final Item FLAT_SCREEN_2X1_ITEM = Registry.register(BuiltInRegistries.ITEM, DreamTvs.id("flat_screen_2x1"),
+            new BlockItem(FLAT_SCREEN_2X1, new Item.Properties()));
+    public static final Block FLAT_SCREEN_3X2 = Registry.register(BuiltInRegistries.BLOCK, DreamTvs.id("flat_screen_3x2"),
+            new FlatScreen3x2Block(FlatScreenBlock.defaultProperties()));
+    public static final Item FLAT_SCREEN_3X2_ITEM = Registry.register(BuiltInRegistries.ITEM, DreamTvs.id("flat_screen_3x2"),
+            new BlockItem(FLAT_SCREEN_3X2, new Item.Properties()));
 
     @Override
     public void onInitialize() {
@@ -46,6 +57,8 @@ public final class DreamTvsFabric implements ModInitializer {
             entries.accept(LCD_PANEL_ITEM);
             entries.accept(CRT_TV_ITEM);
             entries.accept(JUMBOTRON_ITEM);
+            entries.accept(FLAT_SCREEN_2X1_ITEM);
+            entries.accept(FLAT_SCREEN_3X2_ITEM);
         });
 
         ServerLifecycleEvents.SERVER_STARTING.register(Screens::onServerStarting);

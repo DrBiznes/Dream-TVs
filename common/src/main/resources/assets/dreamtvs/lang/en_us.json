@@ -2,6 +2,8 @@
   "block.dreamtvs.lcd_panel": "LCD Panel",
   "block.dreamtvs.crt_tv": "CRT TV",
   "block.dreamtvs.jumbotron": "Jumbotron",
+  "block.dreamtvs.flat_screen_2x1": "Flat Screen (2x1)",
+  "block.dreamtvs.flat_screen_3x2": "Flat Screen (3x2)",
   "message.dreamtvs.formed": "Screen formed: %s×%s",
   "message.dreamtvs.not_rectangle": "No screen: the panels must fill a rectangle",
   "message.dreamtvs.too_wide": "No screen: it can be at most %s panels wide",
@@ -10,6 +12,7 @@
   "message.dreamtvs.no_permission": "No screen: you don't have permission to create screens",
   "message.dreamtvs.refused": "Dream Displays wouldn't create a screen here",
   "message.dreamtvs.not_ready": "Dream Displays isn't ready yet, try placing the panel again",
+  "message.dreamtvs.no_room": "No room: this screen needs a free %sx%s space",
   "message.dreamtvs.not_yours": "This screen belongs to %s",
   "message.dreamtvs.server_owner": "the server",
   "message.dreamtvs.menu_fallback": "Sneak + right-click the screen to open the Dream Displays menu"

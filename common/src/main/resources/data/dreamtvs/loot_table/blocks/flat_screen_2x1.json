@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [ { "type": "minecraft:item", "name": "dreamtvs:flat_screen_2x1" } ],
+      "conditions": [
+        { "condition": "minecraft:block_state_property", "block": "dreamtvs:flat_screen_2x1", "properties": { "part": "0" } },
+        { "condition": "minecraft:survives_explosion" }
+      ]
+    }
+  ]
+}

@@ -2,6 +2,9 @@ package com.dreamtvs.neoforge;
 
 import com.dreamtvs.DreamTvs;
 import com.dreamtvs.block.CrtTvBlock;
+import com.dreamtvs.block.FlatScreen2x1Block;
+import com.dreamtvs.block.FlatScreen3x2Block;
+import com.dreamtvs.block.FlatScreenBlock;
 import com.dreamtvs.block.JumbotronBlock;
 import com.dreamtvs.block.LcdPanelBlock;
 import com.dreamtvs.screen.Screens;
@@ -33,6 +36,10 @@ public final class DreamTvsNeoForge {
     public static final DeferredItem<BlockItem> CRT_TV_ITEM = ITEMS.registerSimpleBlockItem(CRT_TV);
     public static final DeferredBlock<JumbotronBlock> JUMBOTRON = BLOCKS.registerBlock("jumbotron", JumbotronBlock::new, JumbotronBlock.defaultProperties());
     public static final DeferredItem<BlockItem> JUMBOTRON_ITEM = ITEMS.registerSimpleBlockItem(JUMBOTRON);
+    public static final DeferredBlock<FlatScreen2x1Block> FLAT_SCREEN_2X1 = BLOCKS.registerBlock("flat_screen_2x1", FlatScreen2x1Block::new, FlatScreenBlock.defaultProperties());
+    public static final DeferredItem<BlockItem> FLAT_SCREEN_2X1_ITEM = ITEMS.registerSimpleBlockItem(FLAT_SCREEN_2X1);
+    public static final DeferredBlock<FlatScreen3x2Block> FLAT_SCREEN_3X2 = BLOCKS.registerBlock("flat_screen_3x2", FlatScreen3x2Block::new, FlatScreenBlock.defaultProperties());
+    public static final DeferredItem<BlockItem> FLAT_SCREEN_3X2_ITEM = ITEMS.registerSimpleBlockItem(FLAT_SCREEN_3X2);
 
     public DreamTvsNeoForge(IEventBus modBus) {
         DreamTvs.init();
@@ -44,6 +51,8 @@ public final class DreamTvsNeoForge {
                 event.accept(LCD_PANEL_ITEM);
                 event.accept(CRT_TV_ITEM);
                 event.accept(JUMBOTRON_ITEM);
+                event.accept(FLAT_SCREEN_2X1_ITEM);
+                event.accept(FLAT_SCREEN_3X2_ITEM);
             }
         });
 
