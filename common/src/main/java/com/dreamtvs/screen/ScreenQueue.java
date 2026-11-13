@@ -1,7 +1,7 @@
 package com.dreamtvs.screen;
 
 import com.dreamtvs.DreamTvs;
-import com.dreamtvs.block.TvBlock;
+import com.dreamtvs.block.LcdPanelBlock;
 import com.dreamtvs.dd.DreamDisplaysBridge;
 import com.dreamtvs.dd.ManagedIndex;
 import com.dreamtvs.dd.ManagedTag;
@@ -118,9 +118,9 @@ public final class ScreenQueue {
         for (BlockPos pos : BlockPos.betweenClosed(bounds.min(), bounds.max())) {
             if (!level.isLoaded(pos)) continue;
             BlockState state = level.getBlockState(pos);
-            if (!(state.getBlock() instanceof TvBlock) || !state.getValue(TvBlock.FORMED)) continue;
+            if (!(state.getBlock() instanceof LcdPanelBlock) || !state.getValue(LcdPanelBlock.FORMED)) continue;
             if (!ManagedIndex.at(world, pos).isEmpty()) continue; // another screen covers it now
-            level.setBlock(pos, state.setValue(TvBlock.FORMED, false), Block.UPDATE_CLIENTS);
+            level.setBlock(pos, state.setValue(LcdPanelBlock.FORMED, false), Block.UPDATE_CLIENTS);
         }
     }
 

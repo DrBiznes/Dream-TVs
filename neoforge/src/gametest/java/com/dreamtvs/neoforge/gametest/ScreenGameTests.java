@@ -4,7 +4,7 @@ import com.dreamdisplays.api.CommandResult;
 import com.dreamdisplays.api.server.ServerDisplay;
 import com.dreamdisplays.platform.server.managers.DisplayManager;
 import com.dreamtvs.DreamTvs;
-import com.dreamtvs.block.TvBlock;
+import com.dreamtvs.block.LcdPanelBlock;
 import com.dreamtvs.config.DreamTvsConfig;
 import com.dreamtvs.dd.DreamDisplaysBridge;
 import com.dreamtvs.dd.DreamDisplaysBridge.Managed;
@@ -45,7 +45,7 @@ public final class ScreenGameTests {
     // --- helpers ---------------------------------------------------------------------------------------------
 
     private static BlockState tv() {
-        return DreamTvsNeoForge.TV.get().defaultBlockState().setValue(TvBlock.FACING, Direction.NORTH);
+        return DreamTvsNeoForge.LCD_PANEL.get().defaultBlockState().setValue(LcdPanelBlock.FACING, Direction.NORTH);
     }
 
     private static BlockPos at(int x, int y) {
@@ -116,8 +116,8 @@ public final class ScreenGameTests {
 
     private static void assertFormed(GameTestHelper h, int x, int y, boolean formed) {
         BlockState state = h.getBlockState(at(x, y));
-        h.assertTrue(state.is(DreamTvsNeoForge.TV.get()), "no TV at " + x + "," + y);
-        h.assertTrue(state.getValue(TvBlock.FORMED) == formed, "TV at " + x + "," + y + " formed=" + !formed);
+        h.assertTrue(state.is(DreamTvsNeoForge.LCD_PANEL.get()), "no TV at " + x + "," + y);
+        h.assertTrue(state.getValue(LcdPanelBlock.FORMED) == formed, "TV at " + x + "," + y + " formed=" + !formed);
     }
 
     private static void requireReady(GameTestHelper h) {
@@ -230,7 +230,7 @@ public final class ScreenGameTests {
                 .thenExecute(() -> h.assertTrue(player.gameMode.destroyBlock(h.absolutePos(at(2, 1))),
                         "owner's break was cancelled (Dream Displays protection?)"))
                 .thenWaitUntil(() -> {
-                    h.assertBlockNotPresent(DreamTvsNeoForge.TV.get(), at(2, 1));
+                    h.assertBlockNotPresent(DreamTvsNeoForge.LCD_PANEL.get(), at(2, 1));
                     h.assertTrue(onlyScreen(h, 1, 1, 1, 1).id().equals(id.get()), "shrunk screen has a new id");
                 })
                 .thenSucceed();
@@ -246,7 +246,7 @@ public final class ScreenGameTests {
                 .thenExecute(() -> {
                     h.assertFalse(stranger.hasPermissions(2), "mock players must not be ops for this test");
                     h.assertFalse(stranger.gameMode.destroyBlock(h.absolutePos(at(2, 1))), "a stranger broke a protected TV");
-                    h.assertBlockPresent(DreamTvsNeoForge.TV.get(), at(2, 1));
+                    h.assertBlockPresent(DreamTvsNeoForge.LCD_PANEL.get(), at(2, 1));
                     h.assertFalse(Screens.canPlace(h.getLevel(), h.absolutePos(at(3, 1)), Direction.NORTH, stranger),
                             "a stranger may not attach TVs to someone else's screen");
                     h.assertTrue(Screens.canPlace(h.getLevel(), h.absolutePos(at(5, 1)), Direction.NORTH, stranger),

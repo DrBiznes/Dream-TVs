@@ -1,6 +1,6 @@
 package com.dreamtvs.screen;
 
-import com.dreamtvs.block.TvBlock;
+import com.dreamtvs.block.LcdPanelBlock;
 import com.dreamtvs.config.DreamTvsConfig;
 import com.dreamtvs.screen.solve.Cell;
 import com.dreamtvs.screen.solve.ScreenPlanner.Group;
@@ -58,7 +58,7 @@ public final class ScreenScanner {
     }
 
     public static boolean isTv(BlockState state, ScreenPlane plane) {
-        return state.getBlock() instanceof TvBlock && state.getValue(TvBlock.FACING) == plane.facing();
+        return state.getBlock() instanceof LcdPanelBlock && state.getValue(LcdPanelBlock.FACING) == plane.facing();
     }
 
     /** One group: the capped flood fill from {@code seed}, solved against the configured size limits. */

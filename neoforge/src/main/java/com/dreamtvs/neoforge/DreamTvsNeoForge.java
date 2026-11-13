@@ -1,7 +1,7 @@
 package com.dreamtvs.neoforge;
 
 import com.dreamtvs.DreamTvs;
-import com.dreamtvs.block.TvBlock;
+import com.dreamtvs.block.LcdPanelBlock;
 import com.dreamtvs.screen.Screens;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.BlockItem;
@@ -25,8 +25,8 @@ public final class DreamTvsNeoForge {
     private static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(DreamTvs.MOD_ID);
     private static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(DreamTvs.MOD_ID);
 
-    public static final DeferredBlock<TvBlock> TV = BLOCKS.registerBlock("tv", TvBlock::new, TvBlock.defaultProperties());
-    public static final DeferredItem<BlockItem> TV_ITEM = ITEMS.registerSimpleBlockItem(TV);
+    public static final DeferredBlock<LcdPanelBlock> LCD_PANEL = BLOCKS.registerBlock("lcd_panel", LcdPanelBlock::new, LcdPanelBlock.defaultProperties());
+    public static final DeferredItem<BlockItem> LCD_PANEL_ITEM = ITEMS.registerSimpleBlockItem(LCD_PANEL);
 
     public DreamTvsNeoForge(IEventBus modBus) {
         DreamTvs.init();
@@ -34,7 +34,7 @@ public final class DreamTvsNeoForge {
         BLOCKS.register(modBus);
         ITEMS.register(modBus);
         modBus.addListener((BuildCreativeModeTabContentsEvent event) -> {
-            if (event.getTabKey() == CreativeModeTabs.FUNCTIONAL_BLOCKS) event.accept(TV_ITEM);
+            if (event.getTabKey() == CreativeModeTabs.FUNCTIONAL_BLOCKS) event.accept(LCD_PANEL_ITEM);
         });
 
         NeoForge.EVENT_BUS.addListener((ServerStartingEvent event) -> Screens.onServerStarting(event.getServer()));

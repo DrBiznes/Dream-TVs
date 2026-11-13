@@ -1,0 +1,39 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "bezel": "dreamtvs:block/lcd_panel_bezel",
+    "side": "dreamtvs:block/lcd_panel_side",
+    "particle": "dreamtvs:block/lcd_panel_bezel"
+  },
+  "elements": [
+    {
+      "from": [
+        1,
+        0,
+        3
+      ],
+      "to": [
+        15,
+        1,
+        5
+      ],
+      "faces": {
+        "east": {
+          "texture": "#side"
+        },
+        "west": {
+          "texture": "#side"
+        },
+        "up": {
+          "texture": "#side"
+        },
+        "down": {
+          "texture": "#side"
+        },
+        "north": {
+          "texture": "#bezel"
+        }
+      }
+    }
+  ]
+}

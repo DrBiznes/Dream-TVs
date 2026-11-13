@@ -12,5 +12,5 @@
     "R": { "item": "minecraft:redstone" },
     "C": { "item": "minecraft:copper_ingot" }
   },
-  "result": { "id": "dreamtvs:tv", "count": 4 }
+  "result": { "id": "dreamtvs:lcd_panel", "count": 4 }
 }

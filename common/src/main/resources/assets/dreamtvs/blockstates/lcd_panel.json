@@ -1,0 +1,655 @@
+{
+  "multipart": [
+    {
+      "when": {
+        "facing": "north"
+      },
+      "apply": {
+        "model": "dreamtvs:block/lcd_panel"
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "facing": "north"
+          },
+          {
+            "up": "false"
+          }
+        ]
+      },
+      "apply": {
+        "model": "dreamtvs:block/lcd_panel_bezel_up"
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "facing": "north"
+          },
+          {
+            "down": "false"
+          }
+        ]
+      },
+      "apply": {
+        "model": "dreamtvs:block/lcd_panel_bezel_down"
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "facing": "north"
+          },
+          {
+            "left": "false"
+          }
+        ]
+      },
+      "apply": {
+        "model": "dreamtvs:block/lcd_panel_bezel_left"
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "facing": "north"
+          },
+          {
+            "right": "false"
+          }
+        ]
+      },
+      "apply": {
+        "model": "dreamtvs:block/lcd_panel_bezel_right"
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "facing": "north"
+          },
+          {
+            "OR": [
+              {
+                "up": "false"
+              },
+              {
+                "left": "false"
+              }
+            ]
+          }
+        ]
+      },
+      "apply": {
+        "model": "dreamtvs:block/lcd_panel_bezel_up_left"
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "facing": "north"
+          },
+          {
+            "OR": [
+              {
+                "up": "false"
+              },
+              {
+                "right": "false"
+              }
+            ]
+          }
+        ]
+      },
+      "apply": {
+        "model": "dreamtvs:block/lcd_panel_bezel_up_right"
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "facing": "north"
+          },
+          {
+            "OR": [
+              {
+                "down": "false"
+              },
+              {
+                "left": "false"
+              }
+            ]
+          }
+        ]
+      },
+      "apply": {
+        "model": "dreamtvs:block/lcd_panel_bezel_down_left"
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "facing": "north"
+          },
+          {
+            "OR": [
+              {
+                "down": "false"
+              },
+              {
+                "right": "false"
+              }
+            ]
+          }
+        ]
+      },
+      "apply": {
+        "model": "dreamtvs:block/lcd_panel_bezel_down_right"
+      }
+    },
+    {
+      "when": {
+        "facing": "east"
+      },
+      "apply": {
+        "model": "dreamtvs:block/lcd_panel",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "facing": "east"
+          },
+          {
+            "up": "false"
+          }
+        ]
+      },
+      "apply": {
+        "model": "dreamtvs:block/lcd_panel_bezel_up",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "facing": "east"
+          },
+          {
+            "down": "false"
+          }
+        ]
+      },
+      "apply": {
+        "model": "dreamtvs:block/lcd_panel_bezel_down",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "facing": "east"
+          },
+          {
+            "left": "false"
+          }
+        ]
+      },
+      "apply": {
+        "model": "dreamtvs:block/lcd_panel_bezel_left",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "facing": "east"
+          },
+          {
+            "right": "false"
+          }
+        ]
+      },
+      "apply": {
+        "model": "dreamtvs:block/lcd_panel_bezel_right",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "facing": "east"
+          },
+          {
+            "OR": [
+              {
+                "up": "false"
+              },
+              {
+                "left": "false"
+              }
+            ]
+          }
+        ]
+      },
+      "apply": {
+        "model": "dreamtvs:block/lcd_panel_bezel_up_left",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "facing": "east"
+          },
+          {
+            "OR": [
+              {
+                "up": "false"
+              },
+              {
+                "right": "false"
+              }
+            ]
+          }
+        ]
+      },
+      "apply": {
+        "model": "dreamtvs:block/lcd_panel_bezel_up_right",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "facing": "east"
+          },
+          {
+            "OR": [
+              {
+                "down": "false"
+              },
+              {
+                "left": "false"
+              }
+            ]
+          }
+        ]
+      },
+      "apply": {
+        "model": "dreamtvs:block/lcd_panel_bezel_down_left",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "facing": "east"
+          },
+          {
+            "OR": [
+              {
+                "down": "false"
+              },
+              {
+                "right": "false"
+              }
+            ]
+          }
+        ]
+      },
+      "apply": {
+        "model": "dreamtvs:block/lcd_panel_bezel_down_right",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "south"
+      },
+      "apply": {
+        "model": "dreamtvs:block/lcd_panel",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "facing": "south"
+          },
+          {
+            "up": "false"
+          }
+        ]
+      },
+      "apply": {
+        "model": "dreamtvs:block/lcd_panel_bezel_up",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "facing": "south"
+          },
+          {
+            "down": "false"
+          }
+        ]
+      },
+      "apply": {
+        "model": "dreamtvs:block/lcd_panel_bezel_down",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "facing": "south"
+          },
+          {
+            "left": "false"
+          }
+        ]
+      },
+      "apply": {
+        "model": "dreamtvs:block/lcd_panel_bezel_left",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "facing": "south"
+          },
+          {
+            "right": "false"
+          }
+        ]
+      },
+      "apply": {
+        "model": "dreamtvs:block/lcd_panel_bezel_right",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "facing": "south"
+          },
+          {
+            "OR": [
+              {
+                "up": "false"
+              },
+              {
+                "left": "false"
+              }
+            ]
+          }
+        ]
+      },
+      "apply": {
+        "model": "dreamtvs:block/lcd_panel_bezel_up_left",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "facing": "south"
+          },
+          {
+            "OR": [
+              {
+                "up": "false"
+              },
+              {
+                "right": "false"
+              }
+            ]
+          }
+        ]
+      },
+      "apply": {
+        "model": "dreamtvs:block/lcd_panel_bezel_up_right",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "facing": "south"
+          },
+          {
+            "OR": [
+              {
+                "down": "false"
+              },
+              {
+                "left": "false"
+              }
+            ]
+          }
+        ]
+      },
+      "apply": {
+        "model": "dreamtvs:block/lcd_panel_bezel_down_left",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "facing": "south"
+          },
+          {
+            "OR": [
+              {
+                "down": "false"
+              },
+              {
+                "right": "false"
+              }
+            ]
+          }
+        ]
+      },
+      "apply": {
+        "model": "dreamtvs:block/lcd_panel_bezel_down_right",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "west"
+      },
+      "apply": {
+        "model": "dreamtvs:block/lcd_panel",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "facing": "west"
+          },
+          {
+            "up": "false"
+          }
+        ]
+      },
+      "apply": {
+        "model": "dreamtvs:block/lcd_panel_bezel_up",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "facing": "west"
+          },
+          {
+            "down": "false"
+          }
+        ]
+      },
+      "apply": {
+        "model": "dreamtvs:block/lcd_panel_bezel_down",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "facing": "west"
+          },
+          {
+            "left": "false"
+          }
+        ]
+      },
+      "apply": {
+        "model": "dreamtvs:block/lcd_panel_bezel_left",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "facing": "west"
+          },
+          {
+            "right": "false"
+          }
+        ]
+      },
+      "apply": {
+        "model": "dreamtvs:block/lcd_panel_bezel_right",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "facing": "west"
+          },
+          {
+            "OR": [
+              {
+                "up": "false"
+              },
+              {
+                "left": "false"
+              }
+            ]
+          }
+        ]
+      },
+      "apply": {
+        "model": "dreamtvs:block/lcd_panel_bezel_up_left",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "facing": "west"
+          },
+          {
+            "OR": [
+              {
+                "up": "false"
+              },
+              {
+                "right": "false"
+              }
+            ]
+          }
+        ]
+      },
+      "apply": {
+        "model": "dreamtvs:block/lcd_panel_bezel_up_right",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "facing": "west"
+          },
+          {
+            "OR": [
+              {
+                "down": "false"
+              },
+              {
+                "left": "false"
+              }
+            ]
+          }
+        ]
+      },
+      "apply": {
+        "model": "dreamtvs:block/lcd_panel_bezel_down_left",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "facing": "west"
+          },
+          {
+            "OR": [
+              {
+                "down": "false"
+              },
+              {
+                "right": "false"
+              }
+            ]
+          }
+        ]
+      },
+      "apply": {
+        "model": "dreamtvs:block/lcd_panel_bezel_down_right",
+        "y": 270
+      }
+    }
+  ]
+}

@@ -1,8 +1,0 @@
-{
-  "parent": "minecraft:block/orientable",
-  "textures": {
-    "front": "dreamtvs:block/tv_front",
-    "side": "dreamtvs:block/tv_side",
-    "top": "dreamtvs:block/tv_top"
-  }
-}

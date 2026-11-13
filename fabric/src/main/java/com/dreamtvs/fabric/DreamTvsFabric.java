@@ -1,7 +1,7 @@
 package com.dreamtvs.fabric;
 
 import com.dreamtvs.DreamTvs;
-import com.dreamtvs.block.TvBlock;
+import com.dreamtvs.block.LcdPanelBlock;
 import com.dreamtvs.screen.Screens;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.Event;
@@ -23,16 +23,16 @@ public final class DreamTvsFabric implements ModInitializer {
     /** Our break hook runs in this phase, ordered before the default phase DD registers in. */
     private static final ResourceLocation EARLY = DreamTvs.id("early");
 
-    public static final Block TV = Registry.register(BuiltInRegistries.BLOCK, DreamTvs.id("tv"),
-            new TvBlock(TvBlock.defaultProperties()));
-    public static final Item TV_ITEM = Registry.register(BuiltInRegistries.ITEM, DreamTvs.id("tv"),
-            new BlockItem(TV, new Item.Properties()));
+    public static final Block LCD_PANEL = Registry.register(BuiltInRegistries.BLOCK, DreamTvs.id("lcd_panel"),
+            new LcdPanelBlock(LcdPanelBlock.defaultProperties()));
+    public static final Item LCD_PANEL_ITEM = Registry.register(BuiltInRegistries.ITEM, DreamTvs.id("lcd_panel"),
+            new BlockItem(LCD_PANEL, new Item.Properties()));
 
     @Override
     public void onInitialize() {
         DreamTvs.init();
 
-        ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(entries -> entries.accept(TV_ITEM));
+        ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(entries -> entries.accept(LCD_PANEL_ITEM));
 
         ServerLifecycleEvents.SERVER_STARTING.register(Screens::onServerStarting);
         ServerLifecycleEvents.SERVER_STOPPED.register(server -> Screens.onServerStopped());

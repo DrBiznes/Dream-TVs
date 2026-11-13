@@ -150,9 +150,9 @@ The challenge is that recipe JSON can't read our config by itself. Options:
 > (not a `ModConfigSpec`), so load order isn't a problem. Verify this in the spike (C1).
 
 ### 5.3 Only one TV recipe ever exists
-All variants produce `dreamtvs:tv`. Because non-selected variants are skipped at load time, the recipe book, JEI, REI
+All variants produce `dreamtvs:lcd_panel`. Because non-selected variants are skipped at load time, the recipe book, JEI, REI
 and EMI never show duplicates, and `/recipe give` only grants the active one. Compat recipe ids are
-`dreamtvs:compat/<variant>`. The vanilla recipe **keeps its original id** `dreamtvs:tv`, so existing datapack
+`dreamtvs:compat/<variant>`. The vanilla recipe **keeps its original id** `dreamtvs:lcd_panel`, so existing datapack
 overrides, scripts and recipe-book progress keep working (see [Risks](#9-risks-and-open-questions) K2/K3).
 
 ---
@@ -194,7 +194,7 @@ overrides, scripts and recipe-book progress keep working (see [Risks](#9-risks-a
 | `vanilla` | `minecraft:iron_ingot` | `minecraft:black_stained_glass_pane` | `minecraft:redstone` | `minecraft:copper_ingot` | Existing recipe |
 
 ### 6.3 Adding your own variant (datapacks)
-Pack authors can add a recipe for a mod we don't support by shipping a normal recipe that produces `dreamtvs:tv` with
+Pack authors can add a recipe for a mod we don't support by shipping a normal recipe that produces `dreamtvs:lcd_panel` with
 their own conditions. Document in the README that if they add one, they should also disable the matching built-in
 variant with `compat.recipeSource` or by overriding its file, otherwise two recipes can be active. A clean version of
 this (custom variants ids accepted by the config) is a [stretch goal](#10-stretch-goals).
@@ -260,7 +260,7 @@ dreamtvs/
 | # | Item | Mitigation / decision needed |
 |---|---|---|
 | K1 | Item ids and tags in tech mods change between versions | Prefer `c:` tags. Conditions only check that the mod is *loaded*, so a renamed item would produce a recipe parse error. Consider also guarding with `item_exists`-style conditions where the loader offers them, and test against each mod's latest 1.21.1 build. |
-| K2 | Changing the vanilla recipe id would break datapacks or KubeJS scripts that reference it | Decided: vanilla keeps its original id `dreamtvs:tv`. Only the compat recipes are namespaced under `compat/`. |
+| K2 | Changing the vanilla recipe id would break datapacks or KubeJS scripts that reference it | Decided: vanilla keeps its original id `dreamtvs:lcd_panel`. Only the compat recipes are namespaced under `compat/`. |
 | K3 | Recipe book progress: players who unlocked the old recipe | Unchanged ids keep progress (follows from K2). Compat recipes are new ids and unlock normally. |
 | K4 | Config isn't loaded before data on some loader/path | C1 spike. Fall back to reading the file directly in the condition. |
 | K5 | Fabric only has some of the supported mods | Accepted: the list is per-loader in practice. On Fabric the usable variants are Power Grid, Modern Industrialization, AE2 and `vanilla`. |

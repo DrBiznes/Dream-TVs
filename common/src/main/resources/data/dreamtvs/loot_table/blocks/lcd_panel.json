@@ -3,7 +3,7 @@
   "pools": [
     {
       "rolls": 1,
-      "entries": [ { "type": "minecraft:item", "name": "dreamtvs:tv" } ],
+      "entries": [ { "type": "minecraft:item", "name": "dreamtvs:lcd_panel" } ],
       "conditions": [ { "condition": "minecraft:survives_explosion" } ]
     }
   ]

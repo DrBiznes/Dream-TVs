@@ -1,6 +1,6 @@
 package com.dreamtvs.screen;
 
-import com.dreamtvs.block.TvBlock;
+import com.dreamtvs.block.LcdPanelBlock;
 import com.dreamtvs.config.DreamTvsConfig;
 import com.dreamtvs.dd.DreamDisplaysBridge;
 import com.dreamtvs.dd.DreamDisplaysBridge.Managed;
@@ -109,14 +109,14 @@ public final class Screens {
      * {@code pos} and the break goes through. If they may not, the screen stays and DD cancels the break.
      */
     public static void beforeBreak(ServerLevel level, BlockPos pos, BlockState state, Player player) {
-        if (!(state.getBlock() instanceof TvBlock) || !DreamDisplaysBridge.isReady()) return;
+        if (!(state.getBlock() instanceof LcdPanelBlock) || !DreamDisplaysBridge.isReady()) return;
         Managed m = DreamDisplaysBridge.managedAt(level, pos);
         if (m == null) return;
         if (player instanceof ServerPlayer serverPlayer && !ScreenPermissions.canModify(serverPlayer, m.owner())) {
             serverPlayer.displayClientMessage(Component.translatable("message.dreamtvs.not_yours", ownerName(level, m.owner())), true);
             return;
         }
-        Direction facing = state.getValue(TvBlock.FACING);
+        Direction facing = state.getValue(LcdPanelBlock.FACING);
         ScreenPlane plane = ScreenPlane.of(pos, facing);
         ScreenReconciler.reconcile(level, plane, List.of(plane.cell(pos)), null, null, pos);
         // If something else cancels the break after us, the end-of-tick pass puts the screen back.

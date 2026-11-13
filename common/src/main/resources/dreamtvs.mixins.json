@@ -6,6 +6,10 @@
   "mixins": [
     "DisplayManagerMixin"
   ],
+  "client": [
+    "client.DisplayPoseStackMixin",
+    "client.ScreenRendererMixin"
+  ],
   "injectors": {
     "defaultRequire": 0
   }

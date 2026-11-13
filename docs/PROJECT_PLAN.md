@@ -286,10 +286,12 @@ and test it in a singleplayer world:
 - [x] ~~Optional veto of `/display` resizes~~: DD 1.10.9 has no resize command and no move veto. Instead we
       **follow** moves made by other mods (needed for dreamdisplays-sable).
 - [x] Keep TV screens through DD's join-time base-material cleanup (found during M3).
-- [ ] Multiplayer test pass: two players building one wall, chunk borders, server restart mid-build. *(Manual,
-      checklist below.)*
-- [ ] Test TV screens on Sable sub-levels with [dreamdisplays-sable](https://github.com/apehum/dreamdisplays-sable).
-      *Code support is in (we follow its `moveTo`). It still needs a manual test with Sable installed (NeoForge only).*
+- [x] Multiplayer test pass: two players building one wall, chunk borders, server restart mid-build. *(Manual,
+      checklist below. Passed 2026-11-12 on a NeoForge dedicated server with two clients.)*
+- [x] Test TV screens on Sable sub-levels with [dreamdisplays-sable](https://github.com/apehum/dreamdisplays-sable).
+      *Passed 2026-11-12 (NeoForge: Sable 2.0.6, Create 6.0.10, Create Aeronautics 1.3.2, dreamdisplays-sable
+      0.2.0). Install them into the dev runs with `gradlew :neoforge:installTestMods`; `runClient2` is the second
+      player.*
 
 #### M3 notes (2026-11-12)
 - **Break handling is final.** On Fabric our `PlayerBlockBreakEvents.BEFORE` listener sits in a phase that's
@@ -345,9 +347,32 @@ Run on a dedicated server (`.\gradlew.bat :neoforge:runServer` or `:fabric:runSe
    the screen, keep playing, and survive disassembly. Breaking a TV on the moving sub-level should shrink the screen.
 
 ### M4: Polish
-- [ ] Connected-bezel visuals, "no signal" animation, form and unform sounds and messages.
+- [x] The TV block is now the **LCD Panel** (`dreamtvs:lcd_panel`), with connected bezels. See the notes below.
+- [ ] More TV types (CRT and friends, not multiblock). *Brainstorm in progress.*
+- [ ] Final art for the panel, form and unform sounds and messages.
 - [ ] Config file and validation, clamped to sensible bounds.
 - [ ] README, Modrinth/CurseForge description, screenshots/GIF.
+
+#### M4 notes (2026-11-12)
+- **LCD Panel replaces the TV block.** Id `dreamtvs:lcd_panel` (class `LcdPanelBlock`). Worlds from earlier dev
+  builds lose their `dreamtvs:tv` blocks; there's no alias because nothing was released. The screen system
+  (solver, reconciler, permissions, sync) is unchanged. Wherever this plan says "TV block", read "LCD panel".
+- **Shape:** the dimensions of Create's display board, a 10-pixel slab centred in the block (3 to 13 on the
+  facing axis), no gears. The glass is recessed 1 pixel behind a 1-pixel bezel.
+- **Connected bezel:** blockstate flags `up/down/left/right` (left and right as the viewer sees them) are true
+  when a same-facing panel is on that side. The multipart blockstate draws bezel edges and corners only on open
+  sides, so a wall gets one frame. The flags are visual only and never trigger a reconcile.
+- **Picture on the glass:** DD draws flat screens on the block's front face, which would float 4 pixels in front
+  of the glass. `ScreenRendererMixin` (client, `require = 0`) moves the picture back by
+  `LcdPanelBlock.SCREEN_INSET` for displays carrying our tag, and `DisplayPoseStackMixin` pulls its edges in
+  half a pixel so they end under the bezel (`client/PanelPicture`). The bezel overlaps the outer pixel of the picture.
+  The picture is skipped when the camera is edge-on to the glass or behind it, where it bled through the bezel.
+  If a DD update breaks the mixin, the picture floats in front of the panel and nothing else changes. This also
+  settles §5.6 / R4.
+- **`FORMED` no longer changes the model.** A formed wall is covered by DD's picture or placeholder, and an
+  unformed one shows dark glass.
+- **Art:** the textures and models are placeholders.
+- **Tests:** 34 unit tests and 12 GameTests still pass. Rendering needs a manual look in a dev client.
 
 ### M5: Release and versions
 - [ ] 1.21.1 release (Fabric + NeoForge jars), declared dependency on `dreamdisplays`.
@@ -381,9 +406,10 @@ Run on a dedicated server (`.\gradlew.bat :neoforge:runServer` or `:fabric:runSe
 | R1 | DD block protection blocks breaking TVs | §5.4. Push upstream API, keep the fallback ready. |
 | R2 | Addon API is experimental until DD 1.11.0 | Pin a DD version range. Keep every API call in `DreamDisplaysBridge`. Track DD releases. |
 | R3 | No public Maven for `dreamdisplays-api`, plus renamed bundled Kotlin | Java-only usage, compile against the released jar. Ask upstream to publish. |
-| R4 | Render z-fighting or offset on our block model | Spike A. Recessed or transparent front face. |
+| R4 | Render z-fighting or offset on our block model | Resolved in M4: recessed glass plus `ScreenRendererMixin` (internal, `require = 0`). |
 | R5 | Fabric event ordering vs DD's break hook | Resolved: our phase is ordered before DD's default phase. |
 | R6 | DD's join-time cleanup deletes displays without base material | `DisplayManagerMixin` (internal, `require = 0`) plus the silent-removal fallback. Upstream ask in [UPSTREAM.md](UPSTREAM.md). |
+| R8 | We inject into DD's client renderer (`ScreenRenderer.renderScreenTexture`) | `require = 0`. If it breaks, the picture floats 4 pixels in front of the panel. |
 | R7 | We read DD internals (`VanillaDisplayData`) to follow outside moves | All in `DdInternals`, guarded. If it breaks, moved screens are unmanaged instead of deleted. |
 
 ### Decisions (2026-11-12)
