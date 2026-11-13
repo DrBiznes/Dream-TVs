@@ -25,6 +25,12 @@ public final class PanelPicture {
     /** The kind of the screen Dream Displays is drawing right now, or null if it isn't one of ours. */
     private static @Nullable ScreenKind drawing;
 
+    /** The part of the video texture to show, as a share of its width and height around the centre. */
+    private static float cropU = 1F;
+    private static float cropV = 1F;
+    /** True only while DD is emitting the video quad's vertices for a screen that crops. */
+    private static boolean cropping;
+
     private PanelPicture() {}
 
     /**
@@ -67,8 +73,56 @@ public final class PanelPicture {
         return true;
     }
 
-    public static void end() {
+    /**
+     * Works out which part of the video texture fills the glass. DD's texture has the shape of the screen's
+     * block box, with the whole video fitted inside it between black bars.
+     *
+     * @param videoAspect   width over height of the video itself, or 0 before the first frame
+     * @param textureAspect width over height of DD's texture
+     * @param quarterTurns  DD's picture rotation setting
+     */
+    public static void setVideo(double videoAspect, double textureAspect, int width, int height, int quarterTurns) {
+        cropU = 1F;
+        cropV = 1F;
+        ScreenKind kind = drawing;
+        if (kind == null || !kind.fillsGlass() || videoAspect <= 0 || textureAspect <= 0 || width <= 0 || height <= 0) return;
+        double glass = kind.pictureAspect(width, height);
+        // The video inside the texture, as shares of the texture's width and height.
+        double videoU = videoAspect >= textureAspect ? 1.0 : videoAspect / textureAspect;
+        double videoV = videoAspect >= textureAspect ? textureAspect / videoAspect : 1.0;
+        // The biggest window of the glass's shape that stays inside the video: its edges are cut off, no bars.
+        double u;
+        double v;
+        if (videoAspect >= glass) {
+            v = videoV;
+            u = glass * v / textureAspect;
+        } else {
+            u = videoU;
+            v = u * textureAspect / glass;
+        }
+        boolean sideways = (quarterTurns & 1) == 1;
+        cropU = (float) (sideways ? v : u);
+        cropV = (float) (sideways ? u : v);
+    }
+
+    /** DD starts / stops emitting the vertices of the video quad itself (not the placeholder or subtitles). */
+    public static void videoQuad(boolean emitting) {
+        cropping = emitting && (cropU < 1F || cropV < 1F);
+    }
+
+    public static float cropU(float u) {
+        return cropping ? 0.5F + (u - 0.5F) * cropU : u;
+    }
+
+    public static float cropV(float v) {
+        return cropping ? 0.5F + (v - 0.5F) * cropV : v;
+    }
+
+    /** After DD has drawn a screen; the pose is back where {@link #begin} left it. */
+    public static void end(PoseStack stack, DisplayFacing facing, int width, int height) {
+        if (drawing == ScreenKind.CRT) CrtOverlay.queue(stack, facing, width, height);
         drawing = null;
+        cropping = false;
     }
 
     /** After DD's screen transform: the picture is the unit square here (x to the viewer's right, y up). */

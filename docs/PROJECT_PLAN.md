@@ -397,7 +397,16 @@ The mod ships **five screen types**:
   bar underneath (badge, door, power button, standby light), tube housing at the back. Kind `CRT` doesn't
   merge: each CRT is its own 1x1 screen, also next to other CRTs or panels. Recipe `CCC / GRI / CCC` (gray
   concrete, glass pane, redstone, iron ingot) gives one. Final art.
-  *Not done:* 4:3 letterboxing, scanlines, static, sounds. DD stretches the video to the tube.
+  **CRT look:** a phosphor glow, an aperture grille (fine red/green/blue stripes), soft three-row scanlines,
+  darkened edges, a glass glare and the curved edge of the tube are one translucent texture drawn over the
+  picture (`client/CrtOverlay`), after DD has flushed its own drawing. Under it a faint bar of light rolls
+  down the tube every 9 seconds. It is all an overlay: the video itself isn't warped or blurred, which would
+  need our own shader in place of DD's picture drawing. It uses DD's client screen transform
+  and switches itself off if that ever fails. No sounds or static (decided against).
+  **4:3:** DD fits the whole video into a texture shaped like the block box (square for one block), with black
+  bars, and we were stretching that onto the wider tube. `ScreenRendererVideoMixin` now narrows the texture
+  coordinates of the video quad (`PanelPicture.setVideo`), so the video fills the tube at its true proportions
+  with its left and right edges cut off, like widescreen film on an old set.
 - **Jumbotron:** the original TV block idea. A full cube whose whole front is screen, no bezel and no inset.
   Kind `JUMBOTRON` merges like LCD panels (same rectangle rules, limits and permissions) but never with panels.
   Recipe `IDI / DRD / IDI` (iron ingot, glowstone dust, redstone) gives four. Placeholder art.
