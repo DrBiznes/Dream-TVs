@@ -51,3 +51,27 @@ carries the old and new bounds would be even better.
 Modrinth Maven mod jar, which works but pulls in every internal class.
 
 **Ask:** publish the `dreamdisplays-api` artifact (Maven Central, or a GitHub Packages / Modrinth Maven entry).
+
+## 5. A per-display option for how the video fits the screen (fill / crop)
+
+**Problem.** The client always fits the whole video inside the display's block box and pads the rest with black
+bars. The video texture has the shape of the box (square for a 1×1 display), so a 16:9 video on a 1×1 display is
+letterboxed inside a square. An addon whose visible screen isn't the shape of the box can't change that. Our CRT TV
+is one block with a 4:3 tube: stretching the square picture onto the tube makes the video about 1.4 times too
+wide, with bars on top of that.
+
+**Dream TVs workaround.** `ScreenRendererVideoMixin` injects into the lambda that emits the video quad
+(`ScreenRenderer.renderGpuTexture$lambda$0`, a compiler-generated name) and rewrites the texture-coordinate
+arguments of the private `ScreenRenderer.addVertex`, so only the centre of the texture is drawn. The crop window is
+worked out from `DisplayScreen.videoContentAspect` and the texture size. This is the most fragile hook we have: a
+new lambda in that function or a reordered argument breaks it, and it assumes the video is centred in the texture.
+
+**Ask (any one of these):**
+- A per-display fit mode, e.g. `ServerDisplay.fit = CONTAIN | COVER | STRETCH` (`CONTAIN` being today's behaviour),
+  synced to clients like the other display settings. `COVER` fills the display and cuts off the overflow.
+- Or a per-display content aspect, e.g. `ServerDisplay.contentAspect = 4.0 / 3.0`, meaning "the visible screen has
+  this shape, fit the video to that instead of to the block box". With `COVER` this is exactly what the CRT needs.
+- Or, most general, a per-display source rectangle in texture coordinates (`u0, v0, u1, v1`) that the client
+  applies when it draws the video quad.
+
+Any of these would let us delete `ScreenRendererVideoMixin`.
