@@ -10,6 +10,7 @@ import com.dreamtvs.dd.DreamDisplaysBridge;
 import com.dreamtvs.dd.DreamDisplaysBridge.Managed;
 import com.dreamtvs.neoforge.DreamTvsNeoForge;
 import com.dreamtvs.screen.ScreenPermissions;
+import com.dreamtvs.screen.ScreenKind;
 import com.dreamtvs.screen.ScreenPlane;
 import com.dreamtvs.screen.Screens;
 import net.minecraft.core.BlockPos;
@@ -383,5 +384,63 @@ public final class ScreenGameTests {
                     assertFormed(h, 5, 3, true);
                 })
                 .thenSucceed();
+    }
+
+    private static Managed managedAt(GameTestHelper h, int x, int y) {
+        return DreamDisplaysBridge.managedAt(h.getLevel(), h.absolutePos(at(x, y)));
+    }
+
+    @GameTest(template = EMPTY, timeoutTicks = TIMEOUT)
+    public static void crtsStaySeparateScreens(GameTestHelper h) {
+        requireReady(h);
+        BlockState crt = DreamTvsNeoForge.CRT_TV.get().defaultBlockState().setValue(LcdPanelBlock.FACING, Direction.NORTH);
+        AtomicReference<UUID> second = new AtomicReference<>();
+        // Two CRTs side by side, then an LCD panel on the same wall.
+        h.setBlock(at(1, 1), crt);
+        h.setBlock(at(2, 1), crt);
+        h.setBlock(at(3, 1), tv());
+        h.startSequence()
+                .thenWaitUntil(() -> {
+                    Managed a = managedAt(h, 1, 1);
+                    Managed b = managedAt(h, 2, 1);
+                    Managed c = managedAt(h, 3, 1);
+                    h.assertTrue(a != null && b != null && c != null, "every TV should have a screen");
+                    h.assertTrue(!a.id().equals(b.id()) && !b.id().equals(c.id()), "neighbouring TVs merged");
+                    for (Managed m : List.of(a, b, c)) {
+                        h.assertTrue(m.display().getWidth() == 1 && m.display().getHeight() == 1, "screen isn't 1x1");
+                    }
+                    h.assertTrue(a.bounds().kind() == ScreenKind.CRT && b.bounds().kind() == ScreenKind.CRT, "CRT screens not tagged CRT");
+                    h.assertTrue(c.bounds().kind() == ScreenKind.LCD_PANEL, "panel screen not tagged LCD_PANEL");
+                    h.assertTrue(h.getBlockState(at(1, 1)).getValue(LcdPanelBlock.FORMED), "CRT not formed");
+                    second.set(b.id());
+                })
+                .thenExecute(() -> h.setBlock(at(1, 1), Blocks.AIR.defaultBlockState()))
+                .thenIdle(3)
+                .thenExecute(() -> {
+                    h.assertTrue(managedAt(h, 1, 1) == null, "the removed CRT's screen is still there");
+                    Managed b = managedAt(h, 2, 1);
+                    h.assertTrue(b != null && b.id().equals(second.get()), "the other CRT's screen was replaced");
+                    h.assertTrue(managedAt(h, 3, 1) != null, "the panel's screen went away");
+                })
+                .thenSucceed();
+    }
+
+    @GameTest(template = EMPTY, timeoutTicks = TIMEOUT)
+    public static void jumbotronsMergeButNotWithPanels(GameTestHelper h) {
+        requireReady(h);
+        BlockState jumbo = DreamTvsNeoForge.JUMBOTRON.get().defaultBlockState().setValue(LcdPanelBlock.FACING, Direction.NORTH);
+        for (int x = 1; x <= 2; x++) for (int y = 1; y <= 2; y++) h.setBlock(at(x, y), jumbo);
+        h.setBlock(at(3, 1), tv());
+        h.setBlock(at(3, 2), tv());
+        h.succeedWhen(() -> {
+            Managed wall = managedAt(h, 1, 1);
+            Managed panels = managedAt(h, 3, 1);
+            h.assertTrue(wall != null && panels != null, "both walls should have a screen");
+            h.assertTrue(wall.bounds().kind() == ScreenKind.JUMBOTRON, "Jumbotron screen not tagged JUMBOTRON");
+            h.assertTrue(wall.display().getWidth() == 2 && wall.display().getHeight() == 2, "Jumbotrons didn't merge into 2x2");
+            h.assertTrue(wall.id().equals(managedAt(h, 2, 2).id()), "Jumbotrons didn't merge into one screen");
+            h.assertTrue(!wall.id().equals(panels.id()), "Jumbotrons merged with LCD panels");
+            h.assertTrue(panels.display().getWidth() == 1 && panels.display().getHeight() == 2, "panels should be their own 1x2");
+        });
     }
 }

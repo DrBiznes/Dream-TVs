@@ -347,9 +347,25 @@ Run on a dedicated server (`.\gradlew.bat :neoforge:runServer` or `:fabric:runSe
    the screen, keep playing, and survive disassembly. Breaking a TV on the moving sub-level should shrink the screen.
 
 ### M4: Polish
+The mod ships **five screen types**:
+
+| Screen type | Block | Merges? | Status |
+|---|---|---|---|
+| **LCD screen** | `dreamtvs:lcd_panel` | Yes, any filled rectangle | Done, final art |
+| **CRT** | `dreamtvs:crt_tv` | No, one block is one TV | Done, final art |
+| **Jumbotron** | `dreamtvs:jumbotron` | Yes, any filled rectangle, no bezel | Done, placeholder art |
+| **Projector** | TBD | TBD | Not started |
+| **Flat Screen** | TBD, two sizes: **2x1** and **3x1** | No, fixed sizes | Not started |
+
 - [x] The TV block is now the **LCD Panel** (`dreamtvs:lcd_panel`), with connected bezels. See the notes below.
-- [ ] More TV types (CRT and friends, not multiblock). *Brainstorm in progress.*
-- [ ] Final art for the panel, form and unform sounds and messages.
+- [x] **CRT TV** (`dreamtvs:crt_tv`): one block, one TV, 4:3 tube.
+- [x] **Jumbotron** (`dreamtvs:jumbotron`): full-block screen with no bezel, merges into walls.
+- [x] Final art for the LCD panel and the CRT.
+- [ ] **Projector.**
+- [ ] **Flat Screen**, 2x1 and 3x1.
+- [ ] Final art for the Jumbotron, Projector and Flat Screen.
+- [ ] Add expandable tooltips with explanations for each screen type like in create mod.
+- [ ] Form and unform sounds and messages.
 - [ ] Config file and validation, clamped to sensible bounds.
 - [ ] README, Modrinth/CurseForge description, screenshots/GIF.
 
@@ -371,8 +387,21 @@ Run on a dedicated server (`.\gradlew.bat :neoforge:runServer` or `:fabric:runSe
   settles §5.6 / R4.
 - **`FORMED` no longer changes the model.** A formed wall is covered by DD's picture or placeholder, and an
   unformed one shows dark glass.
-- **Art:** the textures and models are placeholders.
+- **Art:** final. A small fixed palette per material, light from the top left, no random noise.
 - **Tests:** 34 unit tests and 12 GameTests still pass. Rendering needs a manual look in a dev client.
+- **Screen kinds (`ScreenKind`):** every TV block extends `ScreenBlock` and has a kind. A kind says whether
+  neighbours merge, how far back the glass is, and the picture's margins on the block face. `ScreenPlane` now
+  includes the kind, so kinds on the same wall never see each other, and the kind is stored as one more byte in
+  the `customData` tag (older tags read as LCD panels). The client reads it there to place the picture.
+- **CRT TV:** a late-80s flat-tube set in charcoal plastic. 14x10-pixel tube, 1-pixel frame, a 3-pixel control
+  bar underneath (badge, door, power button, standby light), tube housing at the back. Kind `CRT` doesn't
+  merge: each CRT is its own 1x1 screen, also next to other CRTs or panels. Recipe `CCC / GRI / CCC` (gray
+  concrete, glass pane, redstone, iron ingot) gives one. Final art.
+  *Not done:* 4:3 letterboxing, scanlines, static, sounds. DD stretches the video to the tube.
+- **Jumbotron:** the original TV block idea. A full cube whose whole front is screen, no bezel and no inset.
+  Kind `JUMBOTRON` merges like LCD panels (same rectangle rules, limits and permissions) but never with panels.
+  Recipe `IDI / DRD / IDI` (iron ingot, glowstone dust, redstone) gives four. Placeholder art.
+- **Tests now:** 34 unit tests, 14 GameTests (CRTs stay separate; Jumbotrons merge, but not with panels).
 
 ### M5: Release and versions
 - [ ] 1.21.1 release (Fabric + NeoForge jars), declared dependency on `dreamdisplays`.

@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "pattern": [
+    "IDI",
+    "DRD",
+    "IDI"
+  ],
+  "key": {
+    "I": { "item": "minecraft:iron_ingot" },
+    "D": { "item": "minecraft:glowstone_dust" },
+    "R": { "item": "minecraft:redstone" }
+  },
+  "result": { "id": "dreamtvs:jumbotron", "count": 4 }
+}

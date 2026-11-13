@@ -12,8 +12,8 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * Dream Displays draws a flat screen on the front face of its block box. An LCD panel is thinner than a block
- * and its glass sits behind that face, so for our screens the picture is moved back onto the glass
+ * Dream Displays draws a flat screen on the front face of its block box. Our TVs' glass sits behind
+ * that face and may cover only part of it, so for our screens the picture is moved back onto the glass
  * ({@link PanelPicture}). DD pushes the pose before this call and pops it after, so nothing leaks.
  *
  * <p>This targets DD client internals (1.10.9). If the method changes, the injects just don't apply
@@ -26,7 +26,7 @@ public abstract class ScreenRendererMixin {
     @SuppressWarnings("rawtypes")
     private void dreamtvs$beginPanel(DisplayScreen screen, PoseStack stack, boolean replay, Function2 drawQuad,
                                      CallbackInfo ci) {
-        if (!PanelPicture.begin(screen.getCustomData().containsKey(ManagedTag.KEY), screen.getFacing(), stack)) {
+        if (!PanelPicture.begin(screen.getCustomData().get(ManagedTag.KEY), screen.getFacing(), stack)) {
             ci.cancel();
         }
     }

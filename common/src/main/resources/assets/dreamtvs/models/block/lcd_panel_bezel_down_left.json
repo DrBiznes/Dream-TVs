@@ -2,7 +2,10 @@
   "parent": "minecraft:block/block",
   "textures": {
     "bezel": "dreamtvs:block/lcd_panel_bezel",
-    "side": "dreamtvs:block/lcd_panel_side",
+    "side_west": "dreamtvs:block/lcd_panel_side_west",
+    "side_east": "dreamtvs:block/lcd_panel_side_east",
+    "top": "dreamtvs:block/lcd_panel_top",
+    "bottom": "dreamtvs:block/lcd_panel_bottom",
     "particle": "dreamtvs:block/lcd_panel_bezel"
   },
   "elements": [
@@ -18,20 +21,20 @@
         5
       ],
       "faces": {
-        "east": {
-          "texture": "#side"
-        },
-        "west": {
-          "texture": "#side"
-        },
-        "up": {
-          "texture": "#side"
-        },
-        "down": {
-          "texture": "#side"
-        },
         "north": {
           "texture": "#bezel"
+        },
+        "east": {
+          "texture": "#side_east"
+        },
+        "west": {
+          "texture": "#side_west"
+        },
+        "up": {
+          "texture": "#top"
+        },
+        "down": {
+          "texture": "#bottom"
         }
       }
     }

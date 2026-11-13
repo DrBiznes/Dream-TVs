@@ -1,7 +1,7 @@
 package com.dreamtvs.screen;
 
 import com.dreamtvs.DreamTvs;
-import com.dreamtvs.block.LcdPanelBlock;
+import com.dreamtvs.block.ScreenBlock;
 import com.dreamtvs.dd.DreamDisplaysBridge;
 import com.dreamtvs.dd.ManagedIndex;
 import com.dreamtvs.dd.ManagedTag;
@@ -47,9 +47,10 @@ public final class ScreenQueue {
     private ScreenQueue() {}
 
     /** A TV appeared, disappeared or turned at {@code pos}. {@code actor} is the player who placed it, if any. */
-    public static void mark(ServerLevel level, BlockPos pos, Direction facing, @Nullable ServerPlayer actor) {
+    public static void mark(ServerLevel level, BlockPos pos, Direction facing, ScreenKind kind,
+                            @Nullable ServerPlayer actor) {
         if (facing.getAxis() == Direction.Axis.Y) return;
-        ScreenPlane plane = ScreenPlane.of(pos, facing);
+        ScreenPlane plane = ScreenPlane.of(pos, facing, kind);
         Pending p = pending(level.dimension(), plane);
         Cell cell = plane.cell(pos);
         p.changed.add(cell);
@@ -63,7 +64,7 @@ public final class ScreenQueue {
     public static void markBox(String world, ManagedTag.Bounds bounds) {
         ResourceKey<Level> level = DreamDisplaysBridge.levelKey(world);
         if (level == null || bounds.facing().getAxis() == Direction.Axis.Y) return;
-        ScreenPlane plane = ScreenPlane.of(bounds.min(), bounds.facing());
+        ScreenPlane plane = ScreenPlane.of(bounds.min(), bounds.facing(), bounds.kind());
         pending(level, plane).changed.addAll(plane.rect(bounds.min(), bounds.max()).cells());
     }
 
@@ -118,9 +119,9 @@ public final class ScreenQueue {
         for (BlockPos pos : BlockPos.betweenClosed(bounds.min(), bounds.max())) {
             if (!level.isLoaded(pos)) continue;
             BlockState state = level.getBlockState(pos);
-            if (!(state.getBlock() instanceof LcdPanelBlock) || !state.getValue(LcdPanelBlock.FORMED)) continue;
+            if (!(state.getBlock() instanceof ScreenBlock) || !state.getValue(ScreenBlock.FORMED)) continue;
             if (!ManagedIndex.at(world, pos).isEmpty()) continue; // another screen covers it now
-            level.setBlock(pos, state.setValue(LcdPanelBlock.FORMED, false), Block.UPDATE_CLIENTS);
+            level.setBlock(pos, state.setValue(ScreenBlock.FORMED, false), Block.UPDATE_CLIENTS);
         }
     }
 

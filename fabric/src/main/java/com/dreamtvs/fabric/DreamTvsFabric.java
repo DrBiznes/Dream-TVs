@@ -1,6 +1,8 @@
 package com.dreamtvs.fabric;
 
 import com.dreamtvs.DreamTvs;
+import com.dreamtvs.block.CrtTvBlock;
+import com.dreamtvs.block.JumbotronBlock;
 import com.dreamtvs.block.LcdPanelBlock;
 import com.dreamtvs.screen.Screens;
 import net.fabricmc.api.ModInitializer;
@@ -27,12 +29,24 @@ public final class DreamTvsFabric implements ModInitializer {
             new LcdPanelBlock(LcdPanelBlock.defaultProperties()));
     public static final Item LCD_PANEL_ITEM = Registry.register(BuiltInRegistries.ITEM, DreamTvs.id("lcd_panel"),
             new BlockItem(LCD_PANEL, new Item.Properties()));
+    public static final Block CRT_TV = Registry.register(BuiltInRegistries.BLOCK, DreamTvs.id("crt_tv"),
+            new CrtTvBlock(CrtTvBlock.defaultProperties()));
+    public static final Item CRT_TV_ITEM = Registry.register(BuiltInRegistries.ITEM, DreamTvs.id("crt_tv"),
+            new BlockItem(CRT_TV, new Item.Properties()));
+    public static final Block JUMBOTRON = Registry.register(BuiltInRegistries.BLOCK, DreamTvs.id("jumbotron"),
+            new JumbotronBlock(JumbotronBlock.defaultProperties()));
+    public static final Item JUMBOTRON_ITEM = Registry.register(BuiltInRegistries.ITEM, DreamTvs.id("jumbotron"),
+            new BlockItem(JUMBOTRON, new Item.Properties()));
 
     @Override
     public void onInitialize() {
         DreamTvs.init();
 
-        ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(entries -> entries.accept(LCD_PANEL_ITEM));
+        ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(entries -> {
+            entries.accept(LCD_PANEL_ITEM);
+            entries.accept(CRT_TV_ITEM);
+            entries.accept(JUMBOTRON_ITEM);
+        });
 
         ServerLifecycleEvents.SERVER_STARTING.register(Screens::onServerStarting);
         ServerLifecycleEvents.SERVER_STOPPED.register(server -> Screens.onServerStopped());

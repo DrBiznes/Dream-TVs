@@ -97,7 +97,7 @@ public final class DreamTvsAddon implements AddonLifecycle {
             ScreenSync.externallyRemoved(old, false);
             return;
         }
-        ManagedTag.Bounds bounds = new ManagedTag.Bounds(live.min(), live.max(), live.facing(), old.bounds().createdAt());
+        ManagedTag.Bounds bounds = new ManagedTag.Bounds(live.min(), live.max(), live.facing(), old.bounds().createdAt(), old.bounds().kind());
         if (bounds.equals(old.bounds()) && live.world().equals(old.world())) return;
         DreamTvs.LOGGER.debug("Following screen {} moved by another mod: {} -> {}", display.getId(), old.bounds(), bounds);
         DreamDisplaysBridge.tag(display, bounds);

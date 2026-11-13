@@ -1,6 +1,6 @@
 package com.dreamtvs.screen;
 
-import com.dreamtvs.block.LcdPanelBlock;
+import com.dreamtvs.block.ScreenBlock;
 import com.dreamtvs.config.DreamTvsConfig;
 import com.dreamtvs.screen.solve.Cell;
 import com.dreamtvs.screen.solve.ScreenPlanner.Group;
@@ -58,13 +58,17 @@ public final class ScreenScanner {
     }
 
     public static boolean isTv(BlockState state, ScreenPlane plane) {
-        return state.getBlock() instanceof LcdPanelBlock && state.getValue(LcdPanelBlock.FACING) == plane.facing();
+        return state.getBlock() instanceof ScreenBlock block && block.kind() == plane.kind()
+                && state.getValue(ScreenBlock.FACING) == plane.facing();
     }
 
     /** One group: the capped flood fill from {@code seed}, solved against the configured size limits. */
     public static Group group(View view, Cell seed) {
         DreamTvsConfig config = DreamTvsConfig.get();
-        ScreenSolver.Fill fill = ScreenSolver.floodFill(seed, view::filled, config.scanCap());
+        // TVs that don't merge are each their own group, whatever stands next to them.
+        ScreenSolver.Fill fill = view.plane().kind().merges()
+                ? ScreenSolver.floodFill(seed, view::filled, config.scanCap())
+                : ScreenSolver.floodFill(seed, seed::equals, config.scanCap());
         return new Group(fill.cells(), ScreenSolver.solve(fill.cells(), config.maxWidth, config.maxHeight));
     }
 

@@ -1,0 +1,12 @@
+{
+  "parent": "minecraft:block/cube",
+  "textures": {
+    "particle": "dreamtvs:block/jumbotron_side",
+    "north": "dreamtvs:block/jumbotron_front",
+    "south": "dreamtvs:block/jumbotron_back",
+    "east": "dreamtvs:block/jumbotron_side",
+    "west": "dreamtvs:block/jumbotron_side",
+    "up": "dreamtvs:block/jumbotron_side",
+    "down": "dreamtvs:block/jumbotron_side"
+  }
+}

@@ -1,5 +1,7 @@
 {
   "block.dreamtvs.lcd_panel": "LCD Panel",
+  "block.dreamtvs.crt_tv": "CRT TV",
+  "block.dreamtvs.jumbotron": "Jumbotron",
   "message.dreamtvs.formed": "Screen formed: %s×%s",
   "message.dreamtvs.not_rectangle": "No screen: the panels must fill a rectangle",
   "message.dreamtvs.too_wide": "No screen: it can be at most %s panels wide",

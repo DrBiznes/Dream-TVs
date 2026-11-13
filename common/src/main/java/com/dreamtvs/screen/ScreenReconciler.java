@@ -3,7 +3,7 @@ package com.dreamtvs.screen;
 import com.dreamdisplays.api.CommandResult;
 import com.dreamdisplays.api.server.ServerDisplay;
 import com.dreamtvs.DreamTvs;
-import com.dreamtvs.block.LcdPanelBlock;
+import com.dreamtvs.block.ScreenBlock;
 import com.dreamtvs.config.DreamTvsConfig;
 import com.dreamtvs.dd.DreamDisplaysBridge;
 import com.dreamtvs.dd.DreamDisplaysBridge.Managed;
@@ -42,7 +42,7 @@ import java.util.UUID;
  *
  * <p>Steps: scan the groups around the changed cells, collect our screens on that wall, ask
  * {@link ScreenPlanner} what to do, apply it (deletes, then moves, then creates, so DD's overlap checks pass),
- * then set {@link LcdPanelBlock#FORMED} on the blocks and tell the acting player what happened.
+ * then set {@link ScreenBlock#FORMED} on the blocks and tell the acting player what happened.
  */
 public final class ScreenReconciler {
     private ScreenReconciler() {}
@@ -174,8 +174,8 @@ public final class ScreenReconciler {
             BlockPos pos = view.plane().pos(cell);
             BlockState state = level.getBlockState(pos);
             boolean formed = covered(live, cell);
-            if (state.getValue(LcdPanelBlock.FORMED) != formed) {
-                level.setBlock(pos, state.setValue(LcdPanelBlock.FORMED, formed), Block.UPDATE_CLIENTS);
+            if (state.getValue(ScreenBlock.FORMED) != formed) {
+                level.setBlock(pos, state.setValue(ScreenBlock.FORMED, formed), Block.UPDATE_CLIENTS);
             }
         }
     }

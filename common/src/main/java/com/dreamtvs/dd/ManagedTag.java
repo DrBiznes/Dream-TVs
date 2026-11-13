@@ -2,6 +2,7 @@ package com.dreamtvs.dd;
 
 import com.dreamdisplays.api.CommandResult;
 import com.dreamdisplays.api.server.ServerDisplay;
+import com.dreamtvs.screen.ScreenKind;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 
@@ -10,18 +11,21 @@ import java.nio.ByteBuffer;
 /**
  * What Dream TVs stores in a display's {@code customData}. DD doesn't expose a display's corners or facing,
  * so we keep our own copy: 6 ints (min x/y/z, max x/y/z), one facing byte (3D data value), then the time the
- * screen was first formed (epoch millis, used to break merge ties: the oldest screen wins).
+ * screen was first formed (epoch millis, used to break merge ties: the oldest screen wins), then one byte for
+ * the {@link ScreenKind}.
  *
  * <p>The first builds wrote the same thing without the timestamp; those still read, as "formed at time 0".
+ * Tags from before there were kinds read as LCD panels.
  */
 public final class ManagedTag {
     public static final String KEY = "dreamtvs:screen";
     private static final int LEGACY_SIZE = 6 * Integer.BYTES + 1;
-    private static final int SIZE = LEGACY_SIZE + Long.BYTES;
+    private static final int TIMED_SIZE = LEGACY_SIZE + Long.BYTES;
+    private static final int SIZE = TIMED_SIZE + 1;
 
     private ManagedTag() {}
 
-    public record Bounds(BlockPos min, BlockPos max, Direction facing, long createdAt) {
+    public record Bounds(BlockPos min, BlockPos max, Direction facing, long createdAt, ScreenKind kind) {
         public boolean contains(BlockPos pos) {
             return pos.getX() >= min.getX() && pos.getX() <= max.getX()
                     && pos.getY() >= min.getY() && pos.getY() <= max.getY()
@@ -29,7 +33,7 @@ public final class ManagedTag {
         }
 
         public Bounds withBox(BlockPos newMin, BlockPos newMax) {
-            return new Bounds(newMin, newMax, facing, createdAt);
+            return new Bounds(newMin, newMax, facing, createdAt, kind);
         }
     }
 
@@ -42,7 +46,8 @@ public final class ManagedTag {
                 .putInt(bounds.min().getX()).putInt(bounds.min().getY()).putInt(bounds.min().getZ())
                 .putInt(bounds.max().getX()).putInt(bounds.max().getY()).putInt(bounds.max().getZ())
                 .put((byte) bounds.facing().get3DDataValue())
-                .putLong(bounds.createdAt());
+                .putLong(bounds.createdAt())
+                .put((byte) bounds.kind().id());
         return display.getCustomData().set(KEY, buf.array());
     }
 
@@ -53,12 +58,13 @@ public final class ManagedTag {
 
     /** Decodes raw tag bytes (also used on the client, where DD syncs customData). */
     public static Bounds read(byte[] raw) {
-        if (raw == null || (raw.length != SIZE && raw.length != LEGACY_SIZE)) return null;
+        if (raw == null || (raw.length != SIZE && raw.length != TIMED_SIZE && raw.length != LEGACY_SIZE)) return null;
         ByteBuffer buf = ByteBuffer.wrap(raw);
         BlockPos min = new BlockPos(buf.getInt(), buf.getInt(), buf.getInt());
         BlockPos max = new BlockPos(buf.getInt(), buf.getInt(), buf.getInt());
         Direction facing = Direction.from3DDataValue(buf.get());
         long createdAt = buf.remaining() >= Long.BYTES ? buf.getLong() : 0L;
-        return new Bounds(min, max, facing, createdAt);
+        ScreenKind kind = buf.hasRemaining() ? ScreenKind.byId(buf.get()) : ScreenKind.LCD_PANEL;
+        return new Bounds(min, max, facing, createdAt, kind);
     }
 }

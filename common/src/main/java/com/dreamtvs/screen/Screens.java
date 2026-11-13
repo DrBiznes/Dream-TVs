@@ -1,6 +1,6 @@
 package com.dreamtvs.screen;
 
-import com.dreamtvs.block.LcdPanelBlock;
+import com.dreamtvs.block.ScreenBlock;
 import com.dreamtvs.config.DreamTvsConfig;
 import com.dreamtvs.dd.DreamDisplaysBridge;
 import com.dreamtvs.dd.DreamDisplaysBridge.Managed;
@@ -63,29 +63,34 @@ public final class Screens {
     // --- block changes ---------------------------------------------------------------------------------------
 
     /** A TV appeared or turned at {@code pos} (any cause: player, {@code /setblock}, {@code /fill}, structures). */
-    public static void onAdded(ServerLevel level, BlockPos pos, Direction facing) {
-        ScreenQueue.mark(level, pos, facing, null);
+    public static void onAdded(ServerLevel level, BlockPos pos, Direction facing, ScreenKind kind) {
+        ScreenQueue.mark(level, pos, facing, kind, null);
     }
 
     /** {@code player} placed the TV at {@code pos}; they get told how the screen turned out. */
-    public static void onPlaced(ServerLevel level, BlockPos pos, Direction facing, ServerPlayer player) {
-        ScreenQueue.mark(level, pos, facing, player);
+    public static void onPlaced(ServerLevel level, BlockPos pos, Direction facing, ScreenKind kind, ServerPlayer player) {
+        ScreenQueue.mark(level, pos, facing, kind, player);
     }
 
     /** A TV left {@code pos} or turned away from {@code facing}. */
-    public static void onRemoved(ServerLevel level, BlockPos pos, Direction facing) {
-        ScreenQueue.mark(level, pos, facing, null);
+    public static void onRemoved(ServerLevel level, BlockPos pos, Direction facing, ScreenKind kind) {
+        ScreenQueue.mark(level, pos, facing, kind, null);
     }
 
     // --- permission checks -----------------------------------------------------------------------------------
 
     /**
-     * May {@code player} put a TV facing {@code facing} at {@code pos}? Not if it would join or merge a screen they
-     * aren't allowed to change (plan §5.7); they get told whose screen it is.
+     * May {@code player} put a TV of this kind facing {@code facing} at {@code pos}? Not if it would join or merge a
+     * screen they aren't allowed to change (plan §5.7); they get told whose screen it is. TVs that don't merge
+     * never need this check.
      */
     public static boolean canPlace(ServerLevel level, BlockPos pos, Direction facing, ServerPlayer player) {
-        if (!DreamDisplaysBridge.isReady() || facing.getAxis() == Direction.Axis.Y) return true;
-        ScreenPlane plane = ScreenPlane.of(pos, facing);
+        return canPlace(level, pos, facing, ScreenKind.LCD_PANEL, player);
+    }
+
+    public static boolean canPlace(ServerLevel level, BlockPos pos, Direction facing, ScreenKind kind, ServerPlayer player) {
+        if (!kind.merges() || !DreamDisplaysBridge.isReady() || facing.getAxis() == Direction.Axis.Y) return true;
+        ScreenPlane plane = ScreenPlane.of(pos, facing, kind);
         ScreenScanner.View view = new ScreenScanner.View(level, plane, null);
         Set<Cell> joined = new HashSet<>();
         for (Cell n : ScreenSolver.neighbours(plane.cell(pos))) {
@@ -109,18 +114,18 @@ public final class Screens {
      * {@code pos} and the break goes through. If they may not, the screen stays and DD cancels the break.
      */
     public static void beforeBreak(ServerLevel level, BlockPos pos, BlockState state, Player player) {
-        if (!(state.getBlock() instanceof LcdPanelBlock) || !DreamDisplaysBridge.isReady()) return;
+        if (!(state.getBlock() instanceof ScreenBlock block) || !DreamDisplaysBridge.isReady()) return;
         Managed m = DreamDisplaysBridge.managedAt(level, pos);
         if (m == null) return;
         if (player instanceof ServerPlayer serverPlayer && !ScreenPermissions.canModify(serverPlayer, m.owner())) {
             serverPlayer.displayClientMessage(Component.translatable("message.dreamtvs.not_yours", ownerName(level, m.owner())), true);
             return;
         }
-        Direction facing = state.getValue(LcdPanelBlock.FACING);
-        ScreenPlane plane = ScreenPlane.of(pos, facing);
+        Direction facing = state.getValue(ScreenBlock.FACING);
+        ScreenPlane plane = ScreenPlane.of(pos, facing, block.kind());
         ScreenReconciler.reconcile(level, plane, List.of(plane.cell(pos)), null, null, pos);
         // If something else cancels the break after us, the end-of-tick pass puts the screen back.
-        ScreenQueue.mark(level, pos, facing, null);
+        ScreenQueue.mark(level, pos, facing, block.kind(), null);
     }
 
     private static boolean intersects(Rect bounds, Set<Cell> cells) {

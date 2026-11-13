@@ -96,7 +96,7 @@ public final class DreamDisplaysBridge {
                     max.getX(), max.getY(), max.getZ(),
                     toFacing(plane.facing()));
             if (display == null) return null;
-            tag(display, new ManagedTag.Bounds(min, max, plane.facing(), System.currentTimeMillis()));
+            tag(display, new ManagedTag.Bounds(min, max, plane.facing(), System.currentTimeMillis(), plane.kind()));
             return display;
         } finally {
             selfDepth--;
@@ -181,11 +181,11 @@ public final class DreamDisplaysBridge {
         return resolveAll(ManagedIndex.inWorld(worldKey(level)));
     }
 
-    /** Managed displays lying in {@code plane} (same facing, same wall depth). */
+    /** Managed displays lying in {@code plane} (same facing, same wall depth, same kind of TV). */
     public static List<Managed> managedIn(ServerLevel level, ScreenPlane plane) {
         List<Managed> out = new ArrayList<>();
         for (Managed m : managed(level)) {
-            if (m.bounds().facing() == plane.facing() && plane.contains(m.bounds().min()) && plane.contains(m.bounds().max())) {
+            if (m.bounds().facing() == plane.facing() && m.bounds().kind() == plane.kind() && plane.contains(m.bounds().min()) && plane.contains(m.bounds().max())) {
                 out.add(m);
             }
         }
