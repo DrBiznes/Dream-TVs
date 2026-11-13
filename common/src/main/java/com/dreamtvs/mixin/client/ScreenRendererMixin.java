@@ -2,6 +2,7 @@ package com.dreamtvs.mixin.client;
 
 import com.dreamdisplays.libs.kotlin.jvm.functions.Function2;
 import com.dreamdisplays.platform.client.displays.DisplayScreen;
+import com.dreamtvs.client.CrtOverlay;
 import com.dreamtvs.client.PanelPicture;
 import com.dreamtvs.dd.ManagedTag;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -28,13 +29,24 @@ public abstract class ScreenRendererMixin {
                                      CallbackInfo ci) {
         if (!PanelPicture.begin(screen.getCustomData().get(ManagedTag.KEY), screen.getFacing(), stack)) {
             ci.cancel();
+            return;
         }
+        int textureHeight = screen.getTextureHeight();
+        PanelPicture.setVideo(screen.getVideoContentAspect(),
+                textureHeight > 0 ? screen.getTextureWidth() / (double) textureHeight : 0.0,
+                screen.getWidth(), screen.getHeight(), screen.getRotation().getQuarterTurns());
     }
 
     @Inject(method = "renderScreenTexture", at = @At("RETURN"), require = 0, remap = false)
     @SuppressWarnings("rawtypes")
     private void dreamtvs$endPanel(DisplayScreen screen, PoseStack stack, boolean replay, Function2 drawQuad,
                                    CallbackInfo ci) {
-        PanelPicture.end();
+        PanelPicture.end(stack, screen.getFacing(), screen.getWidth(), screen.getHeight());
+    }
+
+    /** Both {@code render} overloads: once DD has flushed its pictures, draw what goes on top of them. */
+    @Inject(method = "render", at = @At("TAIL"), require = 0, remap = false)
+    private void dreamtvs$afterScreens(CallbackInfo ci) {
+        CrtOverlay.flush();
     }
 }

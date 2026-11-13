@@ -89,6 +89,19 @@ public enum ScreenKind {
         return top;
     }
 
+    /**
+     * Whether the video is cropped to fill the glass. Dream Displays fits the whole video inside the screen's
+     * block box with black bars, which on glass that isn't the shape of the box would also stretch it.
+     */
+    public boolean fillsGlass() {
+        return this == CRT;
+    }
+
+    /** Width over height of the picture on a screen {@code width} x {@code height} blocks big. */
+    public float pictureAspect(int width, int height) {
+        return (width - left - right) / (height - bottom - top);
+    }
+
     /** Whether a frame stands in front of the glass (and hides the picture from the side). */
     public boolean hasBezel() {
         return depth > 0F;
