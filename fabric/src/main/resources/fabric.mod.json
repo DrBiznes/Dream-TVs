@@ -13,6 +13,9 @@
     ],
     "client": [
       "com.dreamtvs.fabric.DreamTvsFabricClient"
+    ],
+    "modmenu": [
+      "com.dreamtvs.fabric.DreamTvsModMenu"
     ]
   },
   "mixins": [

@@ -109,6 +109,31 @@ public final class DreamTvsConfig {
     }
 
     /**
+     * The file's values for the config screen, or {@code null} when the file exists but can't be read (it isn't
+     * valid JSON). A missing file gives the defaults. Bad values are fixed the same way {@link #load} fixes them.
+     */
+    public static DreamTvsConfig readForEditing(Path file) {
+        if (!Files.exists(file)) return new DreamTvsConfig();
+        try {
+            return parse(Files.readString(file, StandardCharsets.UTF_8), new ArrayList<>());
+        } catch (IOException | RuntimeException e) {
+            return null;
+        }
+    }
+
+    /**
+     * The config screen's Save: writes {@code config} to the file and makes it the config in use, so a world
+     * running in this game uses it straight away (the compat recipes on the next /reload). Values are checked
+     * and fixed like the file's.
+     */
+    public static void save(Path file, DreamTvsConfig config) throws IOException {
+        DreamTvsConfig checked = parse(config.toFileText(), new ArrayList<>());
+        Files.createDirectories(file.getParent());
+        Files.writeString(file, checked.toFileText(), StandardCharsets.UTF_8);
+        current = checked;
+    }
+
+    /**
      * Reads the file's text. Missing options keep their defaults; bad values are fixed and described in
      * {@code warnings}. Throws {@link JsonParseException} only when the text isn't a JSON object at all.
      */

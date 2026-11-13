@@ -99,6 +99,11 @@ explaining it. Changes apply when the server restarts, except the `compat` optio
 If a value is invalid, Dream TVs fixes it and writes a warning to the server log. If the file can't be read at
 all, it's left alone and the defaults are used.
 
+In game, the same options are in a settings screen: the Config button in NeoForge's Mods list, or the Configure
+button in [Mod Menu](https://modrinth.com/mod/modmenu) on Fabric. The screen edits the file in your own game folder,
+so it's for singleplayer and LAN worlds. Saving while you're in a world applies the changes immediately; recipe
+changes need a `/reload`. A dedicated server still uses its own file.
+
 ## Building from source
 
 ```

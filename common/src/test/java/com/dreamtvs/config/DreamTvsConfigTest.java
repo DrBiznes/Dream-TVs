@@ -3,7 +3,12 @@ package com.dreamtvs.config;
 import com.dreamtvs.config.DreamTvsConfig.ExtendPolicy;
 import com.google.gson.JsonParseException;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -130,5 +135,36 @@ class DreamTvsConfigTest {
         String text = new DreamTvsConfig().toFileText();
         assertTrue(text.contains("mekanism"), text);
         assertTrue(text.contains("Create: Power Grid"), text);
+    }
+
+    @Test
+    void saveWritesTheFileAndUsesTheValues(@TempDir Path dir) throws IOException {
+        Path file = dir.resolve("config").resolve("dreamtvs.json");
+        DreamTvsConfig edited = new DreamTvsConfig();
+        edited.maxWidth = 12;
+        edited.maxHeight = 500; // out of range: fixed like a hand-edited file
+        edited.recipeSource = "mekanism";
+
+        DreamTvsConfig.save(file, edited);
+
+        assertEquals(12, DreamTvsConfig.get().maxWidth);
+        assertEquals(DreamTvsConfig.MAX_SIDE, DreamTvsConfig.get().maxHeight);
+        DreamTvsConfig read = DreamTvsConfig.readForEditing(file);
+        assertNotNull(read);
+        assertEquals(12, read.maxWidth);
+        assertEquals(DreamTvsConfig.MAX_SIDE, read.maxHeight);
+        assertEquals("mekanism", read.recipeSource);
+        DreamTvsConfig.save(file, new DreamTvsConfig()); // put the defaults back for the other tests
+    }
+
+    @Test
+    void readForEditingGivesDefaultsForAMissingFileAndNullForABrokenOne(@TempDir Path dir) throws IOException {
+        Path file = dir.resolve("dreamtvs.json");
+        DreamTvsConfig missing = DreamTvsConfig.readForEditing(file);
+        assertNotNull(missing);
+        assertEquals(32, missing.maxWidth);
+
+        Files.writeString(file, "{ \"maxWidth\": ", StandardCharsets.UTF_8);
+        assertNull(DreamTvsConfig.readForEditing(file));
     }
 }

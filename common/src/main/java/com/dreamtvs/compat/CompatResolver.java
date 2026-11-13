@@ -100,11 +100,14 @@ public final class CompatResolver {
         List<String> ids = new ArrayList<>();
         for (CompatSource source : sources) {
             if (source.id().equals(CompatSource.VANILLA)) continue;
-            boolean any = source.methods().values().stream()
-                    .anyMatch(r -> r.mods().stream().allMatch(modLoaded));
-            if (any) ids.add(source.id());
+            if (isInstalled(source, modLoaded)) ids.add(source.id());
         }
         return ids;
+    }
+
+    /** Whether all the mods for at least one of the source's methods are loaded. */
+    public static boolean isInstalled(CompatSource source, Predicate<String> modLoaded) {
+        return source.methods().values().stream().anyMatch(r -> r.mods().stream().allMatch(modLoaded));
     }
 
     private static final class Check {

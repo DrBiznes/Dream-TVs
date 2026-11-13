@@ -49,6 +49,11 @@ public final class CompatRecipes {
         return modLoaded.test("create");
     }
 
+    /** Whether the source's mods are installed, for the config screen. */
+    public static boolean isInstalled(CompatSource source) {
+        return CompatResolver.isInstalled(source, modLoaded);
+    }
+
     public static synchronized CompatResolver.Selection selection() {
         Object stamp = stamp();
         if (selection == null || !stamp.equals(selectionStamp)) {

@@ -23,6 +23,10 @@ dependencies {
     "modImplementation"("net.fabricmc:fabric-loader:${prop("fabric_loader_version")}")
     "modImplementation"("net.fabricmc.fabric-api:fabric-api:${prop("fabric_api_version")}")
     "modImplementation"("maven.modrinth:dreamdisplays:${prop("dreamdisplays_fabric_id")}")
+    // Optional: Mod Menu opens the settings screen (DreamTvsModMenu). Not needed at runtime, but in the dev
+    // client so the screen can be tried.
+    "modCompileOnly"("maven.modrinth:modmenu:${prop("modmenu_version")}")
+    "modLocalRuntime"("maven.modrinth:modmenu:${prop("modmenu_version")}")
 }
 
 loom {
