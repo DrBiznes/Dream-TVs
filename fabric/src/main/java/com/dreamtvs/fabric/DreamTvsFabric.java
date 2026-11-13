@@ -14,14 +14,16 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerChunkEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
-import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
+import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.BlockItem;
-import net.minecraft.world.item.CreativeModeTabs;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 
 public final class DreamTvsFabric implements ModInitializer {
@@ -49,17 +51,23 @@ public final class DreamTvsFabric implements ModInitializer {
     public static final Item FLAT_SCREEN_3X2_ITEM = Registry.register(BuiltInRegistries.ITEM, DreamTvs.id("flat_screen_3x2"),
             new BlockItem(FLAT_SCREEN_3X2, new Item.Properties()));
 
+    /** Our own creative tab, like Create's. */
+    public static final CreativeModeTab TAB = Registry.register(BuiltInRegistries.CREATIVE_MODE_TAB, DreamTvs.id("main"),
+            FabricItemGroup.builder()
+                    .title(Component.translatable("itemGroup.dreamtvs"))
+                    .icon(() -> new ItemStack(CRT_TV_ITEM))
+                    .displayItems((parameters, output) -> {
+                        output.accept(LCD_PANEL_ITEM);
+                        output.accept(JUMBOTRON_ITEM);
+                        output.accept(CRT_TV_ITEM);
+                        output.accept(FLAT_SCREEN_2X1_ITEM);
+                        output.accept(FLAT_SCREEN_3X2_ITEM);
+                    })
+                    .build());
+
     @Override
     public void onInitialize() {
         DreamTvs.init();
-
-        ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(entries -> {
-            entries.accept(LCD_PANEL_ITEM);
-            entries.accept(CRT_TV_ITEM);
-            entries.accept(JUMBOTRON_ITEM);
-            entries.accept(FLAT_SCREEN_2X1_ITEM);
-            entries.accept(FLAT_SCREEN_3X2_ITEM);
-        });
 
         ServerLifecycleEvents.SERVER_STARTING.register(Screens::onServerStarting);
         ServerLifecycleEvents.SERVER_STOPPED.register(server -> Screens.onServerStopped());

@@ -8,20 +8,22 @@ import com.dreamtvs.block.FlatScreenBlock;
 import com.dreamtvs.block.JumbotronBlock;
 import com.dreamtvs.block.LcdPanelBlock;
 import com.dreamtvs.screen.Screens;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.BlockItem;
-import net.minecraft.world.item.CreativeModeTabs;
+import net.minecraft.world.item.CreativeModeTab;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.event.level.BlockEvent;
 import net.neoforged.neoforge.event.level.ChunkEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
 import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 import net.neoforged.neoforge.registries.DeferredBlock;
+import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
@@ -29,6 +31,7 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 public final class DreamTvsNeoForge {
     private static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(DreamTvs.MOD_ID);
     private static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(DreamTvs.MOD_ID);
+    private static final DeferredRegister<CreativeModeTab> TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, DreamTvs.MOD_ID);
 
     public static final DeferredBlock<LcdPanelBlock> LCD_PANEL = BLOCKS.registerBlock("lcd_panel", LcdPanelBlock::new, LcdPanelBlock.defaultProperties());
     public static final DeferredItem<BlockItem> LCD_PANEL_ITEM = ITEMS.registerSimpleBlockItem(LCD_PANEL);
@@ -41,20 +44,25 @@ public final class DreamTvsNeoForge {
     public static final DeferredBlock<FlatScreen3x2Block> FLAT_SCREEN_3X2 = BLOCKS.registerBlock("flat_screen_3x2", FlatScreen3x2Block::new, FlatScreenBlock.defaultProperties());
     public static final DeferredItem<BlockItem> FLAT_SCREEN_3X2_ITEM = ITEMS.registerSimpleBlockItem(FLAT_SCREEN_3X2);
 
+    /** Our own creative tab, like Create's. */
+    public static final DeferredHolder<CreativeModeTab, CreativeModeTab> TAB = TABS.register("main", () -> CreativeModeTab.builder()
+            .title(Component.translatable("itemGroup.dreamtvs"))
+            .icon(CRT_TV_ITEM::toStack)
+            .displayItems((parameters, output) -> {
+                output.accept(LCD_PANEL_ITEM);
+                output.accept(JUMBOTRON_ITEM);
+                output.accept(CRT_TV_ITEM);
+                output.accept(FLAT_SCREEN_2X1_ITEM);
+                output.accept(FLAT_SCREEN_3X2_ITEM);
+            })
+            .build());
+
     public DreamTvsNeoForge(IEventBus modBus) {
         DreamTvs.init();
 
         BLOCKS.register(modBus);
         ITEMS.register(modBus);
-        modBus.addListener((BuildCreativeModeTabContentsEvent event) -> {
-            if (event.getTabKey() == CreativeModeTabs.FUNCTIONAL_BLOCKS) {
-                event.accept(LCD_PANEL_ITEM);
-                event.accept(CRT_TV_ITEM);
-                event.accept(JUMBOTRON_ITEM);
-                event.accept(FLAT_SCREEN_2X1_ITEM);
-                event.accept(FLAT_SCREEN_3X2_ITEM);
-            }
-        });
+        TABS.register(modBus);
 
         NeoForge.EVENT_BUS.addListener((ServerStartingEvent event) -> Screens.onServerStarting(event.getServer()));
         NeoForge.EVENT_BUS.addListener((ServerStoppedEvent event) -> Screens.onServerStopped());

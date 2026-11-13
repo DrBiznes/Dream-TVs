@@ -26,9 +26,11 @@ dependencies {
     testImplementation(platform("org.junit:junit-bom:5.11.4"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    // DreamTvsConfig's parser; the version Minecraft 1.21.1 ships (the game's libraries aren't on the test classpath).
+    testImplementation("com.google.code.gson:gson:2.10.1")
 }
 
-// The solver and planner (com.dreamtvs.screen.solve) are pure Java and tested here.
+// The solver and planner (com.dreamtvs.screen.solve) and the config parser are pure Java and tested here.
 tasks.test {
     useJUnitPlatform()
 }

@@ -29,7 +29,7 @@
 
 ### Non-goals (v1)
 - Any changes to video playback, the display menu or networking. Dream Displays already handles all of that.
-- Floor or ceiling screens (`UP`/`DOWN` facing). Possible later, see [Stretch goals](#9-stretch-goals).
+- Floor or ceiling screens (`UP`/`DOWN` facing). Possible later together with the projector, see [Stretch goals](#9-stretch-goals).
 - Paper/Bukkit support. Remote controls, redstone control or channel presets.
 - Removing `/display create`. Both flows will exist side by side.
 
@@ -209,7 +209,7 @@ How it's enforced:
 
 | Thing | Details |
 |---|---|
-| **Block** | `dreamtvs:tv`. Item in the *Functional Blocks* creative tab. |
+| **Block** | `dreamtvs:tv`. Item in our own *Dream TVs* creative tab (originally *Functional Blocks*). |
 | **Recipe** (shaped, tweakable via datapack) | `I G I / G R G / I C I` where I = iron ingot, G = black stained glass pane, R = redstone, C = copper ingot. Yields **4**, so big screens stay affordable. |
 | **Models** | Bezel frame using connection flags (multipart, 16 variants). Front: black (formed) or animated static (unformed). Side and back: dark grey plastic. |
 | **Sounds** | Metal place and break. Optional soft "power on" click when a screen forms. |
@@ -239,7 +239,7 @@ We dropped the temporary `/dreamtvs spike` commands. A minimal TV block (one TV 
 same three risks in a more natural way. Launch with `.\gradlew.bat :neoforge:runClient` (or `:fabric:runClient`)
 and test it in a singleplayer world:
 
-1. **A, create + render:** place a TV (*Functional Blocks* tab). The action bar should show *"Screen formed: 1×1"*.
+1. **A, create + render:** place a TV (*Dream TVs* tab). The action bar should show *"Screen formed: 1×1"*.
    Open the DD menu on it, paste a link, and check the video sits flush on the front face.
 2. **C, saved data:** save and quit, reload the world, then break the TV. The screen must disappear with it, which
    proves our stored bounds came back after the reload.
@@ -346,28 +346,25 @@ Run on a dedicated server (`.\gradlew.bat :neoforge:runServer` or `:fabric:runSe
 7. **Sable (NeoForge):** put a TV screen on a contraption, assemble it and fly it around. The video should follow
    the screen, keep playing, and survive disassembly. Breaking a TV on the moving sub-level should shrink the screen.
 
-### M4: Polish
-The mod ships **five screen types**:
+### M4: Polish (done 2026-11-13)
+The first release ships **four screen types**. The Projector moved to [Stretch goals](#9-stretch-goals).
 
 | Screen type | Block | Merges? | Status |
 |---|---|---|---|
 | **LCD screen** | `dreamtvs:lcd_panel` | Yes, any filled rectangle | Done, final art |
 | **CRT** | `dreamtvs:crt_tv` | No, one block is one TV | Done, final art |
-| **Jumbotron** | `dreamtvs:jumbotron` | Yes, any filled rectangle, no bezel | Done, placeholder art |
-| **Projector** | TBD | TBD | Not started |
+| **Jumbotron** | `dreamtvs:jumbotron` | Yes, any filled rectangle, no bezel | Done, final art |
 | **Flat Screen** | `dreamtvs:flat_screen_2x1`, `dreamtvs:flat_screen_3x2` | No, fixed sizes (2x1 and 3x2) | Done, final art |
 
 - [x] The TV block is now the **LCD Panel** (`dreamtvs:lcd_panel`), with connected bezels. See the notes below.
 - [x] **CRT TV** (`dreamtvs:crt_tv`): one block, one TV, 4:3 tube.
 - [x] **Jumbotron** (`dreamtvs:jumbotron`): full-block screen with no bezel, merges into walls.
 - [x] Final art for the LCD panel and the CRT.
-- [ ] **Projector.**
 - [x] **Flat Screen**, 2x1 and 3x2. See the notes below.
-- [ ] Final art for the Jumbotron and Projector.
-- [ ] Add expandable tooltips with explanations for each screen type like in create mod.
-- [ ] Form and unform sounds and messages.
-- [ ] Config file and validation, clamped to sensible bounds.
-- [ ] README, Modrinth/CurseForge description, screenshots/GIF.
+- [x] Final art for the Jumbotron. No more speckle dots on the LCD panel, CRT and Flat Screen.
+- [x] Expandable Create-style tooltips for each screen type, and our own **Dream TVs** creative tab. See the notes below.
+- [x] Config file with comments, per-option validation and clamping. See the notes below.
+- [x] Plain [README](../README.md) (no store page, screenshots or GIFs).
 
 #### M4 notes (2026-11-12)
 - **LCD Panel replaces the TV block.** Id `dreamtvs:lcd_panel` (class `LcdPanelBlock`). Worlds from earlier dev
@@ -440,6 +437,38 @@ The mod ships **five screen types**:
   destroyed without a player drops exactly one item; and a creative break drops nothing. GameTest mock players
   always report `isCreative()`, so drops from a survival player's break are covered by the player-less test.
 
+#### Art cleanup and Jumbotron notes (2026-11-13)
+- **No speckle.** The sparse pattern of one-shade-darker dots is gone from every texture (LCD panel, CRT, Flat
+  Screen back), and so is the `speckle` helper. The art rule is now: flat areas stay flat, and detail comes from
+  edges, seams, vents and fittings (`blockbench/scripts/art.py`).
+- **Jumbotron, final art** (`make_jumbotron.py`): the front is four 8x8 LED modules per block, with louvre shades
+  over the LED rows and a dark gap between modules, so a wall continues the grid with no bezel. The sides are a
+  bolted steel cabinet panel with vents. The back has a louvred service door, a handle, a copper power port and a
+  green status light. Same rules as the other art: a fixed palette and light from the top left. The model
+  still uses vanilla `block/cube`, so faces between neighbours are culled.
+
+#### Config notes (2026-11-13)
+- `config/dreamtvs.json` is written with a `//` comment for every option (read leniently by Gson). Each option is
+  validated on its own: the wrong type falls back to that option's default, out-of-range numbers are clamped
+  (`maxWidth`/`maxHeight` 1 to 128, `maxScreensPerPlayer` 0 or more), `extendPolicy` ignores case, and unknown
+  keys are reported. Every fix is logged as a warning. After a good read, the file is rewritten so it picks up new
+  options and comments. A file that isn't valid JSON is left as it is, and the defaults are used.
+- **Tests:** 8 new unit tests for the parser (`DreamTvsConfigTest`, 42 unit tests in total). 19 GameTests pass.
+
+#### Tooltip and creative tab notes (2026-11-12)
+- **Creative tab:** all TVs are in their own *Dream TVs* tab (`dreamtvs:main`, CRT TV icon) and no longer in
+  *Functional Blocks*. Order: LCD Panel, Jumbotron, CRT TV, Flat Screen 2x1, Flat Screen 3x2.
+- **Tooltips:** `client/ItemDescription` is a port of Create 6's `ItemDescription` and
+  `TooltipHelper.cutTextComponent`, so it looks exactly like Create and the addons that copy it. Collapsed, the
+  tooltip shows a dark grey *"Hold [Shift] for Summary"* under the name. Holding Shift turns `Shift` white and
+  shows the summary, then each *"When ..."* condition in grey with its behaviour indented below. Text is
+  Create's gold (`#C9974C`) with `_underscored_` words in its yellow (`#F1DD79`), wrapped at 200 pixels.
+  *"Hold [Ctrl] for Controls"* (`control1`/`action1` keys) is supported too but unused, as in Create itself.
+- **Lang layout** (Create's): `<item key>.tooltip.summary`, `.condition1`/`.behaviour1`, `.condition2`/...
+  An item with no `.summary` key gets no tooltip. Hooked through Fabric's `ItemTooltipCallback` and NeoForge's
+  `ItemTooltipEvent`, and skipped when there's no player, like Create, so creative search isn't polluted.
+- **Tests:** 34 unit tests and 19 GameTests still pass. The tooltip look needs a check in a dev client.
+
 ### M5: Release and versions
 - [ ] 1.21.1 release (Fabric + NeoForge jars), declared dependency on `dreamdisplays`.
 - [ ] Port to 1.21.11 (DD's current `active` version), then consider Stonecutter for 26.x.
@@ -458,10 +487,14 @@ The mod ships **five screen types**:
 ---
 
 ## 9. Stretch goals
-- Floor and ceiling screens (`UP`/`DOWN`). DD supports them, but they need a 6-direction block and an extra solver plane.
 - Item "remote" to power on/off or open the DD menu from a distance.
 - Redstone signal to pause/play, if DD exposes playback control on the server.
 - Bezel colour variants (dye the TV).
+- **Projector, with floor and ceiling screens.** Moved out of M4; it won't be in the first release. The two
+  could be built together: a projector hung from a ceiling or standing on a floor could throw its picture onto
+  a screen facing `UP` or `DOWN`, which is where floor and ceiling screens make the most sense. DD supports
+  `UP`/`DOWN` displays, but we'd need a 6-direction block and an extra solver plane.
+- Form and unform sounds (a soft "power on" click). The action-bar messages already exist.
 
 ---
 
