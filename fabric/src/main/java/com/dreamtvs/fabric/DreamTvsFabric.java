@@ -5,6 +5,7 @@ import com.dreamtvs.block.TvBlock;
 import com.dreamtvs.screen.Screens;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.Event;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerChunkEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
@@ -36,6 +37,7 @@ public final class DreamTvsFabric implements ModInitializer {
         ServerLifecycleEvents.SERVER_STARTING.register(Screens::onServerStarting);
         ServerLifecycleEvents.SERVER_STOPPED.register(server -> Screens.onServerStopped());
         ServerTickEvents.END_SERVER_TICK.register(Screens::onServerTickEnd);
+        ServerChunkEvents.CHUNK_LOAD.register((level, chunk) -> Screens.onChunkLoaded(level, chunk.getPos()));
 
         PlayerBlockBreakEvents.BEFORE.addPhaseOrdering(EARLY, Event.DEFAULT_PHASE);
         PlayerBlockBreakEvents.BEFORE.register(EARLY, (level, player, pos, state, blockEntity) -> {

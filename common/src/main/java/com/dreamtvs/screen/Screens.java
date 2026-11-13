@@ -4,6 +4,8 @@ import com.dreamtvs.block.TvBlock;
 import com.dreamtvs.config.DreamTvsConfig;
 import com.dreamtvs.dd.DreamDisplaysBridge;
 import com.dreamtvs.dd.DreamDisplaysBridge.Managed;
+import com.dreamtvs.dd.DreamTvsAddon;
+import com.dreamtvs.dd.ManagedIndex;
 import com.dreamtvs.screen.solve.Cell;
 import com.dreamtvs.screen.solve.Rect;
 import com.dreamtvs.screen.solve.ScreenSolver;
@@ -16,9 +18,9 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.GameProfileCache;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.state.BlockState;
 
-import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -37,14 +39,25 @@ public final class Screens {
     public static void onServerStarting(MinecraftServer server) {
         DreamTvsConfig.load(server.getServerDirectory().resolve("config").resolve("dreamtvs.json"));
         ScreenQueue.clear();
+        ManagedIndex.invalidate();
+        ScreenSync.reset();
     }
 
     public static void onServerTickEnd(MinecraftServer server) {
+        ScreenSync.tick();
         ScreenQueue.flush(server);
+        DreamTvsAddon.endOfTick();
     }
 
     public static void onServerStopped() {
         ScreenQueue.clear();
+        ManagedIndex.invalidate();
+        ScreenSync.reset();
+    }
+
+    /** A chunk finished loading: re-check managed screens that reach into it (orphans, offline edits). */
+    public static void onChunkLoaded(ServerLevel level, ChunkPos chunk) {
+        ScreenSync.onChunkLoaded(level, chunk);
     }
 
     // --- block changes ---------------------------------------------------------------------------------------

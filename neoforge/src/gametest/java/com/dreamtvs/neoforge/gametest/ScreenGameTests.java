@@ -1,5 +1,8 @@
 package com.dreamtvs.neoforge.gametest;
 
+import com.dreamdisplays.api.CommandResult;
+import com.dreamdisplays.api.server.ServerDisplay;
+import com.dreamdisplays.platform.server.managers.DisplayManager;
 import com.dreamtvs.DreamTvs;
 import com.dreamtvs.block.TvBlock;
 import com.dreamtvs.config.DreamTvsConfig;
@@ -15,6 +18,7 @@ import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -278,6 +282,106 @@ public final class ScreenGameTests {
                 })
                 .thenWaitUntil(() -> onlyScreen(h, 1, 1, 2, 1))
                 .thenExecute(() -> config.maxScreensPerPlayer = before)
+                .thenSucceed();
+    }
+
+    // --- M3: keeping in sync with Dream Displays -------------------------------------------------------------
+
+    /** {@code /display delete} (any non-Dream-TVs delete): the TVs go dark and don't re-form by themselves. */
+    @GameTest(template = EMPTY, timeoutTicks = TIMEOUT)
+    public static void displayDeleteUnformsWithoutRecreating(GameTestHelper h) {
+        requireReady(h);
+        wall(h, 1, 1, 2, 2);
+        h.startSequence()
+                .thenWaitUntil(() -> onlyScreen(h, 1, 1, 2, 2))
+                .thenExecute(() -> h.assertTrue(onlyScreen(h, 1, 1, 2, 2).display().delete() == CommandResult.OK,
+                        "Dream Displays refused the delete"))
+                .thenIdle(3)
+                .thenExecute(() -> {
+                    h.assertTrue(screens(h).isEmpty(), "a deleted screen must not be re-created on its own");
+                    for (int x = 1; x <= 2; x++) for (int y = 1; y <= 2; y++) assertFormed(h, x, y, false);
+                })
+                // The next change to the wall forms it again.
+                .thenExecute(() -> wall(h, 1, 3, 2, 1))
+                .thenWaitUntil(() -> {
+                    onlyScreen(h, 1, 1, 2, 3);
+                    assertFormed(h, 1, 1, true);
+                })
+                .thenSucceed();
+    }
+
+    /** DD deletes screens without base-material blocks 2s after a player joins; ours must survive that. */
+    @GameTest(template = EMPTY, timeoutTicks = TIMEOUT)
+    public static void joinValidationKeepsTvScreens(GameTestHelper h) {
+        requireReady(h);
+        AtomicReference<UUID> id = new AtomicReference<>();
+        wall(h, 1, 1, 2, 1);
+        h.startSequence()
+                .thenWaitUntil(() -> id.set(onlyScreen(h, 1, 1, 2, 1).id()))
+                .thenExecute(() -> {
+                    List<UUID> removed = DisplayManager.INSTANCE.validateDisplaysAndCleanup(h.getLevel().getServer());
+                    h.assertFalse(removed.contains(id.get()), "Dream Displays' join cleanup removed a TV screen");
+                })
+                .thenIdle(2)
+                .thenExecute(() -> h.assertTrue(onlyScreen(h, 1, 1, 2, 1).id().equals(id.get()), "screen replaced"))
+                .thenSucceed();
+    }
+
+    /** A managed screen with no TVs left (world edited offline) is removed when its chunk is checked. */
+    @GameTest(template = EMPTY, timeoutTicks = TIMEOUT)
+    public static void orphanIsCleanedUp(GameTestHelper h) {
+        requireReady(h);
+        BlockPos a = h.absolutePos(at(1, 1));
+        BlockPos b = h.absolutePos(at(2, 2));
+        ScreenPlane plane = ScreenPlane.of(a, Direction.NORTH);
+        ServerDisplay orphan = DreamDisplaysBridge.create(ScreenPermissions.SERVER_OWNER, h.getLevel(), plane, plane.rect(a, b));
+        h.assertTrue(orphan != null, "couldn't create the orphan screen");
+        h.startSequence()
+                .thenExecute(() -> {
+                    h.assertTrue(screens(h).size() == 1, "orphan not indexed");
+                    Screens.onChunkLoaded(h.getLevel(), new ChunkPos(a));
+                })
+                .thenWaitUntil(() -> {
+                    h.assertTrue(screens(h).isEmpty(), "orphan screen still there");
+                    h.assertFalse(orphan.isAlive(), "orphan still alive in Dream Displays");
+                })
+                .thenSucceed();
+    }
+
+    /**
+     * Another mod moves our screen (what dreamdisplays-sable does when TVs go onto a sub-level): we follow it
+     * instead of deleting it, and it keeps its id once the blocks arrive.
+     */
+    @GameTest(template = EMPTY, timeoutTicks = TIMEOUT)
+    public static void externalMoveIsFollowed(GameTestHelper h) {
+        requireReady(h);
+        AtomicReference<UUID> id = new AtomicReference<>();
+        wall(h, 1, 1, 2, 1);
+        h.startSequence()
+                .thenWaitUntil(() -> id.set(onlyScreen(h, 1, 1, 2, 1).id()))
+                .thenExecute(() -> {
+                    // Like Sable: move the display first, then the blocks.
+                    BlockPos a = h.absolutePos(at(4, 3));
+                    BlockPos b = h.absolutePos(at(5, 3));
+                    BlockPos min = BlockPos.min(a, b);
+                    BlockPos max = BlockPos.max(a, b);
+                    Managed m = onlyScreen(h, 1, 1, 2, 1);
+                    Direction facing = m.bounds().facing();
+                    h.assertTrue(m.display().moveTo(min.getX(), min.getY(), min.getZ(), max.getX(), max.getY(), max.getZ(),
+                            DreamDisplaysBridge.toFacing(facing)) == CommandResult.OK, "external moveTo refused");
+                    BlockState state = h.getBlockState(at(1, 1));
+                    h.setBlock(at(1, 1), Blocks.AIR.defaultBlockState());
+                    h.setBlock(at(2, 1), Blocks.AIR.defaultBlockState());
+                    h.setBlock(at(4, 3), state);
+                    h.setBlock(at(5, 3), state);
+                })
+                .thenIdle(3)
+                .thenExecute(() -> {
+                    Managed m = onlyScreen(h, 4, 3, 2, 1);
+                    h.assertTrue(m.id().equals(id.get()), "the moved screen was replaced");
+                    assertFormed(h, 4, 3, true);
+                    assertFormed(h, 5, 3, true);
+                })
                 .thenSucceed();
     }
 }

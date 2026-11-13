@@ -1,0 +1,12 @@
+{
+  "required": false,
+  "minVersion": "0.8",
+  "package": "com.dreamtvs.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "DisplayManagerMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 0
+  }
+}

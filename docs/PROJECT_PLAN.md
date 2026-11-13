@@ -47,6 +47,7 @@
 | **Addon data** | `ServerDisplay.customData` (`MutableDisplayCustomData`) is saved with the display and synced to clients. | Tag our displays: `dreamtvs:managed`, plus corners and facing (`ServerDisplay` does **not** expose facing or min/max corners). |
 | **Events / vetoes** | `events.on<ServerDisplayEvent.Created/Removed/Moved/...>`, `vetoes.on<DisplayVeto.Create/Delete/SetUrl>`. | Detect `/display delete` on our screens. Optionally veto `/display` resizing of TV-managed displays. |
 | **World key** | Vanilla displays use `worldKey` = dimension id (e.g. `minecraft:overworld`). | Pass `level.dimension().location().toString()`. |
+| **Join-time cleanup** ⚠️ | `VanillaPlayerListener.onJoin` runs `DisplayManager.validateDisplaysAndCleanup` 40 ticks after **every** player join. It deletes any display with no base-material block in its box, even ones created through the API. | TV screens would be wiped on the next join. A mixin guards against it, see [M3 notes](#m3-notes-2026-11-12). |
 | **Block protection** ⚠️ | `VanillaProtectionListener.handleBreak` **cancels every block break inside a display's box** (plus explosions and pistons via mixins). | **Biggest risk.** Without handling, players can't break a formed TV. See [§5.4](#54-breaking-blocks-vs-dd-protection). |
 | **Limits** | DD config defaults: `min 1×1`, `max 32×24`, `max_displays_per_player`. The API `create()` doesn't enforce the per-player limit. | Clamp to our own config (default 32×24) and enforce our own per-player cap. |
 | **Interaction** | The DD client raycasts to displays to open its menu or focus a display (`MinecraftDisplayInteractionService`). | Our block shouldn't consume clicks on the front face (`InteractionResult.PASS`). Needs a check in the spike. |
@@ -231,6 +232,7 @@ How it's enforced:
 - [ ] **Spike B:** confirm the break-protection behavior and prototype fallback 2 on both loaders.
 - [ ] **Spike C:** check that `customData` round-trips across a server restart.
 - [ ] Open an upstream issue or PR for a protection opt-out (and for publishing `dreamdisplays-api` to Maven).
+      *Drafts are in [UPSTREAM.md](UPSTREAM.md), not filed yet.*
 
 #### Spikes, folded into the minimal TV block (2026-11-12)
 We dropped the temporary `/dreamtvs spike` commands. A minimal TV block (one TV = one 1×1 screen) checks the
@@ -278,11 +280,69 @@ and test it in a singleplayer world:
   `neoforge/src/gametest` source set and aren't shipped. Fabric builds from the same code but has no GameTests yet.
 
 ### M3: Robustness
-- [ ] Break handling, final version (upstream API or fallback).
-- [ ] `/display delete` sync, orphan cleanup, managed-display index rebuilt on start.
-- [ ] Optional veto of `/display` resizes on managed screens.
-- [ ] Multiplayer test pass: two players building one wall, chunk borders, server restart mid-build.
-- [ ] Test TV screen on sable sub level support when using https://github.com/apehum/dreamdisplays-sable ensure support for dreamdisplays-sable.
+- [x] Break handling, final version: fallback 2 on both loaders. The upstream request is drafted in
+      [UPSTREAM.md](UPSTREAM.md).
+- [x] `/display delete` sync, orphan cleanup, managed-display index rebuilt on start.
+- [x] ~~Optional veto of `/display` resizes~~: DD 1.10.9 has no resize command and no move veto. Instead we
+      **follow** moves made by other mods (needed for dreamdisplays-sable).
+- [x] Keep TV screens through DD's join-time base-material cleanup (found during M3).
+- [ ] Multiplayer test pass: two players building one wall, chunk borders, server restart mid-build. *(Manual,
+      checklist below.)*
+- [ ] Test TV screens on Sable sub-levels with [dreamdisplays-sable](https://github.com/apehum/dreamdisplays-sable).
+      *Code support is in (we follow its `moveTo`). It still needs a manual test with Sable installed (NeoForge only).*
+
+#### M3 notes (2026-11-12)
+- **Break handling is final.** On Fabric our `PlayerBlockBreakEvents.BEFORE` listener sits in a phase that's
+  explicitly ordered before `Event.DEFAULT_PHASE`, where DD's `FabricProtectionListener` registers. So the order is
+  fixed and needs no mixin. On NeoForge we listen at `HIGHEST`. A protection opt-out in the DD API would still be
+  nicer ([UPSTREAM.md](UPSTREAM.md) §2).
+- **DD's join-time cleanup would delete every TV screen.** 40 ticks after any player joins, DD removes displays
+  that have no black concrete in their box. `DisplayManagerMixin` (`dreamtvs.mixins.json`, both loaders) redirects
+  the `List.add` in `DisplayManager.validateDisplaysAndCleanup`, so managed displays are never queued for removal.
+  It's `require = 0`: if a DD update changes that method, the mixin just doesn't apply, and the "silent removal"
+  path below gives the standing TVs a fresh screen (without the link). The upstream ask is in [UPSTREAM.md](UPSTREAM.md) §1.
+  *This also means the M0 "Spike C" check (reload, then break) would have passed even if the cleanup had already
+  deleted the screen.*
+- **Index:** `dd/ManagedIndex` maps id → world + stored bounds, plus world → chunk → ids. It's rebuilt from
+  `customData` the first time it's needed after a server start or addon enable. After that it's kept up to date
+  by the bridge (our changes) and DD events (everyone else's). Block hooks and chunk loads no longer walk every
+  DD display.
+- **Our changes vs. everyone else's:** the bridge wraps its own create/move/delete/tag calls in a "self" flag.
+  Events outside it are handled in `DreamTvsAddon` → `screen/ScreenSync`:
+  - *Deleted on purpose* (a `DisplayVeto.Delete` was asked first: `/display delete`, the DD menu, an addon's
+    `delete()`): the TVs go dark (`FORMED=false`) and stay that way until the wall changes again.
+  - *Removed silently* (no delete request): the wall is reconciled, so a whole rectangle gets a new screen.
+  - *Moved by another mod*: we read the display's new box and facing from DD internals (`dd/DdInternals`,
+    guarded), re-tag it, and re-check both places. If the new box can't be read, or the screen now faces up or
+    down, we stop managing it.
+- **Orphans:** after each server start, every managed screen is re-checked once DD is ready. It's checked again
+  whenever one of its chunks loads (Fabric `ServerChunkEvents.CHUNK_LOAD`, NeoForge `ChunkEvent.Load`). A re-check
+  is a normal reconcile of the screen's box, so a screen with no TVs left is deleted and a partly broken one
+  shrinks. Walls that reach into unloaded chunks are still skipped until the rest loads.
+- **Sable:** before the blocks move, dreamdisplays-sable calls `moveTo(world, …)` on every display inside the
+  blocks it moves into a sub-level. We follow that move, so the screen keeps its id and link, and the reconcile
+  of the new place finds the TVs and the display together. Removing a sub-level deletes the display through
+  `delete()`, which counts as *deleted on purpose*.
+- **Tests:** 4 new GameTests (12 in total, all pass): a `/display`-style delete unforms without re-creating,
+  the join cleanup keeps TV screens, orphans are cleaned up on a chunk check, and an outside move is followed.
+  Fabric builds from the same code, but no tests cover its runtime yet.
+
+#### M3 manual checklist
+Run on a dedicated server (`.\gradlew.bat :neoforge:runServer` or `:fabric:runServer`) with two clients:
+1. **Join cleanup:** build a screen, set a link, then have the second player join. 2 seconds later the screen and
+   link must still be there (check both loaders).
+2. **`/display delete`:** run it on a TV screen. The TVs show "no signal" and stay that way. Place one more TV on
+   the wall, and the screen forms again with no link.
+3. **Two builders:** player A starts a wall and player B adds to it. B is refused with "This screen belongs to A"
+   (`extendPolicy=OWNER`). Switch to `ANYONE`, restart, and B can grow it.
+4. **Chunk borders:** build a wall across a chunk border (x or z a multiple of 16). Fly away until it unloads,
+   come back, and the screen and link are unchanged.
+5. **Restart mid-build:** leave a row half-built and restart the server. The screen keeps its old size, and
+   finishing the row grows it.
+6. **Offline edit:** stop the server, remove a screen's TVs with an external world editor, then start again. The
+   orphaned screen is gone (`/display list`).
+7. **Sable (NeoForge):** put a TV screen on a contraption, assemble it and fly it around. The video should follow
+   the screen, keep playing, and survive disassembly. Breaking a TV on the moving sub-level should shrink the screen.
 
 ### M4: Polish
 - [ ] Connected-bezel visuals, "no signal" animation, form and unform sounds and messages.
@@ -322,7 +382,9 @@ and test it in a singleplayer world:
 | R2 | Addon API is experimental until DD 1.11.0 | Pin a DD version range. Keep every API call in `DreamDisplaysBridge`. Track DD releases. |
 | R3 | No public Maven for `dreamdisplays-api`, plus renamed bundled Kotlin | Java-only usage, compile against the released jar. Ask upstream to publish. |
 | R4 | Render z-fighting or offset on our block model | Spike A. Recessed or transparent front face. |
-| R5 | Fabric event ordering vs DD's break hook | Mixin-based hook if `BEFORE` ordering isn't reliable. |
+| R5 | Fabric event ordering vs DD's break hook | Resolved: our phase is ordered before DD's default phase. |
+| R6 | DD's join-time cleanup deletes displays without base material | `DisplayManagerMixin` (internal, `require = 0`) plus the silent-removal fallback. Upstream ask in [UPSTREAM.md](UPSTREAM.md). |
+| R7 | We read DD internals (`VanillaDisplayData`) to follow outside moves | All in `DdInternals`, guarded. If it breaks, moved screens are unmanaged instead of deleted. |
 
 ### Decisions (2026-11-12)
 - **Name:** "Dream TVs" / `dreamtvs`. The "Dream" prefix is OK.

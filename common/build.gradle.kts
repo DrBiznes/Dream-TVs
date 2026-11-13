@@ -8,8 +8,15 @@ neoForge {
     neoFormVersion = providers.gradleProperty("neo_form_version").get()
 }
 
+repositories {
+    maven("https://maven.fabricmc.net/") { content { includeGroup("net.fabricmc") } }
+}
+
 dependencies {
-    // Only the Dream Displays API classes are used; the NeoForge jar carries them unrelocated.
+    // Mixin annotations for com.dreamtvs.mixin (both loaders ship Mixin at runtime).
+    compileOnly("net.fabricmc:sponge-mixin:0.15.2+mixin.0.8.7") { isTransitive = false }
+    // The Dream Displays API classes, plus the few internals in DdInternals / DisplayManagerMixin;
+    // the NeoForge jar carries them unrelocated.
     compileOnly("maven.modrinth:dreamdisplays:${providers.gradleProperty("dreamdisplays_neoforge_id").get()}") {
         isTransitive = false
     }
