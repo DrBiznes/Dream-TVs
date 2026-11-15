@@ -33,9 +33,9 @@ public final class DreamDisplaysMenu {
 
     public static boolean open(BlockPos pos) {
         try {
-            UUID id = findDisplay(pos);
-            if (id == null) return false;
-            DisplayScreen screen = screens().get(id);
+            Display display = displayAt(pos);
+            if (display == null) return false;
+            DisplayScreen screen = screens().get(display.getId().getUuid());
             if (screen == null) return false;
             DisplayMenu.Companion.open(screen);
             return true;
@@ -48,11 +48,11 @@ public final class DreamDisplaysMenu {
     }
 
     /** The managed display whose stored bounds contain {@code pos}, via the public client API. */
-    private static UUID findDisplay(BlockPos pos) {
+    static Display displayAt(BlockPos pos) {
         if (!DreamDisplays.isAvailable()) return null;
         for (Display display : DreamDisplays.getDisplays()) {
             ManagedTag.Bounds bounds = ManagedTag.read(display.getCustomData().get(ManagedTag.KEY));
-            if (bounds != null && bounds.contains(pos)) return display.getId().getUuid();
+            if (bounds != null && bounds.contains(pos)) return display;
         }
         return null;
     }

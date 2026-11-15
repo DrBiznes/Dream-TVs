@@ -1,6 +1,7 @@
 package com.dreamtvs.block;
 
 import com.dreamtvs.McCompat;
+import com.dreamtvs.item.RemoteItem;
 import com.dreamtvs.screen.ScreenKind;
 import com.dreamtvs.screen.Screens;
 import net.minecraft.core.BlockPos;
@@ -129,19 +130,24 @@ public abstract class ScreenBlock extends HorizontalDirectionalBlock {
         return a.getBlock() instanceof ScreenBlock && a.getBlock() == b.getBlock() && a.getValue(FACING) == b.getValue(FACING);
     }
 
-    /** Holding a block: skip our click so it gets placed (e.g. stacking TVs). Anything else: fall through to the menu. */
+    /**
+     * Holding a block: skip our click so it gets placed (e.g. stacking TVs). Holding a remote: let the remote
+     * handle it (bind, or open its own TV's menu). Anything else: fall through to the menu.
+     */
     //? if >=1.21.2 {
     /*@Override
     protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos,
                                           Player player, InteractionHand hand, BlockHitResult hit) {
-        if (stack.getItem() instanceof BlockItem) return InteractionResult.PASS;
+        if (stack.getItem() instanceof BlockItem || stack.getItem() instanceof RemoteItem) return InteractionResult.PASS;
         return InteractionResult.TRY_WITH_EMPTY_HAND;
     }
     *///?} else {
     @Override
     protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos,
                                               Player player, InteractionHand hand, BlockHitResult hit) {
-        if (stack.getItem() instanceof BlockItem) return ItemInteractionResult.SKIP_DEFAULT_BLOCK_INTERACTION;
+        if (stack.getItem() instanceof BlockItem || stack.getItem() instanceof RemoteItem) {
+            return ItemInteractionResult.SKIP_DEFAULT_BLOCK_INTERACTION;
+        }
         return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
     }
     //?}

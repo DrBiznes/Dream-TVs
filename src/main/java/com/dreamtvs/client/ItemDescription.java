@@ -1,6 +1,8 @@
 package com.dreamtvs.client;
 
 import com.dreamtvs.DreamTvs;
+import com.dreamtvs.McCompat;
+import com.dreamtvs.item.RemoteItem;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -61,7 +63,28 @@ public record ItemDescription(List<Component> lines, List<Component> linesOnShif
             CACHE.clear();
         }
         ItemDescription description = CACHE.computeIfAbsent(item, i -> create(i.getDescriptionId() + ".tooltip"));
-        if (description != null) tooltip.addAll(1, description.currentLines());
+        if (description == null) return;
+        List<Component> lines = description.currentLines();
+        tooltip.addAll(1, lines);
+        // What this one stack is set to goes at the end of the summary, so it's hidden until Shift is held.
+        if (lines == description.linesOnShift && item instanceof RemoteItem) {
+            tooltip.add(1 + lines.size(), CommonComponents.EMPTY);
+            tooltip.add(2 + lines.size(), remoteBinding(stack));
+        }
+    }
+
+    /** "Bound to the TV at 12, 64, -30", with the dimension when it isn't the one the player is in. */
+    private static Component remoteBinding(ItemStack stack) {
+        RemoteItem.Binding binding = RemoteItem.binding(stack);
+        if (binding == null) return Component.translatable("item.dreamtvs.remote.tooltip.unbound").withStyle(PRIMARY);
+        Component where = Component.literal(binding.pos().getX() + ", " + binding.pos().getY() + ", " + binding.pos().getZ())
+                .withStyle(HIGHLIGHT);
+        var level = Minecraft.getInstance().level;
+        if (level != null && binding.dimension().equals(McCompat.dimensionId(level))) {
+            return Component.translatable("item.dreamtvs.remote.tooltip.bound", where).withStyle(PRIMARY);
+        }
+        return Component.translatable("item.dreamtvs.remote.tooltip.bound_in", where,
+                Component.literal(binding.dimension()).withStyle(HIGHLIGHT)).withStyle(PRIMARY);
     }
 
     private List<Component> currentLines() {

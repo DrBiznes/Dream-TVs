@@ -47,7 +47,7 @@ import java.util.Collection;
 *///?} else
 @GameTestHolder(DreamTvs.MOD_ID)
 public final class TvGameTests {
-    static final List<Class<?>> CLASSES = List.of(ScreenGameTests.class, CompatRecipeGameTests.class);
+    static final List<Class<?>> CLASSES = List.of(ScreenGameTests.class, CompatRecipeGameTests.class, RemoteGameTests.class);
     private static final String DEFAULT_BATCH = "default";
 
     /** One {@link TvTest} method. */

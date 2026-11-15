@@ -80,6 +80,12 @@ tasks.test {
     systemProperty("dreamtvs.root", rootProject.projectDir.absolutePath)
 }
 
+// The built-in resource packs (resourcepacks/ in the jar) say which resource format they're for. Formats up to
+// 64 are a single "pack_format"; later ones are a "min_format" and "max_format".
+val packFormats: String = prop("mod.resource_format").toInt().let {
+    if (it > 64) "\"min_format\": $it, \"max_format\": $it" else "\"pack_format\": $it"
+}
+
 tasks.processResources {
     val props = mapOf(
         "mod_id" to prop("mod.id"),
@@ -91,10 +97,12 @@ tasks.processResources {
         "java_version" to javaVersion.toString(),
         "fabric_loader_version" to prop("deps.fabric_loader"),
         "dreamdisplays_version" to prop("deps.dreamdisplays"),
+        "pack_formats" to packFormats,
     )
     inputs.properties(props)
     filesMatching("fabric.mod.json") { expand(props) }
     filesMatching("dreamtvs.mixins.json") { expand(props) }
+    filesMatching("resourcepacks/*/pack.mcmeta") { expand(props) }
     exclude("META-INF/neoforge.mods.toml")
 }
 

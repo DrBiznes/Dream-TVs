@@ -1,0 +1,92 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "create"
+    },
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "immersiveengineering"
+    },
+    {
+      "type": "dreamtvs:recipe_source",
+      "source": "immersiveengineering",
+      "method": "sequenced_assembly"
+    }
+  ],
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "create",
+        "immersiveengineering"
+      ]
+    },
+    {
+      "condition": "dreamtvs:recipe_source",
+      "source": "immersiveengineering",
+      "method": "sequenced_assembly"
+    }
+  ],
+  "type": "create:sequenced_assembly",
+  "ingredient": "immersiveengineering:plate_steel",
+  "loops": 1,
+  "results": [
+    {
+      "id": "dreamtvs:remote"
+    }
+  ],
+  "sequence": [
+    {
+      "type": "create:deploying",
+      "ingredients": [
+        "dreamtvs:incomplete_remote",
+        "immersiveengineering:wire_copper"
+      ],
+      "results": [
+        {
+          "id": "dreamtvs:incomplete_remote"
+        }
+      ]
+    },
+    {
+      "type": "create:deploying",
+      "ingredients": [
+        "dreamtvs:incomplete_remote",
+        "immersiveengineering:component_electronic"
+      ],
+      "results": [
+        {
+          "id": "dreamtvs:incomplete_remote"
+        }
+      ]
+    },
+    {
+      "type": "create:deploying",
+      "ingredients": [
+        "dreamtvs:incomplete_remote",
+        "immersiveengineering:wire_copper"
+      ],
+      "results": [
+        {
+          "id": "dreamtvs:incomplete_remote"
+        }
+      ]
+    },
+    {
+      "type": "create:deploying",
+      "ingredients": [
+        "dreamtvs:incomplete_remote",
+        "immersiveengineering:light_bulb"
+      ],
+      "results": [
+        {
+          "id": "dreamtvs:incomplete_remote"
+        }
+      ]
+    }
+  ],
+  "transitional_item": {
+    "id": "dreamtvs:incomplete_remote"
+  }
+}

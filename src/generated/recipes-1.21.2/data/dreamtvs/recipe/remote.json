@@ -1,0 +1,32 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "dreamtvs:recipe_source",
+      "source": "vanilla",
+      "method": "crafting"
+    }
+  ],
+  "fabric:load_conditions": [
+    {
+      "condition": "dreamtvs:recipe_source",
+      "source": "vanilla",
+      "method": "crafting"
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "pattern": [
+    " L ",
+    "CRC",
+    " I "
+  ],
+  "key": {
+    "L": "minecraft:glowstone_dust",
+    "C": "minecraft:copper_ingot",
+    "R": "minecraft:redstone",
+    "I": "minecraft:iron_ingot"
+  },
+  "result": {
+    "id": "dreamtvs:remote"
+  }
+}

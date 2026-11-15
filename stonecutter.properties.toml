@@ -15,6 +15,8 @@ loomx.loom_version = "1.17.13"
 
 ["1.21.1"]
 mod.mc_releases = ["1.21.1"]
+# The game's resource pack format (version.json in the client jar), for the built-in resource packs.
+mod.resource_format = "34"
 deps.java = "21"
 
 [fabric."1.21.1"]
@@ -36,6 +38,7 @@ test.dreamdisplays_sable = "Euqyd176"
 
 ["1.21.11"]
 mod.mc_releases = ["1.21.11"]
+mod.resource_format = "75"
 deps.java = "21"
 
 [fabric."1.21.11"]
@@ -51,6 +54,7 @@ deps.dreamdisplays_id = "DWJ3y96l"
 
 ["26.3"]
 mod.mc_releases = ["26.3"]
+mod.resource_format = "97"
 deps.java = "25"
 
 [fabric."26.3"]

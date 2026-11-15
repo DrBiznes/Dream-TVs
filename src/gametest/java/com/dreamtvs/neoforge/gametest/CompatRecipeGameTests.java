@@ -16,12 +16,12 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 /**
- * Compat recipes (docs/COMPAT_RECIPES_PLAN.md): exactly one recipe per TV loads, from the selected source. The
+ * Compat recipes (docs/COMPAT_RECIPES_PLAN.md): exactly one recipe per TV (and the remote) loads, from the selected source. The
  * plain GameTest run has no tech mods, so that's vanilla with the original ids; with Create in
  * {@code run/neoforge-<version>-gametest/mods} it's Create's sequenced assemblies.
  */
 public final class CompatRecipeGameTests {
-    private static final List<String> TVS = List.of("lcd_panel", "jumbotron", "crt_tv", "flat_screen_2x1", "flat_screen_3x2");
+    private static final List<String> TVS = List.of("lcd_panel", "jumbotron", "crt_tv", "flat_screen_2x1", "flat_screen_3x2", "remote");
 
     @TvTest
     public static void oneRecipePerTvFromTheSelectedSource(GameTestHelper h) {
@@ -35,6 +35,9 @@ public final class CompatRecipeGameTests {
                 .map(tv -> selection.source().equals(CompatSource.VANILLA) ? DreamTvs.id(tv).toString()
                         : DreamTvs.id("compat/" + selection.source() + "/" + selection.method().id() + "/" + tv).toString())
                 .collect(Collectors.toCollection(TreeSet::new));
+        // The remote's copy and unbind recipes don't depend on the source.
+        expected.add(DreamTvs.id("remote_copy").toString());
+        expected.add(DreamTvs.id("remote_unbind").toString());
         Set<String> loaded = h.getLevel().getServer().getRecipeManager().getRecipes().stream()
                 .map(CompatRecipeGameTests::id)
                 .filter(id -> id.startsWith(DreamTvs.MOD_ID + ":"))

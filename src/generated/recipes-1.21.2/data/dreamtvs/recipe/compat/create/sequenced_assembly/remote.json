@@ -1,0 +1,87 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "create"
+    },
+    {
+      "type": "dreamtvs:recipe_source",
+      "source": "create",
+      "method": "sequenced_assembly"
+    }
+  ],
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "create"
+      ]
+    },
+    {
+      "condition": "dreamtvs:recipe_source",
+      "source": "create",
+      "method": "sequenced_assembly"
+    }
+  ],
+  "type": "create:sequenced_assembly",
+  "ingredient": "create:iron_sheet",
+  "loops": 1,
+  "results": [
+    {
+      "id": "dreamtvs:remote"
+    }
+  ],
+  "sequence": [
+    {
+      "type": "create:deploying",
+      "ingredients": [
+        "dreamtvs:incomplete_remote",
+        "create:copper_sheet"
+      ],
+      "results": [
+        {
+          "id": "dreamtvs:incomplete_remote"
+        }
+      ]
+    },
+    {
+      "type": "create:deploying",
+      "ingredients": [
+        "dreamtvs:incomplete_remote",
+        "create:electron_tube"
+      ],
+      "results": [
+        {
+          "id": "dreamtvs:incomplete_remote"
+        }
+      ]
+    },
+    {
+      "type": "create:deploying",
+      "ingredients": [
+        "dreamtvs:incomplete_remote",
+        "create:copper_sheet"
+      ],
+      "results": [
+        {
+          "id": "dreamtvs:incomplete_remote"
+        }
+      ]
+    },
+    {
+      "type": "create:deploying",
+      "ingredients": [
+        "dreamtvs:incomplete_remote",
+        "minecraft:glowstone_dust"
+      ],
+      "results": [
+        {
+          "id": "dreamtvs:incomplete_remote"
+        }
+      ]
+    }
+  ],
+  "transitional_item": {
+    "id": "dreamtvs:incomplete_remote"
+  }
+}

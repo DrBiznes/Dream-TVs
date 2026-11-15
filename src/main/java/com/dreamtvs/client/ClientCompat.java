@@ -2,8 +2,10 @@ package com.dreamtvs.client;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.CycleButton;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.InteractionHand;
 
 import java.util.function.Function;
 
@@ -43,6 +45,14 @@ public final class ClientCompat {
         return minecraft.getToasts();
     }
     //?}
+
+    /** The arm swing of a left-click, as the vanilla attack does it. */
+    public static void swingMainHand(LocalPlayer player) {
+        //? if >=26.1 {
+        /*player.swing(InteractionHand.MAIN_HAND, player.getMainHandItem().getAttackAnimation(), false);
+        *///?} else
+        player.swing(InteractionHand.MAIN_HAND);
+    }
 
     public static boolean hasShiftDown() {
         //? if >=1.21.9 {

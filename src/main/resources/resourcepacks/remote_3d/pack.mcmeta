@@ -1,0 +1,6 @@
+{
+  "pack": {
+    "description": "A 3D model for the TV Remote",
+    ${pack_formats}
+  }
+}

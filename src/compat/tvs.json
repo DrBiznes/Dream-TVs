@@ -1,6 +1,6 @@
 {
   "//": [
-    "One recipe template per TV, filled in with each source's materials (sources.json).",
+    "One recipe template per TV (and the remote), filled in with each source's materials (sources.json).",
     "A key or step names a role (frame, screen, circuit, wire, light, tube, housing) or a literal item id.",
     "",
     "crafting: a shaped crafting-table recipe. The vanilla source keeps the ids dreamtvs:<tv>.",
@@ -72,6 +72,19 @@
       "sequenced_assembly": {
         "input": "dreamtvs:flat_screen_2x1",
         "steps": ["deploy screen", "deploy screen", "deploy screen", "deploy circuit", "press"],
+        "count": 1
+      }
+    },
+    {
+      "id": "remote",
+      "crafting": {
+        "pattern": [" L ", "CRC", " I "],
+        "key": { "L": "light", "C": "wire", "R": "circuit", "I": "frame" },
+        "count": 1
+      },
+      "sequenced_assembly": {
+        "input": "frame",
+        "steps": ["deploy wire", "deploy circuit", "deploy wire", "deploy light"],
         "count": 1
       }
     }

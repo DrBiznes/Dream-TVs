@@ -40,6 +40,21 @@ A few rules:
 - LCD Panels and Jumbotrons never merge with each other.
 - Flat Screens are placed whole from one item, and breaking any part removes the whole TV.
 
+## The TV Remote
+
+A remote controls one TV from anywhere nearby.
+
+- **Right-click a TV** to bind the remote to it (or to the whole screen that TV is part of). A bound remote glints,
+  and holding **Shift** over it shows where its TV is. Sneak + right-click binds an already bound remote to
+  another TV.
+- **Right-click** anywhere to open the bound TV's Dream Displays menu.
+- **Left-click** to turn the TV off (pause it) or back on.
+- Put a bound remote **alone in a crafting grid** to get an unbound one. Put a **bound and an unbound remote**
+  in together to get two remotes for the same TV.
+
+The remote is a flat item by default. For a 3D model, turn on the **Dream TVs: 3D Remote** resource pack that
+comes with the mod (Options > Resource Packs).
+
 ## Recipes
 
 | TV | Recipe | Makes |
@@ -49,6 +64,7 @@ A few rules:
 | CRT TV | 3 gray concrete / glass pane, redstone, iron / 3 gray concrete | 1 |
 | Flat Screen (2x1) | 3 black glass panes / iron, redstone, iron | 1 |
 | Flat Screen (3x2) | 3 black glass panes / 3 black glass panes / iron, redstone, iron | 1 |
+| TV Remote | glowstone dust (middle) / copper, redstone, copper / iron (middle) | 1 |
 
 Each line between slashes is one row of the crafting grid. Recipes can be changed with a datapack.
 

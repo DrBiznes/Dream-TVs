@@ -1,0 +1,110 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "create"
+    },
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "thermal"
+    },
+    {
+      "type": "dreamtvs:recipe_source",
+      "source": "thermal",
+      "method": "sequenced_assembly"
+    }
+  ],
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "create",
+        "thermal"
+      ]
+    },
+    {
+      "condition": "dreamtvs:recipe_source",
+      "source": "thermal",
+      "method": "sequenced_assembly"
+    }
+  ],
+  "type": "create:sequenced_assembly",
+  "ingredient": {
+    "item": "thermal:steel_ingot"
+  },
+  "loops": 1,
+  "results": [
+    {
+      "id": "dreamtvs:remote"
+    }
+  ],
+  "sequence": [
+    {
+      "type": "create:deploying",
+      "ingredients": [
+        {
+          "item": "dreamtvs:incomplete_remote"
+        },
+        {
+          "item": "thermal:electrum_ingot"
+        }
+      ],
+      "results": [
+        {
+          "id": "dreamtvs:incomplete_remote"
+        }
+      ]
+    },
+    {
+      "type": "create:deploying",
+      "ingredients": [
+        {
+          "item": "dreamtvs:incomplete_remote"
+        },
+        {
+          "item": "thermal:rf_coil"
+        }
+      ],
+      "results": [
+        {
+          "id": "dreamtvs:incomplete_remote"
+        }
+      ]
+    },
+    {
+      "type": "create:deploying",
+      "ingredients": [
+        {
+          "item": "dreamtvs:incomplete_remote"
+        },
+        {
+          "item": "thermal:electrum_ingot"
+        }
+      ],
+      "results": [
+        {
+          "id": "dreamtvs:incomplete_remote"
+        }
+      ]
+    },
+    {
+      "type": "create:deploying",
+      "ingredients": [
+        {
+          "item": "dreamtvs:incomplete_remote"
+        },
+        {
+          "item": "minecraft:glowstone_dust"
+        }
+      ],
+      "results": [
+        {
+          "id": "dreamtvs:incomplete_remote"
+        }
+      ]
+    }
+  ],
+  "transitional_item": {
+    "id": "dreamtvs:incomplete_remote"
+  }
+}

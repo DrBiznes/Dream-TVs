@@ -1,0 +1,42 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "immersiveengineering"
+    },
+    {
+      "type": "dreamtvs:recipe_source",
+      "source": "immersiveengineering",
+      "method": "crafting"
+    }
+  ],
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "immersiveengineering"
+      ]
+    },
+    {
+      "condition": "dreamtvs:recipe_source",
+      "source": "immersiveengineering",
+      "method": "crafting"
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "pattern": [
+    " L ",
+    "CRC",
+    " I "
+  ],
+  "key": {
+    "L": "immersiveengineering:light_bulb",
+    "C": "immersiveengineering:wire_copper",
+    "R": "immersiveengineering:component_electronic",
+    "I": "immersiveengineering:plate_steel"
+  },
+  "result": {
+    "id": "dreamtvs:remote"
+  }
+}

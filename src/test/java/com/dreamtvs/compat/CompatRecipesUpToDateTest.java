@@ -67,7 +67,7 @@ class CompatRecipesUpToDateTest {
     void vanillaRecipesKeepTheirOriginalIds() throws IOException {
         Map<String, String> files = generate();
         for (CompatRecipeGenerator.Format format : CompatRecipeGenerator.Format.values()) {
-            for (String tv : List.of("lcd_panel", "jumbotron", "crt_tv", "flat_screen_2x1", "flat_screen_3x2")) {
+            for (String tv : List.of("lcd_panel", "jumbotron", "crt_tv", "flat_screen_2x1", "flat_screen_3x2", "remote")) {
                 assertTrue(files.containsKey(format.dir + "/data/dreamtvs/recipe/" + tv + ".json"), format + " " + tv);
             }
         }
@@ -84,7 +84,7 @@ class CompatRecipesUpToDateTest {
             if (assembly != null) assertTrue(assembly.mods().contains("create"), source.id());
         }
         assertEquals(Set.of("incomplete_lcd_panel", "incomplete_jumbotron", "incomplete_crt_tv",
-                        "incomplete_flat_screen_2x1", "incomplete_flat_screen_3x2"),
+                        "incomplete_flat_screen_2x1", "incomplete_flat_screen_3x2", "incomplete_remote"),
                 CompatIndex.transitionalItems(sources));
     }
 

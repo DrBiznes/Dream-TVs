@@ -10,6 +10,8 @@ import com.dreamtvs.block.JumbotronBlock;
 import com.dreamtvs.block.LcdPanelBlock;
 import com.dreamtvs.compat.CompatIndex;
 import com.dreamtvs.compat.CompatRecipes;
+import com.dreamtvs.item.RemoteItem;
+import com.dreamtvs.item.RemoteRecipe;
 import com.dreamtvs.screen.Screens;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
@@ -17,6 +19,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import com.mojang.serialization.MapCodec;
@@ -56,8 +59,13 @@ public final class DreamTvsNeoForge {
     private static final DeferredRegister<MapCodec<? extends ICondition>> CONDITIONS =
             DeferredRegister.create(NeoForgeRegistries.Keys.CONDITION_CODECS, DreamTvs.MOD_ID);
 
+    private static final DeferredRegister<RecipeSerializer<?>> RECIPE_SERIALIZERS =
+            DeferredRegister.create(Registries.RECIPE_SERIALIZER, DreamTvs.MOD_ID);
+
     static {
         CONDITIONS.register("recipe_source", () -> RecipeSourceCondition.CODEC);
+        RECIPE_SERIALIZERS.register("remote_copy", () -> RemoteRecipe.COPY_SERIALIZER);
+        RECIPE_SERIALIZERS.register("remote_unbind", () -> RemoteRecipe.UNBIND_SERIALIZER);
     }
 
     public static final DeferredBlock<LcdPanelBlock> LCD_PANEL = block("lcd_panel", LcdPanelBlock::new, LcdPanelBlock::defaultProperties);
@@ -70,6 +78,12 @@ public final class DreamTvsNeoForge {
     public static final DeferredItem<BlockItem> FLAT_SCREEN_2X1_ITEM = ITEMS.registerSimpleBlockItem(FLAT_SCREEN_2X1);
     public static final DeferredBlock<FlatScreen3x2Block> FLAT_SCREEN_3X2 = block("flat_screen_3x2", FlatScreen3x2Block::new, FlatScreenBlock::defaultProperties);
     public static final DeferredItem<BlockItem> FLAT_SCREEN_3X2_ITEM = ITEMS.registerSimpleBlockItem(FLAT_SCREEN_3X2);
+
+    public static final DeferredItem<RemoteItem> REMOTE =
+            //? if >=1.21.2 {
+            /*ITEMS.registerItem("remote", RemoteItem::new, () -> new Item.Properties().stacksTo(1));
+            *///?} else
+            ITEMS.registerItem("remote", RemoteItem::new, new Item.Properties().stacksTo(1));
 
     /** NeoForge 21.2+ takes the properties as a supplier, so it can set the block's id on them first. */
     private static <B extends Block> DeferredBlock<B> block(String name, Function<BlockBehaviour.Properties, B> factory,
@@ -90,6 +104,7 @@ public final class DreamTvsNeoForge {
                 output.accept(CRT_TV_ITEM);
                 output.accept(FLAT_SCREEN_2X1_ITEM);
                 output.accept(FLAT_SCREEN_3X2_ITEM);
+                output.accept(REMOTE);
             })
             .build());
 
@@ -116,6 +131,7 @@ public final class DreamTvsNeoForge {
         ITEMS.register(modBus);
         TABS.register(modBus);
         CONDITIONS.register(modBus);
+        RECIPE_SERIALIZERS.register(modBus);
 
         NeoForge.EVENT_BUS.addListener((ServerStartingEvent event) -> Screens.onServerStarting(event.getServer()));
         NeoForge.EVENT_BUS.addListener((ServerStoppedEvent event) -> Screens.onServerStopped());

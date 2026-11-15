@@ -10,6 +10,8 @@ import com.dreamtvs.block.JumbotronBlock;
 import com.dreamtvs.block.LcdPanelBlock;
 import com.dreamtvs.compat.CompatIndex;
 import com.dreamtvs.compat.CompatRecipes;
+import com.dreamtvs.item.RemoteItem;
+import com.dreamtvs.item.RemoteRecipe;
 import com.dreamtvs.screen.Screens;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.resource.conditions.v1.ResourceConditions;
@@ -67,6 +69,8 @@ public final class DreamTvsFabric implements ModInitializer {
         return Registry.register(BuiltInRegistries.ITEM, DreamTvs.id(path), factory.apply(properties));
     }
 
+    public static final Item REMOTE = item("remote", RemoteItem::new, new Item.Properties().stacksTo(1));
+
     private static Item blockItem(String path, Block block) {
         //? if >=1.21.2 {
         /^return item(path, properties -> new BlockItem(block, properties), new Item.Properties().useBlockDescriptionPrefix());
@@ -88,6 +92,7 @@ public final class DreamTvsFabric implements ModInitializer {
                         output.accept(CRT_TV_ITEM);
                         output.accept(FLAT_SCREEN_2X1_ITEM);
                         output.accept(FLAT_SCREEN_3X2_ITEM);
+                        output.accept(REMOTE);
                     })
                     .build());
 
@@ -95,6 +100,9 @@ public final class DreamTvsFabric implements ModInitializer {
     public void onInitialize() {
         FabricLoader loader = FabricLoader.getInstance();
         DreamTvs.init(loader.getConfigDir(), loader::isModLoaded);
+
+        Registry.register(BuiltInRegistries.RECIPE_SERIALIZER, DreamTvs.id("remote_copy"), RemoteRecipe.COPY_SERIALIZER);
+        Registry.register(BuiltInRegistries.RECIPE_SERIALIZER, DreamTvs.id("remote_unbind"), RemoteRecipe.UNBIND_SERIALIZER);
 
         // Compat recipes (docs/COMPAT_RECIPES_PLAN.md). The in-progress items only exist with Create installed,
         // since only Create's sequenced assembly uses them.

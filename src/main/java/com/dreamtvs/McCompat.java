@@ -1,6 +1,7 @@
 package com.dreamtvs;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
@@ -105,5 +106,28 @@ public final class McCompat {
         GameProfileCache cache = server.getProfileCache();
         return cache == null ? Optional.empty() : cache.get(id).map(GameProfile::getName);
         //?}
+    }
+
+    // NBT getters: since 1.21.5 the plain ones return Optionals.
+
+    public static CompoundTag nbtCompound(CompoundTag tag, String key) {
+        //? if >=1.21.5 {
+        /*return tag.getCompoundOrEmpty(key);
+        *///?} else
+        return tag.getCompound(key);
+    }
+
+    public static String nbtString(CompoundTag tag, String key) {
+        //? if >=1.21.5 {
+        /*return tag.getStringOr(key, "");
+        *///?} else
+        return tag.getString(key);
+    }
+
+    public static int nbtInt(CompoundTag tag, String key) {
+        //? if >=1.21.5 {
+        /*return tag.getIntOr(key, 0);
+        *///?} else
+        return tag.getInt(key);
     }
 }
