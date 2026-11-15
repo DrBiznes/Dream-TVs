@@ -13,7 +13,7 @@ import java.util.UUID;
 /**
  * The few things we need that Dream Displays' public API doesn't expose: where a display actually is (its box
  * and facing) after someone else moved it. These are DD internals, so every call is guarded and callers must
- * cope with {@code null}. Keep all such access in this class (plan R2).
+ * cope with {@code null}. Keep all such access in this class.
  */
 public final class DdInternals {
     private static boolean broken;

@@ -32,7 +32,7 @@ sourceSets.main {
     resources.srcDir(rootProject.file(if (sc.current.parsed >= "1.21.2") "src/generated/recipes-1.21.2" else "src/generated/recipes-1.21.1"))
 }
 
-// GameTests (plan §8) live in their own source set so they never ship in the mod jar.
+// GameTests live in their own source set so they never ship in the mod jar.
 val gametest: SourceSet = sourceSets.create("gametest")
 configurations[gametest.compileClasspathConfigurationName].extendsFrom(configurations.compileClasspath.get())
 configurations[gametest.runtimeClasspathConfigurationName].extendsFrom(configurations.runtimeClasspath.get())
@@ -40,7 +40,7 @@ configurations[gametest.runtimeClasspathConfigurationName].extendsFrom(configura
 dependencies {
     "gametestImplementation"(sourceSets.main.get().output)
     implementation("maven.modrinth:dreamdisplays:${prop("deps.dreamdisplays_id")}")
-    // Optional: when LuckPerms is installed we check its nodes, like Dream Displays does (plan §5.7).
+    // Optional: when LuckPerms is installed we check its nodes, like Dream Displays does.
     compileOnly("net.luckperms:api:${prop("deps.luckperms_api")}")
 
     testImplementation(platform("org.junit:junit-bom:5.11.4"))
@@ -68,11 +68,18 @@ neoForge {
             gameDirectory = rootProject.file("run/neoforge-$mc-client")
             programArguments.addAll("--username", "Dev")
         }
-        // A second player for multiplayer tests (plan M3 checklist). Not an op by default.
+        // A second player for multiplayer tests. Not an op by default.
         register("client2") {
             client()
             gameDirectory = rootProject.file("run/neoforge-$mc-client2")
             programArguments.addAll("--username", "Dev2")
+        }
+        // gradlew :1.21.1-neoforge:runVisualTest  (screenshots every kind of TV; see VisualTests)
+        register("visualTest") {
+            client()
+            gameDirectory = rootProject.file("run/neoforge-$mc-visualtest")
+            systemProperty("dreamtvs.visualTest", "true")
+            programArguments.addAll("--username", "Dev")
         }
         register("server") {
             server()
@@ -87,6 +94,12 @@ neoForge {
             sourceSet(gametest)
         }
     }
+}
+
+// A crash before the game is up must not leave the last run's screenshots and results looking current.
+tasks.matching { it.name == "runVisualTest" }.configureEach {
+    val runDir = rootProject.file("run/neoforge-$mc-visualtest")
+    doFirst { delete(runDir.resolve("screenshots"), runDir.resolve("visualtest-results.txt")) }
 }
 
 java {
@@ -138,6 +151,8 @@ tasks.named("createMinecraftArtifacts") {
 
 tasks.withType<Jar>().configureEach {
     from(rootProject.file("LICENSE")) { rename { "LICENSE_dreamtvs" } }
+    // The visual tests only run from the dev classes (runVisualTest).
+    exclude("com/dreamtvs/visualtest/**")
 }
 
 tasks.register<Copy>("buildAndCollect") {
@@ -147,7 +162,7 @@ tasks.register<Copy>("buildAndCollect") {
     into(rootProject.layout.buildDirectory.dir("libs/${prop("mod.version")}"))
 }
 
-// Optional mods for compatibility testing (plan M3: Sable sub-levels), 1.21.1 only. Never on the compile
+// Optional mods for compatibility testing (Sable sub-levels), 1.21.1 only. Never on the compile
 // classpath and not in the GameTest run. `installTestMods` copies them into the client, client2 and server
 // mods/ folders; `removeTestMods` takes them out again. Versions are Modrinth version IDs.
 val testModIds = listOf("sable", "create", "create-aeronautics", "kotlin-for-forge", "dreamdisplays-sable")

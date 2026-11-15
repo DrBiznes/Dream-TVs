@@ -81,7 +81,7 @@ public final class Screens {
 
     /**
      * May {@code player} put a TV of this kind facing {@code facing} at {@code pos}? Not if it would join or merge a
-     * screen they aren't allowed to change (plan §5.7); they get told whose screen it is. TVs that don't merge
+     * screen they aren't allowed to change; they get told whose screen it is. TVs that don't merge
      * never need this check.
      */
     public static boolean canPlace(ServerLevel level, BlockPos pos, Direction facing, ServerPlayer player) {
@@ -109,7 +109,7 @@ public final class Screens {
     }
 
     /**
-     * Runs before Dream Displays' break protection (plan §5.4). If the player may change this screen, it's
+     * Runs before Dream Displays' break protection. If the player may change this screen, it's
      * shrunk, split or removed right now as if the TV were already gone, so DD finds nothing to protect at
      * {@code pos} and the break goes through. If they may not, the screen stays and DD cancels the break.
      */

@@ -16,7 +16,7 @@ import org.jetbrains.annotations.Nullable;
 
 /^*
  * {@code "fabric:load_conditions": [{"condition": "dreamtvs:recipe_source", "source": "mekanism", "method":
- * "crafting"}]}: the recipe loads only when it's the active compat recipe (docs/COMPAT_RECIPES_PLAN.md §5).
+ * "crafting"}]}: the recipe loads only when it's the active compat recipe (docs/DEVELOPMENT.md).
  ^/
 public record RecipeSourceCondition(String source, String method) implements ResourceCondition {
     public static final MapCodec<RecipeSourceCondition> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(

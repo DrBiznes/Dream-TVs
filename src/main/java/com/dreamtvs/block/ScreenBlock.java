@@ -70,7 +70,7 @@ public abstract class ScreenBlock extends HorizontalDirectionalBlock {
         return state;
     }
 
-    /** Server side, placing is refused when the block would join a screen the player may not change (plan §5.7). */
+    /** Server side, placing is refused when the block would join a screen the player may not change. */
     @Override
     public @Nullable BlockState getStateForPlacement(BlockPlaceContext context) {
         BlockState state = defaultBlockState().setValue(FACING, context.getHorizontalDirection().getOpposite());

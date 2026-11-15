@@ -17,7 +17,7 @@ import java.util.Set;
 import java.util.UUID;
 
 /**
- * Server-side index of the displays Dream TVs manages (plan §5.3): id → world + stored bounds, plus a lookup by
+ * Server-side index of the displays Dream TVs manages: id → world + stored bounds, plus a lookup by
  * chunk so block hooks and chunk loads don't have to walk every Dream Displays screen and decode its
  * {@code customData}. Rebuilt from {@code customData} the first time it's used after a server start, then kept
  * current by {@link DreamDisplaysBridge} (our own changes) and {@link DreamTvsAddon} (everyone else's).

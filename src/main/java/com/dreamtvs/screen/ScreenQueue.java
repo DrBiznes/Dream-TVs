@@ -28,7 +28,7 @@ import java.util.Set;
 import java.util.UUID;
 
 /**
- * End-of-tick debounce (plan §5.3). TV changes only mark their wall dirty; once per server tick every dirty wall
+ * End-of-tick debounce. TV changes only mark their wall dirty; once per server tick every dirty wall
  * is reconciled once, so {@code /fill} and other bulk edits cost one pass per wall instead of one per block.
  * Server thread only.
  */

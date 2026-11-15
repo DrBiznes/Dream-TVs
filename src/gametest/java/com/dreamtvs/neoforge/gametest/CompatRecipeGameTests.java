@@ -16,7 +16,7 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 /**
- * Compat recipes (docs/COMPAT_RECIPES_PLAN.md): exactly one recipe per TV (and the remote) loads, from the selected source. The
+ * Compat recipes (docs/DEVELOPMENT.md): exactly one recipe per TV (and the remote) loads, from the selected source. The
  * plain GameTest run has no tech mods, so that's vanilla with the original ids; with Create in
  * {@code run/neoforge-<version>-gametest/mods} it's Create's sequenced assemblies.
  */

@@ -9,7 +9,7 @@ import java.util.UUID;
 import java.util.function.Predicate;
 
 /**
- * Decides what to do with the Dream Displays screens in one plane after TV blocks changed (plan §5.3).
+ * Decides what to do with the Dream Displays screens in one plane after TV blocks changed.
  * Pure: it only sees cells and rectangles, and the result is a list of actions for the caller to apply.
  *
  * <p>Rules:

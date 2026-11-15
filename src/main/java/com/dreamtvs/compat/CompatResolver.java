@@ -8,7 +8,7 @@ import java.util.Set;
 import java.util.function.Predicate;
 
 /**
- * Picks the one recipe source and method the TVs use (docs/COMPAT_RECIPES_PLAN.md §5). Pure: no Minecraft or
+ * Picks the one recipe source and method the TVs use (docs/DEVELOPMENT.md). Pure: no Minecraft or
  * loader classes, so it's unit-tested without a game.
  *
  * <ol>

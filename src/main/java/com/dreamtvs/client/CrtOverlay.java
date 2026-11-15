@@ -8,6 +8,13 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 //? if >=26.1 {
 /*import com.dreamdisplays.libs.kotlin.Unit;
 import com.dreamdisplays.libs.kotlin.jvm.functions.Function2;
+import com.dreamdisplays.platform.client.render.DisplaySolidPhase;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.client.renderer.SubmitNodeStorage;
+import java.lang.reflect.Field;
+import java.util.HashMap;
+import java.util.Map;
 *///?} else {
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -30,13 +37,14 @@ import java.util.function.Consumer;
  * phosphor glow, aperture grille, scanlines, darkened edges, glass glare and the curved edge of the tube, and
  * under it a soft bar of light that rolls slowly down the screen.
  *
- * <p>The overlay has to be drawn after DD has flushed its pictures, so each CRT only queues where it is while
- * DD draws it, and everything queued is drawn when DD's render pass ends. Uses DD's own screen transform (a DD
- * client internal, 1.10.9); if that ever fails the overlay switches itself off and CRTs show a plain picture.
+ * <p>Up to 1.21.x the overlay has to be drawn after DD has flushed its pictures, so each CRT only queues where
+ * it is while DD draws it, and everything queued is drawn through the game's buffer source when DD's render pass
+ * ends. Uses DD's own screen transform (a DD client internal, 1.10.9); if that ever fails the overlay switches
+ * itself off and CRTs show a plain picture.
  *
- * <p>Up to 1.21.x the overlay goes through the game's buffer source. 26.x has none, so there it goes through the
- * draw callback DD hands its own screen drawing ({@link #useDrawer}), which DD flushes in the order things were
- * drawn.
+ * <p>26.x has no buffer source, and the game draws what it is handed later in the frame. There the overlay is
+ * handed over straight after each CRT's picture ({@code PanelPicture.end}), in a way that puts it after the
+ * picture whichever way DD is drawing ({@link #draw}).
  */
 public final class CrtOverlay {
     private static final ResourceLocation TEXTURE = DreamTvs.id("textures/effect/crt_overlay.png");
@@ -54,6 +62,10 @@ public final class CrtOverlay {
     /*/^* DD's {@code (RenderType, (Pose, VertexConsumer) -> Unit) -> Unit} for the current render pass. ^/
     @SuppressWarnings("rawtypes")
     private static Function2 drawer;
+    private static final Map<ResourceLocation, RenderType> TYPES = new HashMap<>();
+    private static Field levelSubmits;
+    /^* The quads carry their own positions, so the pose the draw list stores with them isn't used. ^/
+    private static final PoseStack UNUSED_POSE = new PoseStack();
 
     /^* Called before DD draws each screen, with the draw callback DD uses for it. ^/
     @SuppressWarnings("rawtypes")
@@ -81,9 +93,11 @@ public final class CrtOverlay {
         }
     }
 
-    /** Called when DD's render pass is over: draws every queued overlay. */
+    /** Draws every queued overlay: when DD's render pass is over, or on 26.x after each CRT's picture. */
     public static void flush() {
         if (queued.isEmpty()) return;
+        // A copy: on 26.x the quads are emitted later in the frame, after the queue has been cleared.
+        List<Matrix4f> poses = List.copyOf(queued);
         try {
             // The rolling bar first, so the tube's edge in the main texture covers its ends.
             float travel = 1F + BAND_HEIGHT;
@@ -95,8 +109,8 @@ public final class CrtOverlay {
                 // v runs 0 at the bar's top to 1 at its bottom; clipped where the bar leaves the tube.
                 float v1 = (top - y1) / BAND_HEIGHT;
                 float v0 = (top - y0) / BAND_HEIGHT;
-                draw(ClientCompat.translucentEmissive(BAND), band -> {
-                    for (Matrix4f pose : queued) {
+                draw(type(BAND), band -> {
+                    for (Matrix4f pose : poses) {
                         vertex(band, pose, 0F, y0, 0F, v0);
                         vertex(band, pose, 1F, y0, 1F, v0);
                         vertex(band, pose, 1F, y1, 1F, v1);
@@ -105,8 +119,8 @@ public final class CrtOverlay {
                 });
             }
 
-            draw(ClientCompat.translucentEmissive(TEXTURE), out -> {
-                for (Matrix4f pose : queued) {
+            draw(type(TEXTURE), out -> {
+                for (Matrix4f pose : poses) {
                     vertex(out, pose, 0F, 0F, 0F, 1F);
                     vertex(out, pose, 1F, 0F, 1F, 1F);
                     vertex(out, pose, 1F, 1F, 1F, 0F);
@@ -121,16 +135,53 @@ public final class CrtOverlay {
         }
     }
 
-    /** Emits quads of {@code type} and draws them now. */
+    /**
+     * Translucent, full-bright, textured. On 26.x the type is also marked as one of DD's own (a DD client
+     * internal, 1.10.9), which keeps it out of the game's order-independent transparency pass: there the
+     * overlay came out as an even grey tint. DD's pictures are marked the same way.
+     */
+    private static RenderType type(ResourceLocation texture) {
+        //? if >=26.1 {
+        /*return TYPES.computeIfAbsent(texture, t -> DisplaySolidPhase.INSTANCE.mark(ClientCompat.translucentEmissive(t)));
+        *///?} else
+        return ClientCompat.translucentEmissive(texture);
+    }
+
+    //? if >=26.1 {
+    /*/^*
+     * The level's draw list. It has no getter, and DD's callback only reaches its default order; 26.x isn't
+     * obfuscated, so the field has this name on both loaders.
+     ^/
+    private static SubmitNodeStorage levelSubmits() throws ReflectiveOperationException {
+        if (levelSubmits == null) {
+            levelSubmits = LevelRenderer.class.getDeclaredField("submitNodeStorage");
+            levelSubmits.setAccessible(true);
+        }
+        return (SubmitNodeStorage) levelSubmits.get(Minecraft.getInstance().levelRenderer);
+    }
+    *///?}
+
+    /**
+     * Emits quads of {@code type} and draws them: now up to 1.21.x, later in the frame on 26.x.
+     *
+     * <p>On 26.x DD usually hands its pictures to the game's draw list, where draws of different render types
+     * come out in no fixed order, so the overlay could land under the picture. It goes into the list's next
+     * order instead, which the game draws after everything in the default one. When DD draws its pictures
+     * itself at the end of the frame (its {@code ScreenRenderer} callback), it keeps the order it was given.
+     */
     @SuppressWarnings("unchecked")
-    private static void draw(RenderType type, Consumer<VertexConsumer> quads) {
+    private static void draw(RenderType type, Consumer<VertexConsumer> quads) throws ReflectiveOperationException {
         //? if >=26.1 {
         /*if (drawer == null) return;
-        Function2<Object, VertexConsumer, Unit> emit = (pose, out) -> {
-            quads.accept(out);
-            return Unit.INSTANCE;
-        };
-        drawer.invoke(type, emit);
+        if (drawer.getClass().getName().contains("ScreenRenderer")) {
+            Function2<Object, VertexConsumer, Unit> emit = (pose, out) -> {
+                quads.accept(out);
+                return Unit.INSTANCE;
+            };
+            drawer.invoke(type, emit);
+        } else {
+            levelSubmits().order(1).submitCustomGeometry(UNUSED_POSE, type, (pose, out) -> quads.accept(out));
+        }
         *///?} else {
         MultiBufferSource.BufferSource buffers = Minecraft.getInstance().renderBuffers().bufferSource();
         quads.accept(buffers.getBuffer(type));

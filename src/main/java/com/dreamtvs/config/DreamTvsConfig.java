@@ -23,7 +23,7 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 /**
- * Server config, {@code config/dreamtvs.json} (plan §6), loaded when the server starts.
+ * Server config, {@code config/dreamtvs.json}, loaded when the server starts.
  *
  * <ul>
  *   <li>A missing file is written with the defaults and a comment for every option ({@code //} comments are
@@ -35,7 +35,7 @@ import java.util.regex.Pattern;
  * </ul>
  */
 public final class DreamTvsConfig {
-    /** Who may grow, shrink, break or merge a screen they don't own (plan §5.7). */
+    /** Who may grow, shrink, break or merge a screen they don't own. */
     public enum ExtendPolicy { OWNER, ANYONE }
 
     /** The largest {@link #maxWidth} and {@link #maxHeight} we accept. */
@@ -49,7 +49,7 @@ public final class DreamTvsConfig {
     public boolean showFormMessages = true;
     /**
      * {@code compat.recipeSource}: whose parts the TV recipes use, {@code "auto"}, {@code "vanilla"} or a source
-     * id (docs/COMPAT_RECIPES_PLAN.md §4). Only the format is checked here; {@code CompatResolver} checks the id.
+     * id (docs/DEVELOPMENT.md). Only the format is checked here; {@code CompatResolver} checks the id.
      */
     public String recipeSource = "auto";
     /** {@code compat.createSequencedAssembly}: with Create installed, make TVs in a sequenced assembly. */

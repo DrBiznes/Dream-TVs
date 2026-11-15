@@ -104,7 +104,7 @@ public final class DreamTvsFabric implements ModInitializer {
         Registry.register(BuiltInRegistries.RECIPE_SERIALIZER, DreamTvs.id("remote_copy"), RemoteRecipe.COPY_SERIALIZER);
         Registry.register(BuiltInRegistries.RECIPE_SERIALIZER, DreamTvs.id("remote_unbind"), RemoteRecipe.UNBIND_SERIALIZER);
 
-        // Compat recipes (docs/COMPAT_RECIPES_PLAN.md). The in-progress items only exist with Create installed,
+        // Compat recipes (docs/DEVELOPMENT.md). The in-progress items only exist with Create installed,
         // since only Create's sequenced assembly uses them.
         ResourceConditions.register(RecipeSourceCondition.TYPE);
         if (CompatRecipes.createLoaded()) {

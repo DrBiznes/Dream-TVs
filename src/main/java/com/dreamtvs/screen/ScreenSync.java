@@ -7,7 +7,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
 
 /**
- * Keeps TV walls and their screens in step when something other than a TV block changes (plan §5.5):
+ * Keeps TV walls and their screens in step when something other than a TV block changes:
  * <ul>
  *   <li><b>Deleted on purpose</b> ({@code /display delete}, the DD menu, another addon's {@code delete()}): the TVs
  *       go dark and stay unformed until the wall changes again.</li>

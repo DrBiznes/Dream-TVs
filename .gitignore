@@ -10,3 +10,7 @@ run/
 # All art work and art scripts live here and stay local (scripts/, textures/, models/).
 # Only the finished files under */src/main/resources/assets get committed.
 blockbench/
+
+# IDE build output
+bin/
+.eclipse/

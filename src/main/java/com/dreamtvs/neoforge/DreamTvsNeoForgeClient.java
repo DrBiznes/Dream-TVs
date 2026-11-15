@@ -7,6 +7,7 @@ import com.dreamtvs.client.DreamDisplaysMenu;
 import com.dreamtvs.client.DreamTvsConfigScreen;
 import com.dreamtvs.client.ItemDescription;
 import com.dreamtvs.client.RemoteClient;
+import com.dreamtvs.visualtest.VisualTests;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.packs.PackType;
@@ -45,6 +46,11 @@ public final class DreamTvsNeoForgeClient {
         modBus.addListener((AddPackFindersEvent event) -> event.addPackFinders(DreamTvs.id("resourcepacks/remote_3d"),
                 PackType.CLIENT_RESOURCES, Component.translatable("pack.dreamtvs.remote_3d"), PackSource.BUILT_IN,
                 false, Pack.Position.TOP));
+
+        // gradlew :<version>-neoforge:runVisualTest. The class isn't in the mod jar, and is only touched in that run.
+        if (Boolean.getBoolean(VisualTests.PROPERTY)) {
+            NeoForge.EVENT_BUS.addListener((ClientTickEvent.Post event) -> VisualTests.tick(Minecraft.getInstance()));
+        }
     }
 }
 //?}

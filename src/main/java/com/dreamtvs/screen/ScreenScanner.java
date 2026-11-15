@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Reads TV groups out of the world (plan §5.2): coplanar, same-facing TVs, 4-connected, with a capped flood
+ * Reads TV groups out of the world: coplanar, same-facing TVs, 4-connected, with a capped flood
  * fill so a huge wall stays cheap. Never loads chunks; touching an unloaded one marks the view incomplete, and
  * callers then leave that wall alone rather than act on half the picture.
  */

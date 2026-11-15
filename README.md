@@ -132,6 +132,11 @@ writes its jar to `versions/<minecraft>-<loader>/build/libs`. Gradle needs JDK 2
 
 - `gradlew :1.21.11-neoforge:runClient` (or `runServer`) starts a dev game for one version.
 - `gradlew test` runs the unit tests, and `gradlew :26.3-neoforge:runGameTestServer` runs the in-game tests.
+- `gradlew :26.3-fabric:runVisualTest` (any version and loader) runs the visual tests: the game opens, builds every
+  kind of TV at several sizes in a new flat world, and saves a screenshot of each to
+  `run/<loader>-<minecraft>-visualtest/screenshots`. Each should show Dream Displays' loading picture, black with a
+  blue bar at the bottom. The run fails if a screen doesn't form; `visualtest-results.txt` lists every case.
+- [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) explains how the mod works, the version setup and the tests.
 - Code that differs between versions sits in `//? if >=1.21.11 { ... //?}` comment blocks. The sources are
   committed for `1.21.1-neoforge`; to work on another version, run the `Set active project to <version>` task,
   and run `Reset active project` before committing. Small API differences live in `McCompat` and `ClientCompat`.

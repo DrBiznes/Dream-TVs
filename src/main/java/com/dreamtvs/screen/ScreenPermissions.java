@@ -8,7 +8,7 @@ import net.minecraft.server.level.ServerPlayer;
 import java.util.UUID;
 
 /**
- * Who may do what with TV screens (plan §5.7). Same node names and fallbacks as Dream Displays: LuckPerms decides
+ * Who may do what with TV screens. Same node names and fallbacks as Dream Displays: LuckPerms decides
  * when it's installed and the node is set; otherwise the fallback applies (everyone, or op level 2).
  */
 public final class ScreenPermissions {

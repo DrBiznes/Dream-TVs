@@ -1,6 +1,6 @@
 {
   "//": [
-    "Recipe sources for the TV compat recipes (docs/COMPAT_RECIPES_PLAN.md). Highest priority first: in auto",
+    "Recipe sources for the TV compat recipes (docs/DEVELOPMENT.md). Highest priority first: in auto",
     "mode the first source whose mods are installed and whose items all exist wins.",
     "",
     "materials: the item for each role the TV templates (tvs.json) use. A plain id is an item, '#ns:path' is a",

@@ -18,7 +18,7 @@ import java.util.UUID;
 
 /**
  * The server-side Dream Displays addon. Enabled by DD once its server API is ready. Listens for changes to our
- * screens that Dream TVs didn't make itself and hands them to {@link ScreenSync} (plan §5.5).
+ * screens that Dream TVs didn't make itself and hands them to {@link ScreenSync}.
  */
 @Addon(
         id = "dreamtvs",

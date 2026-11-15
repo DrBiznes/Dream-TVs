@@ -15,7 +15,7 @@ import java.util.function.Predicate;
 
 /**
  * Answers the {@code dreamtvs:recipe_source} load condition that every TV recipe carries, so exactly one source
- * and method is active (docs/COMPAT_RECIPES_PLAN.md §5). The choice is made once per data load: the first
+ * and method is active (docs/DEVELOPMENT.md). The choice is made once per data load: the first
  * condition test resolves it, and it's resolved again after {@link #invalidate} (each loader calls that when a
  * reload starts) or when the config file changes.
  */

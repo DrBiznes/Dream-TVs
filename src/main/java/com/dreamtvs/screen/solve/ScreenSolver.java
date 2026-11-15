@@ -10,7 +10,7 @@ import java.util.Set;
 import java.util.function.Predicate;
 
 /**
- * Pure multiblock rules (plan §5.2). No Minecraft imports: everything works on {@link Cell}s in one plane.
+ * Pure multiblock rules. No Minecraft imports: everything works on {@link Cell}s in one plane.
  *
  * <p>The v1 rule is simple: a connected group of TVs forms a screen only if it's a completely filled
  * axis-aligned rectangle within the size limits.

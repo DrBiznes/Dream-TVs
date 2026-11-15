@@ -111,7 +111,7 @@ public final class DreamTvsNeoForge {
     public DreamTvsNeoForge(IEventBus modBus) {
         DreamTvs.init(FMLPaths.CONFIGDIR.get(), ModList.get()::isLoaded);
 
-        // Compat recipes (docs/COMPAT_RECIPES_PLAN.md). The in-progress items only exist with Create installed,
+        // Compat recipes (docs/DEVELOPMENT.md). The in-progress items only exist with Create installed,
         // since only Create's sequenced assembly uses them.
         if (CompatRecipes.createLoaded()) {
             for (String path : CompatIndex.transitionalItems(CompatIndex.sources())) {

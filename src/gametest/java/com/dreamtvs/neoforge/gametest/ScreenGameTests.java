@@ -39,7 +39,7 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
- * End-to-end checks against the real Dream Displays server API (plan §8). Every test builds a north-facing wall
+ * End-to-end checks against the real Dream Displays server API. Every test builds a north-facing wall
  * at z = 2 inside an empty 9×6×5 area. Run with {@code gradlew :<version>-neoforge:runGameTestServer}.
  */
 public final class ScreenGameTests {

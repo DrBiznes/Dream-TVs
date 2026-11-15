@@ -26,7 +26,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 /**
- * Builds the TV compat recipes (docs/COMPAT_RECIPES_PLAN.md) from {@code src/compat/sources.json} and
+ * Builds the TV compat recipes (docs/DEVELOPMENT.md) from {@code src/compat/sources.json} and
  * {@code tvs.json}. Run with {@code gradlew :tools:generateCompatRecipes}; the output is committed under
  * {@code src/generated} and a unit test fails when it's out of date.
  *

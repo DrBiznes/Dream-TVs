@@ -37,7 +37,7 @@ import java.util.Collection;
 //?}
 
 /**
- * Registers every {@link TvTest} method of {@link #CLASSES} (plan §8). Up to Minecraft 1.21.4 tests are
+ * Registers every {@link TvTest} method of {@link #CLASSES}. Up to Minecraft 1.21.4 tests are
  * {@code TestFunction}s from a {@code @GameTestGenerator}; since 1.21.5 they are test functions plus test
  * instances in registries, and each batch is its own (empty) test environment. Test ids are the method names in
  * snake case, e.g. {@code dreamtvs:rectangle_forms_one_screen}.

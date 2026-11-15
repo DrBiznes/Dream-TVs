@@ -38,7 +38,7 @@ import java.util.Set;
 import java.util.UUID;
 
 /**
- * Makes the Dream Displays screens on one wall match the TV blocks on it (plan §5.3). The world is the source
+ * Makes the Dream Displays screens on one wall match the TV blocks on it. The world is the source
  * of truth and every run is idempotent, so a missed update or a crash heals on the next change to the wall.
  *
  * <p>Steps: scan the groups around the changed cells, collect our screens on that wall, ask

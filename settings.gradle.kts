@@ -9,7 +9,7 @@ pluginManagement {
 }
 
 plugins {
-    // One source tree for every Minecraft version and loader; see docs/PROJECT_PLAN.md (M5).
+    // One source tree for every Minecraft version and loader; see docs/DEVELOPMENT.md.
     id("dev.kikugie.stonecutter") version "0.10"
     // Applies fabric-loom-remap on obfuscated versions (1.21.x) and fabric-loom on 26.x.
     id("dev.kikugie.loom-back-compat") version "0.4.3"

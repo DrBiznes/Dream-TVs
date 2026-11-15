@@ -39,7 +39,7 @@ dependencies {
     // Optional: Mod Menu opens the settings screen (DreamTvsModMenu). In the dev client so it can be tried.
     modCompileOnly("maven.modrinth:modmenu:${prop("deps.modmenu")}")
     modLocalRuntime("maven.modrinth:modmenu:${prop("deps.modmenu")}")
-    // Optional: when LuckPerms is installed we check its nodes, like Dream Displays does (plan §5.7).
+    // Optional: when LuckPerms is installed we check its nodes, like Dream Displays does.
     compileOnly("net.luckperms:api:${prop("deps.luckperms_api")}")
 
     testImplementation(platform("org.junit:junit-bom:5.11.4"))
@@ -62,7 +62,21 @@ loom {
             runDir("../../run/fabric-$mc-server")
             ideConfigGenerated(true)
         }
+        // gradlew :<version>-fabric:runVisualTest  (screenshots every kind of TV; see VisualTests)
+        register("visualTest") {
+            client()
+            configName = "Fabric Visual Test $mc"
+            runDir("../../run/fabric-$mc-visualtest")
+            vmArg("-Ddreamtvs.visualTest=true")
+            ideConfigGenerated(false)
+        }
     }
+}
+
+// A crash before the game is up must not leave the last run's screenshots and results looking current.
+tasks.matching { it.name == "runVisualTest" }.configureEach {
+    val runDir = rootProject.file("run/fabric-$mc-visualtest")
+    doFirst { delete(runDir.resolve("screenshots"), runDir.resolve("visualtest-results.txt")) }
 }
 
 java {
@@ -108,6 +122,8 @@ tasks.processResources {
 
 tasks.withType<Jar>().configureEach {
     from(rootProject.file("LICENSE")) { rename { "LICENSE_dreamtvs" } }
+    // The visual tests only run from the dev classes (runVisualTest).
+    exclude("com/dreamtvs/visualtest/**")
 }
 
 tasks.register<Copy>("buildAndCollect") {

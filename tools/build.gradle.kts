@@ -1,4 +1,4 @@
-// The compat recipe generator (docs/COMPAT_RECIPES_PLAN.md). Pure Java, no Minecraft.
+// The compat recipe generator (docs/DEVELOPMENT.md). Pure Java, no Minecraft.
 // src/compat holds the hand-written sources; the generator writes the recipes and the runtime index to
 // src/generated, which is committed (like NeoForge datagen output) and shipped by every node.
 // CompatRecipesUpToDateTest (src/test) fails the build when the committed files don't match the sources.

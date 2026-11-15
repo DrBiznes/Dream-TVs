@@ -17,7 +17,7 @@ import java.util.UUID;
 import static com.dreamtvs.screen.solve.ScreenSolverTest.grid;
 import static org.junit.jupiter.api.Assertions.*;
 
-/** Reconcile decisions (plan §8: "reconcile decisions using a fake bridge"), on pictures of a wall. */
+/** Reconcile decisions, on pictures of a wall. */
 class ScreenPlannerTest {
     private static final UUID A = new UUID(0, 1);
     private static final UUID B = new UUID(0, 2);

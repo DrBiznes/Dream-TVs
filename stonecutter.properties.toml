@@ -29,7 +29,7 @@ deps.dreamdisplays_id = "NPXmbw2Z"
 mod.mc_compat = "[1.21.1]"
 deps.neoforge = "21.1.233"
 deps.dreamdisplays_id = "yKZXGbDX"
-# Optional mods for :1.21.1-neoforge:installTestMods (plan M3, Sable sub-levels)
+# Optional mods for :1.21.1-neoforge:installTestMods (Sable sub-levels)
 test.sable = "fg9dTRz9"
 test.create = "UjX6dr61"
 test.create_aeronautics = "44pLdPGg"

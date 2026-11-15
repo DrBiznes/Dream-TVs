@@ -121,6 +121,9 @@ public final class PanelPicture {
     /** After DD has drawn a screen; the pose is back where {@link #begin} left it. */
     public static void end(PoseStack stack, DisplayFacing facing, int width, int height) {
         if (drawing == ScreenKind.CRT) CrtOverlay.queue(stack, facing, width, height);
+        // On 26.x the end-of-pass hook (ScreenRendererMixin) doesn't fire, and drawing in order is enough.
+        //? if >=26.1
+        //CrtOverlay.flush();
         drawing = null;
         cropping = false;
     }

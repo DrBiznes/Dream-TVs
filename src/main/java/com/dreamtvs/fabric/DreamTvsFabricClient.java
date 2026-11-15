@@ -6,7 +6,9 @@ import com.dreamtvs.block.TvClientHooks;
 import com.dreamtvs.client.DreamDisplaysMenu;
 import com.dreamtvs.client.ItemDescription;
 import com.dreamtvs.client.RemoteClient;
+import com.dreamtvs.visualtest.VisualTests;
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
 import net.fabricmc.fabric.api.event.client.player.ClientPreAttackCallback;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
@@ -25,6 +27,8 @@ public final class DreamTvsFabricClient implements ClientModInitializer {
         FabricLoader.getInstance().getModContainer(DreamTvs.MOD_ID).ifPresent(mod ->
                 ResourceManagerHelper.registerBuiltinResourcePack(DreamTvs.id("remote_3d"), mod,
                         Component.translatable("pack.dreamtvs.remote_3d"), ResourcePackActivationType.NORMAL));
+        // gradlew :<version>-fabric:runVisualTest. The class isn't in the mod jar, and is only touched in that run.
+        if (Boolean.getBoolean(VisualTests.PROPERTY)) ClientTickEvents.END_CLIENT_TICK.register(VisualTests::tick);
     }
 }
 *///?}
