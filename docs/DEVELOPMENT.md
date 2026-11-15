@@ -3,7 +3,7 @@
 How the mod works, how one source tree builds every Minecraft version and loader, and how to check it. This
 replaces the project plan and the compat recipes plan, which were written while the mod was being built; what
 is still true or still open from them is here. What players need (recipes, permissions, config options) is in
-the [README](../README.md). Requests for Dream Displays itself are in [UPSTREAM.md](UPSTREAM.md).
+the [reference](REFERENCE.md). Requests for Dream Displays itself are in [UPSTREAM.md](UPSTREAM.md).
 
 Dream Displays is "DD" below. Everything was checked against DD **1.10.9**.
 
@@ -115,7 +115,7 @@ fills the tube at its true proportions with its sides cut off.
 
 ### Permissions
 
-The rules and nodes are in the README. How they are enforced:
+The rules and nodes are in the [reference](REFERENCE.md). How they are enforced:
 
 - LuckPerms is checked through its API when it is installed; the fallback applies when it is absent or leaves a
   node undefined. It is an optional, compile-only dependency.
