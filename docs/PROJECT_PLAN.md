@@ -10,8 +10,8 @@
 | **Mod ID** | `dreamtvs` |
 | **Loaders** | Fabric, NeoForge (no Paper, Forge, Quilt-specific or proxy support) |
 | **Requires** | Dream Displays (on client **and** server), Fabric API on Fabric |
-| **First target** | Minecraft **1.21.1** (Fabric + NeoForge); 1.21.11 and 26.x later |
-| **Language** | Java 21 (see [Why Java](#why-java-not-kotlin)) |
+| **Versions** | Minecraft **1.21.1**, **1.21.11** and **26.3**, each on Fabric and NeoForge (see [M5](#m5-release-and-versions)) |
+| **Language** | Java 21 (Java 25 for 26.3, see [Why Java](#why-java-not-kotlin)) |
 | **Reference** | Dream Displays `1.10.9` (commit `47e44d1`, 2026-11-08) |
 
 ---
@@ -81,21 +81,24 @@ default parameters such as `setUrl(url, lang = "")`. Call `on(Class, Consumer)` 
 
 ```
 dreamtvs/
-├── common/        # Loader-agnostic: block, multiblock solver, DD bridge, config model
-│   ├── TvBlock                     # Block + FACING + connection properties
-│   ├── ScreenSolver               # PURE: Set<Cell2D> → rectangles / verdict (unit-tested)
-│   ├── ScreenScanner              # World → coplanar same-facing TV cells (flood fill, capped)
-│   ├── ScreenReconciler           # Desired screens vs existing DD displays → create/moveTo/delete
-│   ├── DreamDisplaysBridge        # Only class that touches com.dreamdisplays.api.*
-│   └── DreamTvsAddon              # @Addon(id="dreamtvs", side=SERVER), event/veto subscriptions
-├── fabric/        # Registration, events (PlayerBlockBreakEvents, etc.), fabric.mod.json
-└── neoforge/      # DeferredRegister, BlockEvent.BreakEvent @HIGHEST, neoforge.mods.toml
+├── src/main/java/com/dreamtvs/    # One source tree for every version and loader (Stonecutter, see M5)
+│   ├── block/, screen/, dd/, ...  # Shared: blocks, multiblock solver, DD bridge, config model
+│   ├── McCompat, client/ClientCompat  # Small Minecraft API differences between versions
+│   ├── fabric/                    # Fabric only (`//? if fabric`): registration, events, Mod Menu
+│   └── neoforge/                  # NeoForge only (`//? if neoforge`): DeferredRegister, events
+├── src/gametest/                  # NeoForge GameTests (not shipped)
+├── src/compat, src/generated      # Compat recipe sources and generated recipes (docs/COMPAT_RECIPES_PLAN.md)
+├── tools/                         # The compat recipe generator (plain Java)
+├── build.fabric.gradle.kts        # Build script of every Fabric node (Fabric Loom via loom-back-compat)
+├── build.neoforge.gradle.kts      # Build script of every NeoForge node (ModDevGradle)
+├── stonecutter.properties.toml    # Versions of everything, per Minecraft version and loader
+└── versions/<mc>-<loader>/        # One Gradle project per build (only build output lives here)
 ```
 
-- **Build:** a MultiLoader-style Gradle layout (common + fabric + neoforge), using Fabric Loom and NeoForge
-  ModDevGradle. DD uses the same tools.
-- **DD dependency:** `compileOnly` on the DD API. Runtime dependency on the DD mod jar in dev runs (`modLocalRuntime` /
-  `localRuntime`), taken from a pinned GitHub release.
+- **Build:** Stonecutter 0.10 (its official multiloader template), Fabric Loom 1.17 and NeoForge ModDevGradle 2.0.
+  DD uses the same tools.
+- **DD dependency:** the DD mod jar for each version and loader from Modrinth's Maven, on the compile classpath and
+  in the dev runs.
 - **Required on both sides.** Fabric `environment: "*"`. NeoForge `side = "BOTH"`, plus a `dreamdisplays` dependency
   with `ordering = "AFTER"`.
 - **The world is the source of truth.** Screens are always *derived* from the blocks in the world. Every change runs
@@ -470,8 +473,48 @@ The first release ships **four screen types**. The Projector moved to [Stretch g
 - **Tests:** 34 unit tests and 19 GameTests still pass. The tooltip look needs a check in a dev client.
 
 ### M5: Release and versions
-- [ ] 1.21.1 release (Fabric + NeoForge jars), declared dependency on `dreamdisplays`.
-- [ ] Port to 1.21.11 (DD's current `active` version), then consider Stonecutter for 26.x.
+- [x] One source tree for all versions: Stonecutter, six builds (1.21.1, 1.21.11, 26.3 × Fabric, NeoForge).
+- [x] Port to **1.21.11** (Fabric + NeoForge). Unit tests and all 20 GameTests pass; a Fabric dedicated server starts.
+- [x] Port to **26.3** (Fabric + NeoForge). Unit tests and all 20 GameTests pass; a Fabric dedicated server starts.
+- [ ] Look at every version in a dev client: models, item icons, the picture on the glass, CRT overlay, tooltips,
+      settings screen (no automated test covers rendering or GUI).
+- [ ] 1.21.1, 1.21.11 and 26.3 release (Fabric + NeoForge jars), declared dependency on `dreamdisplays`.
+
+#### M5 notes (2026-11-13)
+- **Layout.** The `common`/`fabric`/`neoforge` projects are gone. Everything is in one `src/` tree, built by
+  Stonecutter into a Gradle project per version and loader: `:1.21.1-fabric`, `:1.21.1-neoforge`,
+  `:1.21.11-fabric`, `:1.21.11-neoforge`, `:26.3-fabric`, `:26.3-neoforge`. Loader-only files are wrapped in
+  `//? if fabric {` or `//? if neoforge {`; version differences in `//? if >=1.21.11 {` blocks. The committed
+  sources are in the `1.21.1-neoforge` state (run `Reset active project` before committing). Versions of all
+  dependencies are in `stonecutter.properties.toml`; `gradle.properties` holds only Gradle options.
+- **Commands changed.** `:neoforge:runClient` is now `:1.21.1-neoforge:runClient` (and so on for each version),
+  `:common:test` is `gradlew test`, `:common:generateCompatRecipes` is `:tools:generateCompatRecipes`,
+  `:neoforge:installTestMods` is `:1.21.1-neoforge:installTestMods`. Run folders are per version
+  (`run/neoforge-1.21.1-client`, ...), so worlds in the old `run/neoforge-client` aren't picked up.
+- **Gradle runs on JDK 25** (`gradle/gradle-daemon-jvm.properties`): Stonecutter 0.10 needs it, and 26.3 compiles
+  for Java 25. The 1.21.x builds still target Java 21.
+- **Same DD internals everywhere.** DD 1.10.9 has the same `ScreenRenderer`, `DisplayPoseStack` and
+  `DisplayManager` signatures on all three versions, so the mixins are unchanged.
+- **1.21.11 changes:** `ResourceLocation` is `Identifier` (a Stonecutter string replacement); blocks and items need
+  their registry id before they're built; `useItemOn` returns `InteractionResult`; `updateShape` has a new
+  signature; `onRemove` is gone, so a replaced TV is seen in `affectNeighborsAfterRemoval` and a turned one in
+  `onPlace`; permission levels, the user cache, render types and a few GUI widgets moved. Since 1.21.2 recipes
+  write ingredients as plain ids, so the generator writes a second recipe folder. Items need
+  `assets/dreamtvs/items/*.json` (ignored by 1.21.1).
+- **26.3 changes:** blocks have no codecs; `PushReaction.BLOCK` is `IMMOVEABLE`; overlay messages, chunk
+  positions, the toast manager, NeoForge's break event (`BreakBlockEvent`) and Fabric's creative tab builder were
+  renamed. Loot tables have a new format (one `condition` object with a `type`), so they're kept twice:
+  `src/main/resources-1.21` and `src/main/resources-26`. The old format still loads on 26.3 but its conditions are
+  silently ignored, which made every Flat Screen part drop an item; the GameTests caught it.
+- **CRT overlay on 26.3.** 26.x has no `MultiBufferSource`. There the overlay goes through the draw callback DD
+  passes to its own screen drawing (captured by `ScreenRendererMixin`), which DD flushes in order. Not looked at in
+  a client yet.
+- **GameTests.** Minecraft 1.21.5 replaced `@GameTest`. Tests are now marked with our own `@TvTest`, and
+  `TvGameTests` registers them: a `@GameTestGenerator` on 1.21.1, test functions plus test instances on 1.21.11
+  and 26.3 (each batch is its own test environment). Test ids are snake case, e.g.
+  `dreamtvs:rectangle_forms_one_screen`.
+- **Compat recipes** for tech mods were only tried on 1.21.1. On newer versions they load only if the mods exist
+  and still accept the same recipe format; otherwise the resolver falls back as before.
 
 ---
 
@@ -510,6 +553,8 @@ The first release ships **four screen types**. The Projector moved to [Stretch g
 | R6 | DD's join-time cleanup deletes displays without base material | `DisplayManagerMixin` (internal, `require = 0`) plus the silent-removal fallback. Upstream ask in [UPSTREAM.md](UPSTREAM.md). |
 | R8 | We inject into DD's client renderer (`ScreenRenderer.renderScreenTexture`) | `require = 0`. If it breaks, the picture floats 4 pixels in front of the panel. |
 | R7 | We read DD internals (`VanillaDisplayData`) to follow outside moves | All in `DdInternals`, guarded. If it breaks, moved screens are unmanaged instead of deleted. |
+| R9 | Three Minecraft versions from one source tree | Stonecutter comments, small differences in `McCompat`/`ClientCompat`. Unit tests and GameTests run on every version; rendering is checked by hand. |
+| R10 | 26.x CRT overlay draws through DD's internal draw callback | Guarded like the rest of `CrtOverlay`: if it fails, the overlay switches off and CRTs show a plain picture. |
 
 ### Decisions (2026-11-12)
 - **Name:** "Dream TVs" / `dreamtvs`. The "Dream" prefix is OK.

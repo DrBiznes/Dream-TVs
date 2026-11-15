@@ -1,0 +1,47 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "create"
+    },
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "powergrid"
+    },
+    {
+      "type": "dreamtvs:recipe_source",
+      "source": "power_grid",
+      "method": "crafting"
+    }
+  ],
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "create",
+        "powergrid"
+      ]
+    },
+    {
+      "condition": "dreamtvs:recipe_source",
+      "source": "power_grid",
+      "method": "crafting"
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "pattern": [
+    "CCC",
+    "GRI",
+    "CCC"
+  ],
+  "key": {
+    "C": "minecraft:gray_concrete",
+    "G": "powergrid:crt",
+    "R": "powergrid:circuit_board",
+    "I": "create:iron_sheet"
+  },
+  "result": {
+    "id": "dreamtvs:crt_tv"
+  }
+}

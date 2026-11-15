@@ -66,7 +66,7 @@ Notes from research (C0, 2026-11-13):
   will pick them up on versions where Fabric builds exist.
 - Sources that are Create addons (rows 1, 2, 4) inherit Create's parts for roles they don't override.
 
-The priority order, mod ids and materials all live in one file, [`common/src/compat/sources.json`](../common/src/compat/sources.json).
+The priority order, mod ids and materials all live in one file, [`src/compat/sources.json`](../src/compat/sources.json).
 Reordering is moving one entry. A user-editable order is a [stretch goal](#10-stretch-goals).
 
 ---
@@ -200,7 +200,7 @@ Each source maps **roles** to items; each TV's templates use roles. Roles a sour
 
 ### 6.2 Templates
 
-From [`common/src/compat/tvs.json`](../common/src/compat/tvs.json). Crafting keeps the vanilla shapes and yields.
+From [`src/compat/tvs.json`](../src/compat/tvs.json). Crafting keeps the vanilla shapes and yields.
 
 | TV | Crafting (yield) | Sequenced assembly: input → steps (yield) |
 |---|---|---|
@@ -221,21 +221,27 @@ From [`common/src/compat/tvs.json`](../common/src/compat/tvs.json). Crafting kee
 The recipes are generated, not hand-written:
 
 ```
-common/src/compat/sources.json   # sources in priority order, mods, materials per role
-common/src/compat/tvs.json       # one crafting + one sequenced assembly template per TV
-        │  gradlew :common:generateCompatRecipes   (CompatRecipeGenerator, common/src/compatgen)
+src/compat/sources.json   # sources in priority order, mods, materials per role
+src/compat/tvs.json       # one crafting + one sequenced assembly template per TV
+        │  gradlew :tools:generateCompatRecipes   (CompatRecipeGenerator, tools/src/main/java)
         ▼
-common/src/generated/resources/  # committed, shipped by both loaders
-  data/dreamtvs/recipe/<tv>.json                                  (vanilla)
-  data/dreamtvs/recipe/compat/<source>/<method>/<tv>.json         (90 compat recipes)
-  assets/dreamtvs/models/item/incomplete_<tv>.json
-  dreamtvs.compat.json            # runtime index: sources in order, mods and items per method
+src/generated/            # committed, shipped by every build
+  common/                 # every Minecraft version
+    dreamtvs.compat.json            # runtime index: sources in order, mods and items per method
+    assets/dreamtvs/models/item/incomplete_<tv>.json
+    assets/dreamtvs/items/incomplete_<tv>.json      (item model definitions, 1.21.4+)
+  recipes-1.21.1/         # 1.21.1: ingredients as {"item": ...} / {"tag": ...}
+  recipes-1.21.2/         # 1.21.2 and later (1.21.11, 26.x): ingredients as "id" / "#tag"
+    data/dreamtvs/recipe/<tv>.json                                  (vanilla)
+    data/dreamtvs/recipe/compat/<source>/<method>/<tv>.json         (90 compat recipes)
 ```
 
-`CompatRecipesUpToDateTest` fails the build if the committed output doesn't match the sources. **Porting:** the
-1.21.1 / Create 6 JSON format is confined to two methods in the generator (`crafting`, `sequencedAssembly`); a port
-with a different recipe format changes those and regenerates. Mods or items missing on that version need no code
-change, the resolver skips them.
+`CompatRecipesUpToDateTest` fails the build if the committed output doesn't match the sources. Each build picks
+the recipe folder for its Minecraft version (`build.fabric.gradle.kts`, `build.neoforge.gradle.kts`). **Porting:**
+the recipe format is confined to the generator's `Format` and two methods (`crafting`, `sequencedAssembly`); a
+version with another format adds a `Format` and regenerates. Mods or items missing on that version need no code
+change, the resolver skips them. The vanilla recipes are checked on every version by the GameTests; the compat
+recipes were only tried with the tech mods on 1.21.1.
 
 ### 6.4 Overriding or adding recipes (datapacks)
 - Override any generated file by id, like any recipe. Keep the `dreamtvs:recipe_source` condition if it should still
@@ -250,21 +256,20 @@ change, the resolver skips them.
 
 ```
 dreamtvs/
-├── common/
-│   ├── src/compat/{sources,tvs}.json           # hand-written sources (the priority list lives here)
-│   ├── src/compatgen/.../CompatRecipeGenerator # Gradle-run generator (Gson only, no Minecraft)
-│   ├── src/generated/resources/                # generated recipes, models, index (committed)
-│   └── src/main/java/com/dreamtvs/compat/
+├── src/compat/{sources,tvs}.json               # hand-written sources (the priority list lives here)
+├── tools/src/main/java/.../CompatRecipeGenerator # Gradle-run generator (Gson only, no Minecraft)
+├── src/generated/                              # generated recipes, models, index (committed)
+├── src/main/java/com/dreamtvs/compat/
 │       ├── CompatIndex       # reads dreamtvs.compat.json from the jar
 │       ├── CompatResolver    # PURE: (config, sources, mods, items) -> (source, method)
 │       ├── CompatRecipes     # caches the choice per data load, logs it, answers the condition
 │       └── RecipeMethod      # crafting | sequenced_assembly
-├── fabric/   RecipeSourceCondition  (ResourceConditionType, registered with ResourceConditions)
-└── neoforge/ RecipeSourceCondition  (ICondition codec, DeferredRegister on CONDITION_CODECS)
+├── src/main/java/com/dreamtvs/fabric/   RecipeSourceCondition  (ResourceConditionType, registered with ResourceConditions)
+└── src/main/java/com/dreamtvs/neoforge/ RecipeSourceCondition  (ICondition codec, DeferredRegister on CONDITION_CODECS)
 ```
 
-- `DreamTvs.init(configDir, modLoaded)` gets the loader's config folder and `isModLoaded` check, so `common` never
-  touches loader APIs.
+- `DreamTvs.init(configDir, modLoaded)` gets the loader's config folder and `isModLoaded` check, so the shared code
+  never touches loader APIs.
 - **No compile dependency** on any supported mod or on Create. Recipes reference items by id in JSON only. The
   in-progress items are plain `Item`s, registered only when `create` is loaded.
 
@@ -331,7 +336,7 @@ dreamtvs/
 
 ## 11. Testing
 
-- **Unit (`common`, `gradlew :common:test`):**
+- **Unit (`gradlew test`, run in every version build):**
   - `CompatResolverTest`: no mods → vanilla; one tech mod → its crafting; Create → Create assembly; Create + tech mod
     → assembly with its parts; priority regardless of load order; assembly off → crafting; config names a lower
     source; forced source without Create → its crafting; not installed / unknown id / wrong case → auto (+ warning);
@@ -340,9 +345,9 @@ dreamtvs/
   - `CompatRecipesUpToDateTest`: committed files match the generator; one `dreamtvs:recipe_source` per loader block;
     vanilla ids kept; the shipped index parses; clashing assembly starts are rejected.
   - `DreamTvsConfigTest`: the compat section round-trips, defaults, normalisation and bad values.
-- **GameTest (`gradlew :neoforge:runGameTestServer`):** `CompatRecipeGameTests` checks that exactly the selected
-  source's five recipes load. With no extra mods that's vanilla. To check another source, copy its jars into
-  `run/neoforge-gametest/mods` (the screen tests crash with Create there because Create's networking doesn't
+- **GameTest (`gradlew :<version>-neoforge:runGameTestServer`):** `CompatRecipeGameTests` checks that exactly the
+  selected source's five recipes load. With no extra mods that's vanilla. To check another source, copy its jars into
+  `run/neoforge-<version>-gametest/mods` (the screen tests crash with Create there because Create's networking doesn't
   accept GameTest fake players, so run the compat test on its own).
 - **Manual matrix:** {NeoForge, Fabric} × {singleplayer, dedicated} × {no mods, Create, Create + 1 mod, 1 mod without
   Create, 2+ mods} × {`auto`, forced other source, `vanilla`, assembly off, bad value}. In each: check the recipe in

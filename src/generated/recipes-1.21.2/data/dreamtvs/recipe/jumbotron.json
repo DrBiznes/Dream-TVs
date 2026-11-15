@@ -1,0 +1,32 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "dreamtvs:recipe_source",
+      "source": "vanilla",
+      "method": "crafting"
+    }
+  ],
+  "fabric:load_conditions": [
+    {
+      "condition": "dreamtvs:recipe_source",
+      "source": "vanilla",
+      "method": "crafting"
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "pattern": [
+    "IDI",
+    "DRD",
+    "IDI"
+  ],
+  "key": {
+    "I": "minecraft:iron_ingot",
+    "D": "minecraft:glowstone_dust",
+    "R": "minecraft:redstone"
+  },
+  "result": {
+    "id": "dreamtvs:jumbotron",
+    "count": 4
+  }
+}

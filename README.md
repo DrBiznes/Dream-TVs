@@ -6,9 +6,9 @@ permissions.
 
 ## Requirements
 
-- Minecraft **1.21.1**
+- Minecraft **1.21.1**, **1.21.11** or **26.3**
 - **Fabric** (with Fabric API) or **NeoForge**
-- **Dream Displays 1.10.9** or newer
+- **Dream Displays 1.10.9** or newer, built for the same Minecraft version
 
 Install Dream TVs on both the server and every client.
 
@@ -110,9 +110,16 @@ changes need a `/reload`. A dedicated server still uses its own file.
 gradlew build
 ```
 
-The jars are written to `fabric/build/libs` and `neoforge/build/libs`. `gradlew :common:test` runs the unit
-tests, and `gradlew :neoforge:runGameTestServer` runs the in-game tests. After editing the compat recipe sources
-in `common/src/compat`, run `gradlew :common:generateCompatRecipes`.
+One source tree builds every Minecraft version and loader with [Stonecutter](https://stonecutter.kikugie.dev/).
+Each build has its own Gradle project, named `<minecraft>-<loader>` (`1.21.1-fabric`, `26.3-neoforge`, ...), and
+writes its jar to `versions/<minecraft>-<loader>/build/libs`. Gradle needs JDK 25 (it is downloaded if missing).
+
+- `gradlew :1.21.11-neoforge:runClient` (or `runServer`) starts a dev game for one version.
+- `gradlew test` runs the unit tests, and `gradlew :26.3-neoforge:runGameTestServer` runs the in-game tests.
+- Code that differs between versions sits in `//? if >=1.21.11 { ... //?}` comment blocks. The sources are
+  committed for `1.21.1-neoforge`; to work on another version, run the `Set active project to <version>` task,
+  and run `Reset active project` before committing. Small API differences live in `McCompat` and `ClientCompat`.
+- After editing the compat recipe sources in `src/compat`, run `gradlew :tools:generateCompatRecipes`.
 
 ## License
 

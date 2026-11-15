@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "condition": {
+        "type": "minecraft:survives_explosion"
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "condition": {
+            "type": "minecraft:match_block",
+            "blocks": "dreamtvs:flat_screen_2x1",
+            "state": {
+              "part": "0"
+            }
+          },
+          "name": "dreamtvs:flat_screen_2x1"
+        }
+      ],
+      "rolls": 1
+    }
+  ],
+  "random_sequence": "dreamtvs:blocks/flat_screen_2x1"
+}

@@ -1,0 +1,92 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "create"
+    },
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "ae2"
+    },
+    {
+      "type": "dreamtvs:recipe_source",
+      "source": "ae2",
+      "method": "sequenced_assembly"
+    }
+  ],
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "create",
+        "ae2"
+      ]
+    },
+    {
+      "condition": "dreamtvs:recipe_source",
+      "source": "ae2",
+      "method": "sequenced_assembly"
+    }
+  ],
+  "type": "create:sequenced_assembly",
+  "ingredient": "minecraft:iron_ingot",
+  "loops": 1,
+  "results": [
+    {
+      "id": "dreamtvs:jumbotron",
+      "count": 4
+    }
+  ],
+  "sequence": [
+    {
+      "type": "create:deploying",
+      "ingredients": [
+        "dreamtvs:incomplete_jumbotron",
+        "minecraft:glowstone_dust"
+      ],
+      "results": [
+        {
+          "id": "dreamtvs:incomplete_jumbotron"
+        }
+      ]
+    },
+    {
+      "type": "create:deploying",
+      "ingredients": [
+        "dreamtvs:incomplete_jumbotron",
+        "ae2:logic_processor"
+      ],
+      "results": [
+        {
+          "id": "dreamtvs:incomplete_jumbotron"
+        }
+      ]
+    },
+    {
+      "type": "create:deploying",
+      "ingredients": [
+        "dreamtvs:incomplete_jumbotron",
+        "minecraft:glowstone_dust"
+      ],
+      "results": [
+        {
+          "id": "dreamtvs:incomplete_jumbotron"
+        }
+      ]
+    },
+    {
+      "type": "create:pressing",
+      "ingredients": [
+        "dreamtvs:incomplete_jumbotron"
+      ],
+      "results": [
+        {
+          "id": "dreamtvs:incomplete_jumbotron"
+        }
+      ]
+    }
+  ],
+  "transitional_item": {
+    "id": "dreamtvs:incomplete_jumbotron"
+  }
+}

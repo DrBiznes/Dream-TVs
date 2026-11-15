@@ -1,0 +1,65 @@
+# Versions for every build node (Stonecutter centralized properties). A node reads the top level, then
+# ["<minecraft>"], then [<loader>."<minecraft>"]; later tables win.
+mod.id = "dreamtvs"
+mod.name = "Dream TVs"
+mod.version = "0.9.0"
+mod.group = "com.dreamtvs"
+mod.description = "Survival-friendly TVs for Dream Displays. Place LCD panels side by side to build bigger screens."
+mod.license = "LGPL-3.0"
+
+# Dream Displays 1.10.9 on every version (Modrinth Maven version ids below).
+deps.dreamdisplays = "1.10.9"
+deps.fabric_loader = "0.19.5"
+deps.luckperms_api = "5.4"
+loomx.loom_version = "1.17.13"
+
+["1.21.1"]
+mod.mc_releases = ["1.21.1"]
+deps.java = "21"
+
+[fabric."1.21.1"]
+mod.mc_compat = "~1.21.1"
+deps.fabric_api = "0.116.12+1.21.1"
+deps.modmenu = "11.0.3"
+deps.dreamdisplays_id = "NPXmbw2Z"
+
+[neoforge."1.21.1"]
+mod.mc_compat = "[1.21.1]"
+deps.neoforge = "21.1.233"
+deps.dreamdisplays_id = "yKZXGbDX"
+# Optional mods for :1.21.1-neoforge:installTestMods (plan M3, Sable sub-levels)
+test.sable = "fg9dTRz9"
+test.create = "UjX6dr61"
+test.create_aeronautics = "44pLdPGg"
+test.kotlin_for_forge = "uhJhCT7X"
+test.dreamdisplays_sable = "Euqyd176"
+
+["1.21.11"]
+mod.mc_releases = ["1.21.11"]
+deps.java = "21"
+
+[fabric."1.21.11"]
+mod.mc_compat = "~1.21.11"
+deps.fabric_api = "0.141.6+1.21.11"
+deps.modmenu = "17.0.1"
+deps.dreamdisplays_id = "phbpp5aZ"
+
+[neoforge."1.21.11"]
+mod.mc_compat = "[1.21.11]"
+deps.neoforge = "21.11.48"
+deps.dreamdisplays_id = "DWJ3y96l"
+
+["26.3"]
+mod.mc_releases = ["26.3"]
+deps.java = "25"
+
+[fabric."26.3"]
+mod.mc_compat = "~26.3"
+deps.fabric_api = "0.166.2+26.3"
+deps.modmenu = "21.0.1"
+deps.dreamdisplays_id = "FfvsiArT"
+
+[neoforge."26.3"]
+mod.mc_compat = "[26.3]"
+deps.neoforge = "26.3.0.103"
+deps.dreamdisplays_id = "jwVlpeEk"

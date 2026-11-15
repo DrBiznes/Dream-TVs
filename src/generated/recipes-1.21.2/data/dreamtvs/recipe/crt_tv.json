@@ -1,0 +1,32 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "dreamtvs:recipe_source",
+      "source": "vanilla",
+      "method": "crafting"
+    }
+  ],
+  "fabric:load_conditions": [
+    {
+      "condition": "dreamtvs:recipe_source",
+      "source": "vanilla",
+      "method": "crafting"
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "pattern": [
+    "CCC",
+    "GRI",
+    "CCC"
+  ],
+  "key": {
+    "C": "minecraft:gray_concrete",
+    "G": "minecraft:glass_pane",
+    "R": "minecraft:redstone",
+    "I": "minecraft:iron_ingot"
+  },
+  "result": {
+    "id": "dreamtvs:crt_tv"
+  }
+}

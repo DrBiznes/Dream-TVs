@@ -1,0 +1,41 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "ae2"
+    },
+    {
+      "type": "dreamtvs:recipe_source",
+      "source": "ae2",
+      "method": "crafting"
+    }
+  ],
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "ae2"
+      ]
+    },
+    {
+      "condition": "dreamtvs:recipe_source",
+      "source": "ae2",
+      "method": "crafting"
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "pattern": [
+    "PPP",
+    "PPP",
+    "IRI"
+  ],
+  "key": {
+    "P": "ae2:quartz_vibrant_glass",
+    "I": "minecraft:iron_ingot",
+    "R": "ae2:logic_processor"
+  },
+  "result": {
+    "id": "dreamtvs:flat_screen_3x2"
+  }
+}

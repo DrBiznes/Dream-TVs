@@ -1,0 +1,42 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "thermal"
+    },
+    {
+      "type": "dreamtvs:recipe_source",
+      "source": "thermal",
+      "method": "crafting"
+    }
+  ],
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "thermal"
+      ]
+    },
+    {
+      "condition": "dreamtvs:recipe_source",
+      "source": "thermal",
+      "method": "crafting"
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "pattern": [
+    "CCC",
+    "GRI",
+    "CCC"
+  ],
+  "key": {
+    "C": "minecraft:gray_concrete",
+    "G": "minecraft:glass_pane",
+    "R": "thermal:rf_coil",
+    "I": "thermal:steel_ingot"
+  },
+  "result": {
+    "id": "dreamtvs:crt_tv"
+  }
+}

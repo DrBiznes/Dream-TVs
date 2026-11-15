@@ -1,0 +1,92 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "create"
+    },
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "mekanism"
+    },
+    {
+      "type": "dreamtvs:recipe_source",
+      "source": "mekanism",
+      "method": "sequenced_assembly"
+    }
+  ],
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "create",
+        "mekanism"
+      ]
+    },
+    {
+      "condition": "dreamtvs:recipe_source",
+      "source": "mekanism",
+      "method": "sequenced_assembly"
+    }
+  ],
+  "type": "create:sequenced_assembly",
+  "ingredient": "mekanism:ingot_steel",
+  "loops": 1,
+  "results": [
+    {
+      "id": "dreamtvs:jumbotron",
+      "count": 4
+    }
+  ],
+  "sequence": [
+    {
+      "type": "create:deploying",
+      "ingredients": [
+        "dreamtvs:incomplete_jumbotron",
+        "minecraft:glowstone_dust"
+      ],
+      "results": [
+        {
+          "id": "dreamtvs:incomplete_jumbotron"
+        }
+      ]
+    },
+    {
+      "type": "create:deploying",
+      "ingredients": [
+        "dreamtvs:incomplete_jumbotron",
+        "mekanism:basic_control_circuit"
+      ],
+      "results": [
+        {
+          "id": "dreamtvs:incomplete_jumbotron"
+        }
+      ]
+    },
+    {
+      "type": "create:deploying",
+      "ingredients": [
+        "dreamtvs:incomplete_jumbotron",
+        "minecraft:glowstone_dust"
+      ],
+      "results": [
+        {
+          "id": "dreamtvs:incomplete_jumbotron"
+        }
+      ]
+    },
+    {
+      "type": "create:pressing",
+      "ingredients": [
+        "dreamtvs:incomplete_jumbotron"
+      ],
+      "results": [
+        {
+          "id": "dreamtvs:incomplete_jumbotron"
+        }
+      ]
+    }
+  ],
+  "transitional_item": {
+    "id": "dreamtvs:incomplete_jumbotron"
+  }
+}

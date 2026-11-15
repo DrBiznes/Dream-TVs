@@ -1,0 +1,80 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "create"
+    },
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "immersiveengineering"
+    },
+    {
+      "type": "dreamtvs:recipe_source",
+      "source": "immersiveengineering",
+      "method": "sequenced_assembly"
+    }
+  ],
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "create",
+        "immersiveengineering"
+      ]
+    },
+    {
+      "condition": "dreamtvs:recipe_source",
+      "source": "immersiveengineering",
+      "method": "sequenced_assembly"
+    }
+  ],
+  "type": "create:sequenced_assembly",
+  "ingredient": "minecraft:gray_concrete",
+  "loops": 1,
+  "results": [
+    {
+      "id": "dreamtvs:crt_tv"
+    }
+  ],
+  "sequence": [
+    {
+      "type": "create:deploying",
+      "ingredients": [
+        "dreamtvs:incomplete_crt_tv",
+        "minecraft:glass_pane"
+      ],
+      "results": [
+        {
+          "id": "dreamtvs:incomplete_crt_tv"
+        }
+      ]
+    },
+    {
+      "type": "create:deploying",
+      "ingredients": [
+        "dreamtvs:incomplete_crt_tv",
+        "immersiveengineering:component_electronic"
+      ],
+      "results": [
+        {
+          "id": "dreamtvs:incomplete_crt_tv"
+        }
+      ]
+    },
+    {
+      "type": "create:deploying",
+      "ingredients": [
+        "dreamtvs:incomplete_crt_tv",
+        "immersiveengineering:plate_steel"
+      ],
+      "results": [
+        {
+          "id": "dreamtvs:incomplete_crt_tv"
+        }
+      ]
+    }
+  ],
+  "transitional_item": {
+    "id": "dreamtvs:incomplete_crt_tv"
+  }
+}

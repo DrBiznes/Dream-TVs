@@ -1,0 +1,42 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "modern_industrialization"
+    },
+    {
+      "type": "dreamtvs:recipe_source",
+      "source": "modern_industrialization",
+      "method": "crafting"
+    }
+  ],
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "modern_industrialization"
+      ]
+    },
+    {
+      "condition": "dreamtvs:recipe_source",
+      "source": "modern_industrialization",
+      "method": "crafting"
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "pattern": [
+    "IDI",
+    "DRD",
+    "IDI"
+  ],
+  "key": {
+    "I": "modern_industrialization:steel_plate",
+    "D": "minecraft:glowstone_dust",
+    "R": "modern_industrialization:analog_circuit"
+  },
+  "result": {
+    "id": "dreamtvs:jumbotron",
+    "count": 4
+  }
+}

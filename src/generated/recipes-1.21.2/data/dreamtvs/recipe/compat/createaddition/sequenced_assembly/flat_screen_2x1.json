@@ -1,0 +1,103 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "create"
+    },
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "createaddition"
+    },
+    {
+      "type": "dreamtvs:recipe_source",
+      "source": "createaddition",
+      "method": "sequenced_assembly"
+    }
+  ],
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "create",
+        "createaddition"
+      ]
+    },
+    {
+      "condition": "dreamtvs:recipe_source",
+      "source": "createaddition",
+      "method": "sequenced_assembly"
+    }
+  ],
+  "type": "create:sequenced_assembly",
+  "ingredient": "create:iron_sheet",
+  "loops": 1,
+  "results": [
+    {
+      "id": "dreamtvs:flat_screen_2x1"
+    }
+  ],
+  "sequence": [
+    {
+      "type": "create:deploying",
+      "ingredients": [
+        "dreamtvs:incomplete_flat_screen_2x1",
+        "createaddition:capacitor"
+      ],
+      "results": [
+        {
+          "id": "dreamtvs:incomplete_flat_screen_2x1"
+        }
+      ]
+    },
+    {
+      "type": "create:deploying",
+      "ingredients": [
+        "dreamtvs:incomplete_flat_screen_2x1",
+        "minecraft:black_stained_glass_pane"
+      ],
+      "results": [
+        {
+          "id": "dreamtvs:incomplete_flat_screen_2x1"
+        }
+      ]
+    },
+    {
+      "type": "create:deploying",
+      "ingredients": [
+        "dreamtvs:incomplete_flat_screen_2x1",
+        "minecraft:black_stained_glass_pane"
+      ],
+      "results": [
+        {
+          "id": "dreamtvs:incomplete_flat_screen_2x1"
+        }
+      ]
+    },
+    {
+      "type": "create:deploying",
+      "ingredients": [
+        "dreamtvs:incomplete_flat_screen_2x1",
+        "minecraft:black_stained_glass_pane"
+      ],
+      "results": [
+        {
+          "id": "dreamtvs:incomplete_flat_screen_2x1"
+        }
+      ]
+    },
+    {
+      "type": "create:pressing",
+      "ingredients": [
+        "dreamtvs:incomplete_flat_screen_2x1"
+      ],
+      "results": [
+        {
+          "id": "dreamtvs:incomplete_flat_screen_2x1"
+        }
+      ]
+    }
+  ],
+  "transitional_item": {
+    "id": "dreamtvs:incomplete_flat_screen_2x1"
+  }
+}
