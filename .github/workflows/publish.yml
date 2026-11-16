@@ -1,0 +1,89 @@
+# Publishes Dream TVs to Modrinth and CurseForge (and attaches the jars to the GitHub release).
+# One job per Stonecutter node, so each Minecraft version + loader becomes its own version entry.
+#
+# How to release:
+#   1. Bump mod.version in stonecutter.properties.toml and commit.
+#   2. Create a GitHub release (e.g. tag v<version>). The release notes become the changelog.
+#      A version containing alpha/beta is published as that release channel.
+#   Or run it by hand from the Actions tab (workflow_dispatch); that skips the GitHub upload.
+#
+# Needs repository secrets MODRINTH_TOKEN and CURSEFORGE_TOKEN.
+# A platform with an empty project ID below is skipped.
+name: Publish
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  MODRINTH_ID: "hNxeSv2u"
+  CURSEFORGE_ID: "1809344"
+
+jobs:
+  publish:
+    name: publish (${{ matrix.mc }}-${{ matrix.loader }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        mc: ["1.21.1", "1.21.11", "26.3"]
+        loader: [fabric, neoforge]
+        include:
+          - mc: "1.21.1"
+            java: 21
+          - mc: "1.21.11"
+            java: 21
+          - mc: "26.3"
+            java: 25
+    env:
+      NODE: ${{ matrix.mc }}-${{ matrix.loader }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up JDKs
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: |
+            21
+            25
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v6
+
+      - name: Build
+        run: |
+          chmod +x gradlew
+          ./gradlew ":$NODE:build"
+
+      - name: Read mod version
+        id: meta
+        run: |
+          version=$(sed -nE 's/^mod\.version *= *"([^"]+)".*/\1/p' stonecutter.properties.toml | head -n1)
+          loader_name=$([ "${{ matrix.loader }}" = fabric ] && echo Fabric || echo NeoForge)
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "loader_name=$loader_name" >> "$GITHUB_OUTPUT"
+
+      - name: Publish
+        uses: Kira-NT/mc-publish@v3.3
+        with:
+          modrinth-id: ${{ env.MODRINTH_ID }}
+          modrinth-token: ${{ env.MODRINTH_ID != '' && secrets.MODRINTH_TOKEN || '' }}
+          curseforge-id: ${{ env.CURSEFORGE_ID }}
+          curseforge-token: ${{ env.CURSEFORGE_ID != '' && secrets.CURSEFORGE_TOKEN || '' }}
+          github-token: ${{ github.event_name == 'release' && secrets.GITHUB_TOKEN || '' }}
+
+          files: versions/${{ env.NODE }}/build/libs/!(*-@(dev|sources|javadoc)).jar
+          name: Dream TVs ${{ steps.meta.outputs.version }} (${{ steps.meta.outputs.loader_name }} ${{ matrix.mc }})
+          version: ${{ steps.meta.outputs.version }}+${{ env.NODE }}
+          loaders: ${{ matrix.loader }}
+          game-versions: ${{ matrix.mc }}
+          java: ${{ matrix.java }}
+          dependencies: |
+            dreamdisplays(required){modrinth:dreamdisplays}{curseforge:dreamdisplays}
+            ${{ matrix.loader == 'fabric' && 'fabric-api(required){modrinth:fabric-api}{curseforge:fabric-api}' || '' }}
