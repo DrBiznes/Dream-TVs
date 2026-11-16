@@ -32,8 +32,9 @@ src/main/java/com/dreamtvs/
 ├── client/       Picture placement, the CRT overlay, tooltips, the settings screen, the remote.
 ├── mixin/        Mixins into DD (server and client).
 ├── compat/       Which recipes are active (section 5).
-├── config/       config/dreamtvs.json.
+├── config/       config/dreamtvs.json (server) and config/dreamtvs-client.json.
 ├── item/         The TV Remote.
+├── net/          The one payload: the server's remote range, sent on join.
 ├── visualtest/   The visual tests (section 6). Not in the mod jar.
 ├── fabric/       Fabric only: registration, events, Mod Menu.
 └── neoforge/     NeoForge only: registration, events.
@@ -52,8 +53,9 @@ and bounds are stored on the DD display itself (`customData`, tag `dreamtvs:scre
 change to a wall runs the same idempotent reconcile, so a bug or a crash heals at the next change.
 
 **Solving (`ScreenSolver`, pure).** TVs group by plane: same wall, same facing, same kind, joined on their four
-sides. A group is a screen only if it is a completely filled rectangle within `maxWidth` by `maxHeight`. The
-flood fill stops at `maxWidth * maxHeight + 1` cells, so huge walls stay cheap.
+sides. A group is a screen only if it is a completely filled rectangle within its kind's `maxWidth` by `maxHeight`
+(`lcdPanel` or `jumbotron` in the config). The flood fill stops at `maxWidth * maxHeight + 1` cells, so huge
+walls stay cheap.
 
 **Reconciling (`ScreenQueue`, `ScreenReconciler`, `ScreenPlanner`).** Placing, breaking and neighbour changes only
 mark the wall dirty. Once per server tick each dirty wall is reconciled, so `/fill` costs one pass. For each
@@ -106,7 +108,8 @@ picture isn't drawn when the camera is edge-on to the glass or behind it, where 
 
 **The CRT look (`CrtOverlay`)** is one translucent texture drawn over DD's picture: phosphor glow, aperture
 grille, scanlines, darkened edges, glass glare, the curved edge of the tube, and under it a faint bar of light
-that rolls down the tube every 9 seconds. It is only an overlay; the video isn't warped or blurred, which would
+that rolls down the tube every 9 seconds. Players can turn it off (`crtOverlay` in the client config). It is
+only an overlay; the video isn't warped or blurred, which would
 need our own shader in place of DD's drawing. No sounds or static (decided against).
 
 **4:3 on the CRT.** DD fits the whole video into a texture the shape of the block box, with black bars.
@@ -127,15 +130,18 @@ The rules and nodes are in the [reference](REFERENCE.md). How they are enforced:
 
 ### Other pieces
 
-- **Config** (`DreamTvsConfig`). The file is written with a `//` comment per option and read leniently. Each
-  option is validated on its own: a wrong type falls back to that option's default, numbers are clamped, unknown
-  keys are reported, and every fix is logged. After a good read the file is rewritten, so it picks up new options.
-  A file that isn't valid JSON is left alone and the defaults are used.
+- **Config** (`DreamTvsConfig` for the server, `DreamTvsClientConfig` for the client, sharing `ConfigJson`).
+  Each file is written with a `//` comment per option and read leniently. Each option is validated on its own: a
+  wrong type falls back to that option's default, numbers are clamped, unknown keys are reported, and every fix is
+  logged. After a good read the file is rewritten, so it picks up new options. A file that isn't valid JSON is
+  left alone and the defaults are used. No config library, so nothing to port per version.
 - **Tooltips** (`ItemDescription`) are a port of Create 6's, so they look like Create's: "Hold [Shift] for
   Summary", then conditions and behaviours. Lang keys follow Create's layout: `<item key>.tooltip.summary`,
   `.condition1`, `.behaviour1`, and so on. An item with no `.summary` key gets no tooltip.
 - **The TV Remote** binds to a TV block's position rather than a screen id, so it keeps working when a wall grows,
-  shrinks or forms again.
+  shrinks or forms again. It works on the client (DD's client API), so the client checks `remoteRange`: the
+  server sends its value when a player joins (`RemoteRangePayload`), and the distance is from the player's eyes
+  to the nearest edge of the screen's blocks.
 - **Art rules.** A small fixed palette per material, light from the top left, flat areas stay flat (no speckle);
   detail comes from edges, seams, vents and fittings.
 

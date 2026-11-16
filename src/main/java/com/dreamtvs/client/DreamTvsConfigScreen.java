@@ -5,8 +5,10 @@ import com.dreamtvs.compat.CompatIndex;
 import com.dreamtvs.compat.CompatRecipes;
 import com.dreamtvs.compat.CompatResolver;
 import com.dreamtvs.compat.CompatSource;
+import com.dreamtvs.config.DreamTvsClientConfig;
 import com.dreamtvs.config.DreamTvsConfig;
 import com.dreamtvs.config.DreamTvsConfig.ExtendPolicy;
+import com.dreamtvs.net.RemoteRangePayload;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.AbstractWidget;
@@ -30,11 +32,13 @@ import java.util.Locale;
 import java.util.function.Consumer;
 
 /**
- * The settings screen for {@code config/dreamtvs.json}, opened from the mod list: Mod Menu on Fabric, the Config
- * button on NeoForge. Vanilla widgets only, so it needs no config library.
+ * The settings screen, opened from the mod list: Mod Menu on Fabric, the Config button on NeoForge. Vanilla
+ * widgets only, so it needs no config library.
  *
- * <p>It edits this game's file, which is the config for worlds hosted here (singleplayer and LAN). Saving in such
- * a world applies the changes at once; a dedicated server keeps its own file, and the screen says so.
+ * <p>The first section is the client config ({@code config/dreamtvs-client.json}), which applies wherever the
+ * player plays. The rest is this game's {@code config/dreamtvs.json}, the config for worlds hosted here
+ * (singleplayer and LAN). Saving in such a world applies the changes at once; a dedicated server keeps its own
+ * file, and the screen says so.
  */
 public final class DreamTvsConfigScreen extends OptionsSubScreen {
     // ARGB: since 1.21.6 text drawn with no alpha is invisible.
@@ -45,12 +49,16 @@ public final class DreamTvsConfigScreen extends OptionsSubScreen {
     /** False when the file isn't valid JSON: the defaults are shown and Save replaces the file. */
     private final boolean fileReadable;
     private final DreamTvsConfig edit;
+    private final DreamTvsClientConfig clientEdit = DreamTvsClientConfig.get().copy();
     private final String savedRecipeSource;
     private final boolean savedSequencedAssembly;
     // The number boxes' text, kept here so it survives the screen being rebuilt.
-    private String widthText;
-    private String heightText;
+    private String lcdWidthText;
+    private String lcdHeightText;
+    private String jumbotronWidthText;
+    private String jumbotronHeightText;
     private String screensText;
+    private String remoteRangeText;
 
     private final List<NumberBox> numberBoxes = new ArrayList<>();
     private Button saveButton;
@@ -62,9 +70,12 @@ public final class DreamTvsConfigScreen extends OptionsSubScreen {
         edit = read != null ? read : new DreamTvsConfig();
         savedRecipeSource = edit.recipeSource;
         savedSequencedAssembly = edit.createSequencedAssembly;
-        widthText = Integer.toString(edit.maxWidth);
-        heightText = Integer.toString(edit.maxHeight);
+        lcdWidthText = Integer.toString(edit.lcdMaxWidth);
+        lcdHeightText = Integer.toString(edit.lcdMaxHeight);
+        jumbotronWidthText = Integer.toString(edit.jumbotronMaxWidth);
+        jumbotronHeightText = Integer.toString(edit.jumbotronMaxHeight);
         screensText = Integer.toString(edit.maxScreensPerPlayer);
+        remoteRangeText = Integer.toString(edit.remoteRange);
     }
 
     @Override
@@ -76,12 +87,22 @@ public final class DreamTvsConfigScreen extends OptionsSubScreen {
 
     @Override
     protected void addOptions() {
+        heading("dreamtvs.config.section.client");
+        row("crtOverlay", CycleButton.onOffBuilder(clientEdit.crtOverlay)
+                .withTooltip(on -> describe("crtOverlay"))
+                .displayOnlyValue()
+                .create(label("crtOverlay"), (button, on) -> clientEdit.crtOverlay = on));
+
         note(Component.translatable(contextKey()), NOTE);
         if (!fileReadable) note(Component.translatable("dreamtvs.config.note.unreadable"), ERROR);
 
         heading("dreamtvs.config.section.screens");
-        numberRow("maxWidth", widthText, 1, DreamTvsConfig.MAX_SIDE, 3, text -> widthText = text);
-        numberRow("maxHeight", heightText, 1, DreamTvsConfig.MAX_SIDE, 3, text -> heightText = text);
+        numberRow("lcdMaxWidth", lcdWidthText, 1, DreamTvsConfig.MAX_SIDE, 3, text -> lcdWidthText = text);
+        numberRow("lcdMaxHeight", lcdHeightText, 1, DreamTvsConfig.MAX_SIDE, 3, text -> lcdHeightText = text);
+        numberRow("jumbotronMaxWidth", jumbotronWidthText, 1, DreamTvsConfig.MAX_SIDE, 3,
+                text -> jumbotronWidthText = text);
+        numberRow("jumbotronMaxHeight", jumbotronHeightText, 1, DreamTvsConfig.MAX_SIDE, 3,
+                text -> jumbotronHeightText = text);
         numberRow("maxScreensPerPlayer", screensText, 0, Integer.MAX_VALUE, 10, text -> screensText = text);
         row("extendPolicy", ClientCompat.<ExtendPolicy>cycleButton(
                         policy -> Component.translatable("dreamtvs.config.extendPolicy." + key(policy)), edit.extendPolicy)
@@ -94,6 +115,10 @@ public final class DreamTvsConfigScreen extends OptionsSubScreen {
                 .withTooltip(on -> describe("showFormMessages"))
                 .displayOnlyValue()
                 .create(label("showFormMessages"), (button, on) -> edit.showFormMessages = on));
+
+        heading("dreamtvs.config.section.remote");
+        numberRow("remoteRange", remoteRangeText, 0, DreamTvsConfig.MAX_REMOTE_RANGE, 4,
+                text -> remoteRangeText = text);
 
         heading("dreamtvs.config.section.compat");
         List<String> sources = recipeSources();
@@ -123,17 +148,23 @@ public final class DreamTvsConfigScreen extends OptionsSubScreen {
 
     private void save() {
         if (!numberBoxes.stream().allMatch(NumberBox::valid)) return;
-        edit.maxWidth = Integer.parseInt(widthText);
-        edit.maxHeight = Integer.parseInt(heightText);
+        edit.lcdMaxWidth = Integer.parseInt(lcdWidthText);
+        edit.lcdMaxHeight = Integer.parseInt(lcdHeightText);
+        edit.jumbotronMaxWidth = Integer.parseInt(jumbotronWidthText);
+        edit.jumbotronMaxHeight = Integer.parseInt(jumbotronHeightText);
         edit.maxScreensPerPlayer = Integer.parseInt(screensText);
+        edit.remoteRange = Integer.parseInt(remoteRangeText);
         try {
+            DreamTvsClientConfig.save(clientEdit);
             DreamTvsConfig.save(DreamTvs.configFile(), edit);
         } catch (IOException e) {
-            DreamTvs.LOGGER.error("Couldn't save {}", DreamTvs.configFile(), e);
+            DreamTvs.LOGGER.error("Couldn't save the Dream TVs config", e);
             toast(Component.translatable("dreamtvs.config.toast.failed"), Component.literal(String.valueOf(e.getMessage())));
             return;
         }
         DreamTvs.LOGGER.info("Dream TVs config saved from the settings screen");
+        // This game's own world uses the new range at once; other players in a LAN world get it when they rejoin.
+        if (minecraft.hasSingleplayerServer()) RemoteRangePayload.receive(RemoteRangePayload.fromConfig());
         boolean recipesChanged = !edit.recipeSource.equals(savedRecipeSource)
                 || edit.createSequencedAssembly != savedSequencedAssembly;
         if (recipesChanged && minecraft.hasSingleplayerServer()) {

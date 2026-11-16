@@ -119,11 +119,8 @@ public class RemoteItem extends Item {
             McCompat.overlay(player, Component.translatable("message.dreamtvs.remote.unbound"));
             return InteractionResult.PASS;
         }
-        if (!binding.dimension().equals(McCompat.dimensionId(level))) {
-            McCompat.overlay(player, Component.translatable("message.dreamtvs.remote.other_dimension"));
-        } else if (!TvClientHooks.openMenu(binding.pos())) {
-            McCompat.overlay(player, Component.translatable("message.dreamtvs.remote.no_screen"));
-        }
+        Component problem = TvClientHooks.useRemote(binding);
+        if (problem != null) McCompat.overlay(player, problem);
         return InteractionResult.SUCCESS;
     }
 }

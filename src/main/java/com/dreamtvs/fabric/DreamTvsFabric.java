@@ -12,6 +12,7 @@ import com.dreamtvs.compat.CompatIndex;
 import com.dreamtvs.compat.CompatRecipes;
 import com.dreamtvs.item.RemoteItem;
 import com.dreamtvs.item.RemoteRecipe;
+import com.dreamtvs.net.RemoteRangePayload;
 import com.dreamtvs.screen.Screens;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.resource.conditions.v1.ResourceConditions;
@@ -21,6 +22,9 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerChunkEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
+import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 //? if >=26.1 {
 /^import net.fabricmc.fabric.api.creativetab.v1.FabricCreativeModeTab;
 ^///?} else
@@ -113,6 +117,14 @@ public final class DreamTvsFabric implements ModInitializer {
             }
         }
         ServerLifecycleEvents.START_DATA_PACK_RELOAD.register((server, resources) -> CompatRecipes.invalidate());
+
+        // The server's remote range, sent on join for the client to check (RemoteRangePayload).
+        //? if >=26.1 {
+        /^PayloadTypeRegistry.clientboundPlay().register(RemoteRangePayload.TYPE, RemoteRangePayload.CODEC);
+        ^///?} else
+        PayloadTypeRegistry.playS2C().register(RemoteRangePayload.TYPE, RemoteRangePayload.CODEC);
+        ServerPlayConnectionEvents.JOIN.register((handler, sender, server) ->
+                ServerPlayNetworking.send(handler.getPlayer(), RemoteRangePayload.fromConfig()));
 
         ServerLifecycleEvents.SERVER_STARTING.register(Screens::onServerStarting);
         ServerLifecycleEvents.SERVER_STOPPED.register(server -> {

@@ -2,7 +2,7 @@
 # ["<minecraft>"], then [<loader>."<minecraft>"]; later tables win.
 mod.id = "dreamtvs"
 mod.name = "Dream TVs"
-mod.version = "0.9.0"
+mod.version = "0.10.0"
 mod.group = "com.dreamtvs"
 mod.description = "Survival-friendly TVs for Dream Displays. Place LCD panels side by side to build bigger screens."
 mod.license = "LGPL-3.0"

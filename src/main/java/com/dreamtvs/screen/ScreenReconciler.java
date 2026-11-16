@@ -89,7 +89,7 @@ public final class ScreenReconciler {
         for (Existing e : existing) touched.addAll(e.bounds().cells());
         updateFormed(level, view, touched, live);
 
-        if (actor != null && actorCell != null) report(actor, actorCell, groups, outcomes);
+        if (actor != null && actorCell != null) report(actor, actorCell, plane.kind(), groups, outcomes);
     }
 
     private static void apply(ServerLevel level, ScreenPlane plane, List<Action> actions, Map<UUID, Managed> byId,
@@ -181,7 +181,7 @@ public final class ScreenReconciler {
         }
     }
 
-    private static void report(ServerPlayer actor, Cell actorCell, List<Group> groups, Map<Rect, Outcome> outcomes) {
+    private static void report(ServerPlayer actor, Cell actorCell, ScreenKind kind, List<Group> groups, Map<Rect, Outcome> outcomes) {
         Group group = null;
         for (Group g : groups) if (g.cells().contains(actorCell)) group = g;
         if (group == null) return;
@@ -201,8 +201,8 @@ public final class ScreenReconciler {
         } else if (chatty) {
             message = switch (group.solution().status()) {
                 case NOT_RECTANGLE -> Component.translatable("message.dreamtvs.not_rectangle");
-                case TOO_WIDE -> Component.translatable("message.dreamtvs.too_wide", config.maxWidth);
-                case TOO_TALL -> Component.translatable("message.dreamtvs.too_tall", config.maxHeight);
+                case TOO_WIDE -> Component.translatable("message.dreamtvs.too_wide", config.maxWidth(kind));
+                case TOO_TALL -> Component.translatable("message.dreamtvs.too_tall", config.maxHeight(kind));
                 case EMPTY, VALID -> null;
             };
         }

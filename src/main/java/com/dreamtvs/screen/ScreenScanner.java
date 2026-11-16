@@ -90,8 +90,9 @@ public final class ScreenScanner {
             return new Group(cells, ScreenSolver.solve(cells, Integer.MAX_VALUE, Integer.MAX_VALUE));
         }
         DreamTvsConfig config = DreamTvsConfig.get();
-        ScreenSolver.Fill fill = ScreenSolver.floodFill(seed, view::filled, config.scanCap());
-        return new Group(fill.cells(), ScreenSolver.solve(fill.cells(), config.maxWidth, config.maxHeight));
+        ScreenKind kind = view.plane().kind();
+        ScreenSolver.Fill fill = ScreenSolver.floodFill(seed, view::filled, config.scanCap(kind));
+        return new Group(fill.cells(), ScreenSolver.solve(fill.cells(), config.maxWidth(kind), config.maxHeight(kind)));
     }
 
     /**

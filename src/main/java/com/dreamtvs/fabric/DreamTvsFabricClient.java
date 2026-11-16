@@ -6,10 +6,13 @@ import com.dreamtvs.block.TvClientHooks;
 import com.dreamtvs.client.DreamDisplaysMenu;
 import com.dreamtvs.client.ItemDescription;
 import com.dreamtvs.client.RemoteClient;
+import com.dreamtvs.config.DreamTvsClientConfig;
+import com.dreamtvs.net.RemoteRangePayload;
 import com.dreamtvs.visualtest.VisualTests;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.event.client.player.ClientPreAttackCallback;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.fabric.api.resource.ResourcePackActivationType;
@@ -19,7 +22,11 @@ import net.minecraft.network.chat.Component;
 public final class DreamTvsFabricClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
+        DreamTvsClientConfig.load(FabricLoader.getInstance().getConfigDir());
+        ClientPlayNetworking.registerGlobalReceiver(RemoteRangePayload.TYPE,
+                (payload, context) -> RemoteRangePayload.receive(payload));
         TvClientHooks.installMenuOpener(DreamDisplaysMenu::open);
+        TvClientHooks.installRemoteUser(RemoteClient::use);
         ItemTooltipCallback.EVENT.register((stack, context, type, lines) -> ItemDescription.appendTo(stack, lines));
         // The remote's left-click. Fires every tick the attack key is down; clickCount is 0 while it's held.
         ClientPreAttackCallback.EVENT.register((client, player, clickCount) -> RemoteClient.onAttack(client, clickCount != 0));

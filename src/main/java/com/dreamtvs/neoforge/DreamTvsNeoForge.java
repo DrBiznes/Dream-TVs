@@ -12,10 +12,12 @@ import com.dreamtvs.compat.CompatIndex;
 import com.dreamtvs.compat.CompatRecipes;
 import com.dreamtvs.item.RemoteItem;
 import com.dreamtvs.item.RemoteRecipe;
+import com.dreamtvs.net.RemoteRangePayload;
 import com.dreamtvs.screen.Screens;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
@@ -38,10 +40,13 @@ import net.neoforged.neoforge.event.AddReloadListenerEvent;
 /*import net.neoforged.neoforge.event.level.block.BreakBlockEvent;
 *///?} else
 import net.neoforged.neoforge.event.level.BlockEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.level.ChunkEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
 import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
+import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.registries.DeferredBlock;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredItem;
@@ -132,6 +137,15 @@ public final class DreamTvsNeoForge {
         TABS.register(modBus);
         CONDITIONS.register(modBus);
         RECIPE_SERIALIZERS.register(modBus);
+
+        // The server's remote range, sent on join for the client to check (RemoteRangePayload).
+        modBus.addListener((RegisterPayloadHandlersEvent event) -> event.registrar("1").playToClient(
+                RemoteRangePayload.TYPE, RemoteRangePayload.CODEC, (payload, context) -> RemoteRangePayload.receive(payload)));
+        NeoForge.EVENT_BUS.addListener((PlayerEvent.PlayerLoggedInEvent event) -> {
+            if (event.getEntity() instanceof ServerPlayer player) {
+                PacketDistributor.sendToPlayer(player, RemoteRangePayload.fromConfig());
+            }
+        });
 
         NeoForge.EVENT_BUS.addListener((ServerStartingEvent event) -> Screens.onServerStarting(event.getServer()));
         NeoForge.EVENT_BUS.addListener((ServerStoppedEvent event) -> Screens.onServerStopped());

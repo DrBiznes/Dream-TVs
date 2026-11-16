@@ -32,29 +32,51 @@ public final class DreamDisplaysMenu {
     private DreamDisplaysMenu() {}
 
     public static boolean open(BlockPos pos) {
+        Display display;
         try {
-            Display display = displayAt(pos);
-            if (display == null) return false;
+            display = displayAt(pos);
+        } catch (Throwable t) {
+            return fallback(t);
+        }
+        return display != null && open(display);
+    }
+
+    /** Opens DD's menu for {@code display}. False if DD has no screen for it on this client. */
+    static boolean open(Display display) {
+        try {
             DisplayScreen screen = screens().get(display.getId().getUuid());
             if (screen == null) return false;
             DisplayMenu.Companion.open(screen);
             return true;
         } catch (Throwable t) {
-            DreamTvs.LOGGER.warn("Couldn't open the Dream Displays menu directly", t);
-            var player = Minecraft.getInstance().player;
-            if (player != null) McCompat.overlay(player, Component.translatable("message.dreamtvs.menu_fallback"));
-            return true;
+            return fallback(t);
         }
     }
 
+    /** Something in DD changed: tells the player DD's own gesture instead. True, since the player was told. */
+    private static boolean fallback(Throwable t) {
+        DreamTvs.LOGGER.warn("Couldn't open the Dream Displays menu directly", t);
+        var player = Minecraft.getInstance().player;
+        if (player != null) McCompat.overlay(player, Component.translatable("message.dreamtvs.menu_fallback"));
+        return true;
+    }
+
+    /** A managed display and the TV blocks it covers. */
+    record Found(Display display, ManagedTag.Bounds bounds) {}
+
     /** The managed display whose stored bounds contain {@code pos}, via the public client API. */
-    static Display displayAt(BlockPos pos) {
+    static Found find(BlockPos pos) {
         if (!DreamDisplays.isAvailable()) return null;
         for (Display display : DreamDisplays.getDisplays()) {
             ManagedTag.Bounds bounds = ManagedTag.read(display.getCustomData().get(ManagedTag.KEY));
-            if (bounds != null && bounds.contains(pos)) return display;
+            if (bounds != null && bounds.contains(pos)) return new Found(display, bounds);
         }
         return null;
+    }
+
+    static Display displayAt(BlockPos pos) {
+        Found found = find(pos);
+        return found == null ? null : found.display();
     }
 
     @SuppressWarnings("unchecked")

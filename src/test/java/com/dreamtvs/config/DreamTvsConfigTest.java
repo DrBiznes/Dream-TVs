@@ -1,6 +1,7 @@
 package com.dreamtvs.config;
 
 import com.dreamtvs.config.DreamTvsConfig.ExtendPolicy;
+import com.dreamtvs.screen.ScreenKind;
 import com.google.gson.JsonParseException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -24,9 +25,12 @@ class DreamTvsConfigTest {
     @Test
     void writtenFileReadsBackWithoutWarnings() {
         DreamTvsConfig original = new DreamTvsConfig();
-        original.maxWidth = 10;
-        original.maxHeight = 5;
+        original.lcdMaxWidth = 10;
+        original.lcdMaxHeight = 5;
+        original.jumbotronMaxWidth = 40;
+        original.jumbotronMaxHeight = 30;
         original.maxScreensPerPlayer = 3;
+        original.remoteRange = 48;
         original.extendPolicy = ExtendPolicy.ANYONE;
         original.showFormMessages = false;
         original.recipeSource = "mekanism";
@@ -35,9 +39,12 @@ class DreamTvsConfigTest {
         DreamTvsConfig read = parse(original.toFileText());
 
         assertEquals(List.of(), warnings);
-        assertEquals(10, read.maxWidth);
-        assertEquals(5, read.maxHeight);
+        assertEquals(10, read.lcdMaxWidth);
+        assertEquals(5, read.lcdMaxHeight);
+        assertEquals(40, read.jumbotronMaxWidth);
+        assertEquals(30, read.jumbotronMaxHeight);
         assertEquals(3, read.maxScreensPerPlayer);
+        assertEquals(48, read.remoteRange);
         assertEquals(ExtendPolicy.ANYONE, read.extendPolicy);
         assertFalse(read.showFormMessages);
         assertEquals("mekanism", read.recipeSource);
@@ -46,31 +53,37 @@ class DreamTvsConfigTest {
 
     @Test
     void missingOptionsKeepTheirDefaults() {
-        DreamTvsConfig read = parse("{ \"maxWidth\": 8 }");
+        DreamTvsConfig read = parse("{ \"jumbotron\": { \"maxWidth\": 8 } }");
         assertEquals(List.of(), warnings);
-        assertEquals(8, read.maxWidth);
-        assertEquals(24, read.maxHeight);
+        assertEquals(8, read.jumbotronMaxWidth);
+        assertEquals(24, read.jumbotronMaxHeight);
+        assertEquals(28, read.lcdMaxWidth);
+        assertEquals(21, read.lcdMaxHeight);
         assertEquals(ExtendPolicy.OWNER, read.extendPolicy);
         assertTrue(read.showFormMessages);
+        assertEquals(0, read.remoteRange);
     }
 
     @Test
     void outOfRangeNumbersAreClamped() {
-        DreamTvsConfig read = parse("{ \"maxWidth\": 500, \"maxHeight\": 0, \"maxScreensPerPlayer\": -4 }");
-        assertEquals(DreamTvsConfig.MAX_SIDE, read.maxWidth);
-        assertEquals(1, read.maxHeight);
+        DreamTvsConfig read = parse("""
+                { "lcdPanel": { "maxWidth": 500, "maxHeight": 0 }, "maxScreensPerPlayer": -4, "remoteRange": 5000 }
+                """);
+        assertEquals(DreamTvsConfig.MAX_SIDE, read.lcdMaxWidth);
+        assertEquals(1, read.lcdMaxHeight);
         assertEquals(0, read.maxScreensPerPlayer);
-        assertEquals(3, warnings.size());
+        assertEquals(DreamTvsConfig.MAX_REMOTE_RANGE, read.remoteRange);
+        assertEquals(4, warnings.size());
     }
 
     @Test
     void wrongTypesFallBackPerOption() {
         DreamTvsConfig read = parse("""
-                { "maxWidth": "big", "maxHeight": 2.5, "maxScreensPerPlayer": [1],
+                { "lcdPanel": { "maxWidth": "big", "maxHeight": 2.5 }, "maxScreensPerPlayer": [1],
                   "extendPolicy": "everyone", "showFormMessages": "yes" }
                 """);
-        assertEquals(32, read.maxWidth);
-        assertEquals(24, read.maxHeight);
+        assertEquals(28, read.lcdMaxWidth);
+        assertEquals(21, read.lcdMaxHeight);
         assertEquals(0, read.maxScreensPerPlayer);
         assertEquals(ExtendPolicy.OWNER, read.extendPolicy);
         assertTrue(read.showFormMessages);
@@ -79,7 +92,7 @@ class DreamTvsConfigTest {
 
     @Test
     void wholeNumbersWrittenAsDecimalsAreAccepted() {
-        assertEquals(16, parse("{ \"maxWidth\": 16.0 }").maxWidth);
+        assertEquals(16, parse("{ \"lcdPanel\": { \"maxWidth\": 16.0 } }").lcdMaxWidth);
         assertEquals(List.of(), warnings);
     }
 
@@ -91,16 +104,26 @@ class DreamTvsConfigTest {
 
     @Test
     void unknownOptionsAreReported() {
-        parse("{ \"maxWidht\": 8 }");
-        assertEquals(1, warnings.size());
+        parse("{ \"maxWidht\": 8, \"jumbotron\": { \"width\": 8 } }");
+        assertEquals(2, warnings.size());
         assertTrue(warnings.get(0).contains("maxWidht"));
+        assertTrue(warnings.get(1).contains("jumbotron.width"));
+    }
+
+    @Test
+    void lcdPanelsDefaultToSlightlySmallerThanJumbotrons() {
+        DreamTvsConfig c = new DreamTvsConfig();
+        assertTrue(c.lcdMaxWidth < c.jumbotronMaxWidth && c.lcdMaxHeight < c.jumbotronMaxHeight);
+        assertEquals(c.lcdMaxWidth, c.maxWidth(ScreenKind.LCD_PANEL));
+        assertEquals(c.jumbotronMaxHeight, c.maxHeight(ScreenKind.JUMBOTRON));
+        assertEquals(28 * 21 + 1, c.scanCap(ScreenKind.LCD_PANEL));
     }
 
     @Test
     void notAnObjectIsAnError() {
         assertThrows(JsonParseException.class, () -> parse(""));
         assertThrows(JsonParseException.class, () -> parse("[1, 2]"));
-        assertThrows(JsonParseException.class, () -> parse("{ \"maxWidth\": "));
+        assertThrows(JsonParseException.class, () -> parse("{ \"remoteRange\": "));
     }
 
     @Test
@@ -141,18 +164,18 @@ class DreamTvsConfigTest {
     void saveWritesTheFileAndUsesTheValues(@TempDir Path dir) throws IOException {
         Path file = dir.resolve("config").resolve("dreamtvs.json");
         DreamTvsConfig edited = new DreamTvsConfig();
-        edited.maxWidth = 12;
-        edited.maxHeight = 500; // out of range: fixed like a hand-edited file
+        edited.lcdMaxWidth = 12;
+        edited.lcdMaxHeight = 500; // out of range: fixed like a hand-edited file
         edited.recipeSource = "mekanism";
 
         DreamTvsConfig.save(file, edited);
 
-        assertEquals(12, DreamTvsConfig.get().maxWidth);
-        assertEquals(DreamTvsConfig.MAX_SIDE, DreamTvsConfig.get().maxHeight);
+        assertEquals(12, DreamTvsConfig.get().lcdMaxWidth);
+        assertEquals(DreamTvsConfig.MAX_SIDE, DreamTvsConfig.get().lcdMaxHeight);
         DreamTvsConfig read = DreamTvsConfig.readForEditing(file);
         assertNotNull(read);
-        assertEquals(12, read.maxWidth);
-        assertEquals(DreamTvsConfig.MAX_SIDE, read.maxHeight);
+        assertEquals(12, read.lcdMaxWidth);
+        assertEquals(DreamTvsConfig.MAX_SIDE, read.lcdMaxHeight);
         assertEquals("mekanism", read.recipeSource);
         DreamTvsConfig.save(file, new DreamTvsConfig()); // put the defaults back for the other tests
     }
@@ -162,9 +185,9 @@ class DreamTvsConfigTest {
         Path file = dir.resolve("dreamtvs.json");
         DreamTvsConfig missing = DreamTvsConfig.readForEditing(file);
         assertNotNull(missing);
-        assertEquals(32, missing.maxWidth);
+        assertEquals(32, missing.jumbotronMaxWidth);
 
-        Files.writeString(file, "{ \"maxWidth\": ", StandardCharsets.UTF_8);
+        Files.writeString(file, "{ \"remoteRange\": ", StandardCharsets.UTF_8);
         assertNull(DreamTvsConfig.readForEditing(file));
     }
 }

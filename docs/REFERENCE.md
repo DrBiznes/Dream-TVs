@@ -61,20 +61,31 @@ explaining it. Changes apply when the server restarts, except the `compat` optio
 
 | Option | Default | Meaning |
 |---|---|---|
-| `maxWidth`, `maxHeight` | `32`, `24` | Largest LCD Panel or Jumbotron screen, in blocks (1 to 128) |
+| `lcdPanel.maxWidth`, `lcdPanel.maxHeight` | `28`, `21` | Largest LCD Panel screen, in blocks (1 to 128) |
+| `jumbotron.maxWidth`, `jumbotron.maxHeight` | `32`, `24` | Largest Jumbotron screen, in blocks (1 to 128) |
 | `maxScreensPerPlayer` | `0` | Screens each player may own, `0` for unlimited |
 | `extendPolicy` | `"OWNER"` | `"OWNER"`: only the owner or an admin can change a screen. `"ANYONE"`: every player can. |
 | `showFormMessages` | `true` | Show "Screen formed" and shape hints on the action bar |
+| `remoteRange` | `0` | How far from its TV a bound remote works, in blocks to the nearest edge of the screen (0 to 1024). `0` for no limit. |
 | `compat.recipeSource` | `"auto"` | Which mod's parts the recipes use: `"auto"`, `"vanilla"`, or a mod listed in the file |
 | `compat.createSequencedAssembly` | `true` | With Create installed, make TVs in a sequenced assembly instead of a crafting table |
+
+A screen that's already bigger than a new size limit keeps working, but can't grow.
 
 If a value is invalid, Dream TVs fixes it and writes a warning to the server log. If the file can't be read at
 all, it's left alone and the defaults are used.
 
-In game, the same options are in a settings screen: the Config button in NeoForge's Mods list, or the Configure
-button in [Mod Menu](https://modrinth.com/mod/modmenu) on Fabric. The screen edits the file in your own game folder,
-so it's for singleplayer and LAN worlds. Saving while you're in a world applies the changes immediately; recipe
-changes need a `/reload`. A dedicated server still uses its own file.
+Each player also has a client config, `config/dreamtvs-client.json`, which applies on every server:
+
+| Option | Default | Meaning |
+|---|---|---|
+| `crtOverlay` | `true` | The CRT look on CRT TVs (scanlines, glow, glare and a rolling bar of light). `false` for a plain picture. |
+
+In game, all of these are in a settings screen: the Config button in NeoForge's Mods list, or the Configure button
+in [Mod Menu](https://modrinth.com/mod/modmenu) on Fabric. The Display section is your client config. The rest
+edits the server config in your own game folder, so it's for singleplayer and LAN worlds. Saving while you're in a
+world applies the changes immediately; recipe changes need a `/reload`. A dedicated server still uses its own
+file.
 
 ## Building from source
 

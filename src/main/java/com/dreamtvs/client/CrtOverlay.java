@@ -3,6 +3,7 @@ package com.dreamtvs.client;
 import com.dreamdisplays.api.display.model.property.DisplayFacing;
 import com.dreamdisplays.platform.client.render.DisplayPoseStack;
 import com.dreamtvs.DreamTvs;
+import com.dreamtvs.config.DreamTvsClientConfig;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 //? if >=26.1 {
@@ -36,6 +37,8 @@ import java.util.function.Consumer;
  * Client only. The CRT look, drawn over the Dream Displays picture on CRT TVs: one translucent texture with the
  * phosphor glow, aperture grille, scanlines, darkened edges, glass glare and the curved edge of the tube, and
  * under it a soft bar of light that rolls slowly down the screen.
+ *
+ * <p>Players can turn it off in the settings ({@code crtOverlay} in the client config).
  *
  * <p>Up to 1.21.x the overlay has to be drawn after DD has flushed its pictures, so each CRT only queues where
  * it is while DD draws it, and everything queued is drawn through the game's buffer source when DD's render pass
@@ -78,7 +81,7 @@ public final class CrtOverlay {
 
     /** Called while DD draws a CRT screen, with the pose DD started that screen with. */
     static void queue(PoseStack stack, DisplayFacing facing, int width, int height) {
-        if (broken) return;
+        if (broken || !DreamTvsClientConfig.get().crtOverlay) return;
         stack.pushPose();
         try {
             DisplayPoseStack.INSTANCE.liftTowardViewer(stack, facing, LIFT);

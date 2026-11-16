@@ -7,6 +7,7 @@ import com.dreamtvs.client.DreamDisplaysMenu;
 import com.dreamtvs.client.DreamTvsConfigScreen;
 import com.dreamtvs.client.ItemDescription;
 import com.dreamtvs.client.RemoteClient;
+import com.dreamtvs.config.DreamTvsClientConfig;
 import com.dreamtvs.visualtest.VisualTests;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
@@ -17,6 +18,7 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.InputEvent;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
@@ -28,7 +30,9 @@ import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
 @Mod(value = DreamTvs.MOD_ID, dist = Dist.CLIENT)
 public final class DreamTvsNeoForgeClient {
     public DreamTvsNeoForgeClient(ModContainer container, IEventBus modBus) {
+        DreamTvsClientConfig.load(FMLPaths.CONFIGDIR.get());
         TvClientHooks.installMenuOpener(DreamDisplaysMenu::open);
+        TvClientHooks.installRemoteUser(RemoteClient::use);
         // The Config button in the Mods list.
         container.registerExtensionPoint(IConfigScreenFactory.class, (mod, parent) -> new DreamTvsConfigScreen(parent));
         NeoForge.EVENT_BUS.addListener((ItemTooltipEvent event) -> ItemDescription.appendTo(event.getItemStack(), event.getToolTip()));
